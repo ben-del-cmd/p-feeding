@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>喂食计算器（简版）</title>
+  <style>
+    :root{
+      --card-max: 560px;
+      --border: #eaeaea;
+      --muted: #666;
+    }
+    html,body{height:100%}
+    body{
+      font-family: system-ui,-apple-system,"Segoe UI",Roboto,Arial,"Noto Sans CJK SC","PingFang SC","Microsoft YaHei",sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 16px;
+      color: #222;
+      background: #fff;
+    }
+    .card{
+      max-width: var(--card-max);
+      margin: 0 auto;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.03);
+    }
+    h3{margin: 0 0 8px}
+    p.hint{margin:0 0 16px;color:var(--muted)}
+    .row{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    label{font-size:14px;color:#333;display:block}
+    select,input{
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 6px;
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      background: #fff;
+    }
+    .box{
+      margin-top: 12px;
+      background: #fafafa;
+      border: 1px dashed #ddd;
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+    .muted{color:var(--muted)}
+    b{font-weight:600}
+    @media (max-width:520px){
+      .row{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h3>喂食计算器（简版）</h3>
+    <p class="hint">按体重/绝育/物种，实时计算每日能量与喂食杯数。</p>
+
+    <!-- 可按自己配方调整：每“杯”的热量/克数 -->
+    <script>
+      window.KCAL_PER_CUP  = 360; // 每杯约 360 kcal（常见范围 320~420）
+      window.GRAMS_PER_CUP = 100; // 每杯约 100 克（用于显示“约 XX 克/天”）
+    </script>
+
+    <div class="row">
+      <label>物种
+        <select id="species">
+          <option value="dog">狗</option>
+          <option value="cat">猫</option>
+        </select>
+      </label>
+
+      <label>是否绝育
+        <select id="neutered">
+          <option value="yes">是</option>
+          <option value="no">否</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="row">
+      <label>体重（kg）
+        <input id="weight" type="number" step="0.1" min="0.5" value="5">
+      </label>
+      <div></div>
+    </div>
+
+    <div class="box">
+      <div>每日所需能量：<b id="dailyKcal">—</b> kcal</div>
+      <div id="byCup">建议喂食：<b id="dailyCups">—</b> 杯/天（约 <b id="dailyGrams">—</b> 克/天）</div>
+      <div class="muted">提示：这是通用估算，具体以兽医建议与配方说明为准。</div>
+    </div>
+  </div>
+
+  <script>
+    // 经验系数：不同物种/绝育状态所需能量倍数（代谢能需求）
+    function mult(species, neutered){
+      if (species === 'dog') return neutered === 'yes' ? 1.6 : 1.8;
+      if (species === 'cat') return neutered === 'yes' ? 1.2 : 1.4;
+      return 1.0;
+    }
+    // 静息能量需求 RER = 70 * 体重^0.75
+    function rer(kg){ return 70 * Math.pow(kg, 0.75); }
+
+    function recalc(){
+      const species  = document.getElementById('species').value;
+      const neutered = document.getElementById('neutered').value;
+      const kgRaw    = Number(document.getElementById('weight').value || 0);
+      const kg       = Math.max(0.1, kgRaw);
+
+      const kcal = rer(kg) * mult(species, neutered);
+      document.getElementById('dailyKcal').textContent = Math.round(kcal);
+
+      const byCupEl = document.getElementById('byCup');
+      const cupsEl  = document.getElementById('dailyCups');
+      const gramsEl = document.getElementById('dailyGrams');
+
+      if (window.KCAL_PER_CUP && Number(window.KCAL_PER_CUP) > 0){
+        const cups = kcal / Number(window.KCAL_PER_CUP);
+        cupsEl.textContent  = cups.toFixed(2);
+
+        const gramsPerCup = Number(window.GRAMS_PER_CUP || 0);
+        gramsEl.textContent = gramsPerCup ? Math.round(cups * gramsPerCup) : '—';
+        byCupEl.style.display = '';
+      }else{
+        byCupEl.style.display = 'none';
+      }
+    }
+
+    ['change','input'].forEach(evt=>{
+      ['species','neutered','weight'].forEach(id=>{
+        document.getElementById(id).addEventListener(evt, recalc);
+      });
+    });
+    recalc();
+  </script>
+</body>
+</html>
