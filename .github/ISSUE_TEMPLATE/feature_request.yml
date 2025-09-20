@@ -1,0 +1,21 @@
+name: 功能建议
+description: 提交改进想法或新工具需求
+labels: [enhancement]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: 你的想法
+      placeholder: 想解决什么问题？对谁有价值？
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 方案草案（可选）
+      placeholder: 交互/文案/公式/参考链接
+  - type: input
+    id: priority
+    attributes:
+      label: 优先级（可选）
+      placeholder: high / medium / low
