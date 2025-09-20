@@ -1,19 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Sitemap for ben-del-cmd.github.io/p-feeding/ -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <!-- 首页（索引/导航页） -->
   <url>
     <loc>https://ben-del-cmd.github.io/p-feeding/</loc>
     <lastmod>2025-09-19</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.8</priority>
   </url>
-
-  <!-- 喂食计算器核心页 -->
   <url>
     <loc>https://ben-del-cmd.github.io/p-feeding/feeding.html</loc>
     <lastmod>2025-09-19</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>1.0</priority>
   </url>
 </urlset>
