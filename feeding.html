@@ -1,196 +1,196 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-  <!-- 基础 -->
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>喂食计算器（简版）｜宠物A计划</title>
+  <meta name="description" content="根据体重与系数估算 RER/kcal，并换算为杯数与克数的轻量喂食计算器。移动端友好，便于分享。">
+  <meta name="keywords" content="宠物,喂食,计算器,猫,狗,kcal,克,杯,RER">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- 基本 SEO -->
-  <title>喂食计算器（简版） - 按体重/绝育/物种估算每日能量与喂食杯数</title>
-  <meta name="description" content="输入体重、物种（狗/猫）与是否绝育，实时计算每日所需能量以及建议喂食杯数（可换算克数）。适合家长快速估算，具体以兽医建议与配方说明为准。">
-  <meta name="keywords" content="喂食计算器,狗狗喂食,猫咪喂食,热量计算,营养计算,kcal,绝育,体重,宠物计算器">
-  <meta name="robots" content="index,follow">
+  <!-- Canonical（必须保留） -->
   <link rel="canonical" href="https://ben-del-cmd.github.io/p-feeding/feeding.html">
 
-  <!-- 站点图标（用封面图代替也行） -->
-  <link rel="icon" href="https://ben-del-cmd.github.io/p-feeding/cover.png?v=20250919" type="image/png">
+  <!-- Favicon / Touch Icon（必须保留；版本号用于防缓存） -->
+  <link rel="icon" href="https://ben-del-cmd.github.io/p-feeding/cover.png?v=20250919">
   <link rel="apple-touch-icon" href="https://ben-del-cmd.github.io/p-feeding/cover.png?v=20250919">
-  <meta name="theme-color" content="#ffffff">
 
-  <!-- Open Graph（社交分享） -->
+  <!-- Open Graph（必须保留） -->
   <meta property="og:type" content="website">
-  <meta property="og:locale" content="zh_CN">
-  <meta property="og:site_name" content="喂食计算器">
+  <meta property="og:site_name" content="宠物A计划">
   <meta property="og:title" content="喂食计算器（简版）">
-  <meta property="og:description" content="按体重/绝育/物种，实时计算每日能量与喂食杯数。">
+  <meta property="og:description" content="根据体重与系数估算 RER/kcal，并换算为杯数与克数。">
   <meta property="og:url" content="https://ben-del-cmd.github.io/p-feeding/feeding.html">
-  <!-- 带版本号，避免平台缓存旧图 -->
   <meta property="og:image" content="https://ben-del-cmd.github.io/p-feeding/cover.png?v=20250919">
-  <!-- 图片信息补充（优化抓取稳定性/无障碍） -->
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="喂食计算器（简版）封面">
 
-  <!-- Twitter 卡片 -->
+  <!-- Twitter Card（必须保留） -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="喂食计算器（简版）">
-  <meta name="twitter:description" content="按体重/绝育/物种，实时计算每日能量与喂食杯数。">
+  <meta name="twitter:description" content="根据体重与系数估算 RER/kcal，并换算为杯数与克数。">
   <meta name="twitter:image" content="https://ben-del-cmd.github.io/p-feeding/cover.png?v=20250919">
-  <meta name="twitter:image:alt" content="喂食计算器（简版）封面">
 
-  <!-- 结构化数据（让搜索更懂是个工具页） -->
+  <!-- 结构化数据（可选） -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "WebApplication",
     "name": "喂食计算器（简版）",
-    "applicationCategory": "BusinessApplication",
+    "applicationCategory": "UtilitiesApplication",
     "operatingSystem": "Web",
     "url": "https://ben-del-cmd.github.io/p-feeding/feeding.html",
-    "inLanguage": "zh-CN",
-    "description": "按体重、物种（狗/猫）与是否绝育，实时估算每日所需能量与建议喂食杯数（可换算克数）。",
-    "image": "https://ben-del-cmd.github.io/p-feeding/cover.png?v=20250919"
+    "description": "根据体重与系数估算 RER/kcal，并换算为杯数与克数。",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
   }
   </script>
 
   <style>
-    :root{
-      --card-max: 560px;
-      --border: #eaeaea;
-      --muted: #666;
+    :root {
+      --bg: #0b0c0f; --card:#101318; --muted:#a7b0c0; --text:#e7ecf3;
+      --primary:#8fd3ff; --border:#1b2430; --ok:#b3ffcc; --radius:16px;
     }
-    html,body{height:100%}
-    body{
-      font-family: system-ui,-apple-system,"Segoe UI",Roboto,Arial,"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
-      line-height: 1.6;
-      margin: 0;
-      padding: 16px;
-      color: #222;
-      background: #fff;
-    }
-    .card{
-      max-width: var(--card-max);
-      margin: 0 auto;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
-      box-shadow: 0 1px 2px rgba(0,0,0,.03);
-    }
-    h3{margin: 0 0 8px}
-    p.hint{margin:0 0 16px;color:var(--muted)}
-    .row{
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-    label{font-size:14px;color:#333;display:block}
-    select,input{
-      width: 100%;
-      box-sizing: border-box;
-      margin-top: 6px;
-      padding: 10px 12px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      font-size: 16px;
-      background: #fff;
-    }
-    .box{
-      margin-top: 12px;
-      background: #fafafa;
-      border: 1px dashed #ddd;
-      border-radius: 10px;
-      padding: 14px 16px;
-    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif}
+    a{color:var(--primary);text-decoration:none} a:hover{text-decoration:underline}
+    header,main,footer{max-width:720px;margin:0 auto;padding:0 16px}
+    header{padding:28px 16px 12px}
+    h1{font-size:24px;margin:0 0 6px}
     .muted{color:var(--muted)}
-    b{font-weight:600}
-    @media (max-width:520px){
-      .row{grid-template-columns:1fr}
-    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+    .row{display:grid;grid-template-columns:1fr;gap:12px;margin:12px 0}
+    label{font-size:14px;color:var(--muted)}
+    input,select{width:100%;padding:12px 12px;background:#0e1217;border:1px solid var(--border);border-radius:12px;color:var(--text);outline:none}
+    .btn{display:inline-block;padding:12px 16px;border:1px solid var(--border);border-radius:12px;background:#0f141a;color:var(--text);cursor:pointer}
+    .btn:hover{border-color:#273246}
+    .result{margin-top:12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+    .kpi{background:#0e141b;border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center}
+    .kpi b{font-size:18px;display:block;margin-top:4px}
+    .hint{font-size:13px;color:var(--muted);margin-top:8px}
+    footer{color:var(--muted);margin:22px auto 36px}
+    .hr{height:1px;background:var(--border);border:0;margin:20px 0}
   </style>
+
+  <!-- 配置位（必须保留）：每杯热量 / 每杯克数，可在此调整 -->
+  <script>
+    window.KCAL_PER_CUP = 360;   // 每杯热量（kcal） ← 可按品牌修正
+    window.GRAMS_PER_CUP = 100;  // 每杯克数（g）   ← 可按颗粒密度修正
+  </script>
 </head>
+
 <body>
-  <div class="card">
-    <h3>喂食计算器（简版）</h3>
-    <p class="hint">按体重/绝育/物种，实时计算每日能量与喂食杯数。</p>
+  <header>
+    <h1>喂食计算器（简版）</h1>
+    <p class="muted">根据体重与系数估算 RER/kcal，并换算为杯数与克数。移动端友好，便于分享。</p>
+  </header>
 
-    <!-- 可按自己配方调整：每“杯”的热量/克数 -->
-    <script>
-      window.KCAL_PER_CUP  = 360; // 每杯约 360 kcal（常见范围 320~420）
-      window.GRAMS_PER_CUP = 100; // 每杯约 100 克（用于显示“约 XX 克/天”）
-    </script>
+  <main>
+    <section class="card" aria-label="输入参数">
+      <div class="row">
+        <div>
+          <label for="weight">体重（kg）</label>
+          <input id="weight" type="number" min="0" step="0.1" placeholder="例如 5.0">
+        </div>
+        <div>
+          <label for="species">物种</label>
+          <select id="species">
+            <option value="dog">狗 Dog</option>
+            <option value="cat">猫 Cat</option>
+          </select>
+        </div>
+        <div>
+          <label for="neuter">状态 / 系数</label>
+          <select id="neuter">
+            <!-- 系数仅示例，可按你项目口径调整；保持选项值为数值字符串 -->
+            <option value="1.6">已绝育 / 中等活动 ≈ 1.6</option>
+            <option value="1.2">老年 / 低活动 ≈ 1.2</option>
+            <option value="2.0">未绝育 / 活跃 ≈ 2.0</option>
+            <option value="2.5">成长期/妊娠（谨慎）≈ 2.5</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn" id="calcBtn">计算</button>
 
-    <div class="row">
-      <label>物种
-        <select id="species">
-          <option value="dog">狗</option>
-          <option value="cat">猫</option>
-        </select>
-      </label>
+      <div class="result" id="result" aria-live="polite" style="display:none">
+        <div class="kpi"><span>RER</span><b id="rerOut">-</b><span class="muted">kcal/日</span></div>
+        <div class="kpi"><span>建议热量</span><b id="kcalOut">-</b><span class="muted">kcal/日</span></div>
+        <div class="kpi"><span>干粮杯数</span><b id="cupsOut">-</b><span class="muted">杯/日</span></div>
+      </div>
+      <p class="hint">换算以每杯 <code id="cfgKcal">360</code> kcal、<code id="cfgGram">100</code> g 估算；可在源码顶部配置。实际喂食请结合品牌配方与兽医建议。</p>
+      <p class="hint">算法口径：<code>RER = 70 × 体重^0.75</code>；建议热量 ≈ <code>RER × 系数</code>；杯数 ≈ <code>建议热量 ÷ 每杯kcal</code>；克数≈<code>杯数 × 每杯克数</code>（克数在结果下方显示）。</p>
 
-      <label>是否绝育
-        <select id="neutered">
-          <option value="yes">是</option>
-          <option value="no">否</option>
-        </select>
-      </label>
-    </div>
+      <div id="gramsLine" class="hint" style="display:none">≈ <span id="gramsOut">-</span> 克/日</div>
+    </section>
 
-    <div class="row">
-      <label>体重（kg）
-        <input id="weight" type="number" step="0.1" min="0.5" value="5">
-      </label>
-      <div></div>
-    </div>
+    <section class="card" style="margin-top:14px" aria-label="说明">
+      <h2 style="margin:0 0 8px;font-size:18px">使用提示</h2>
+      <ul class="hint" style="margin:0 0 0 18px">
+        <li>若要针对某品牌修正，可把“每杯热量/克数”替换为该品牌标注的值。</li>
+        <li>幼宠、肥胖管理、妊娠/哺乳等特殊阶段，请先咨询专业兽医。</li>
+        <li>本工具为估算参考，不替代临床建议。</li>
+      </ul>
+    </section>
 
-    <div class="box">
-      <div>每日所需能量：<b id="dailyKcal">—</b> kcal</div>
-      <div id="byCup">建议喂食：<b id="dailyCups">—</b> 杯/天（约 <b id="dailyGrams">—</b> 克/天）</div>
-      <div class="muted">提示：这是通用估算，具体以兽医建议与配方说明为准。</div>
-    </div>
-  </div>
+    <hr class="hr">
+
+    <!-- 页尾：反馈入口（新增，必须包含在整页底部） -->
+    <footer>
+      <p>
+        <a href="https://github.com/ben-del-cmd/p-feeding/issues" target="_blank" rel="noopener">反馈 / 提建议</a>
+        ・ <a href="https://github.com/ben-del-cmd/p-feeding" target="_blank" rel="noopener">查看源码</a>
+        ・ <a href="https://ben-del-cmd.github.io/p-feeding/" target="_blank" rel="noopener">返回工具索引</a>
+      </p>
+      <p class="muted">© 宠物A计划 · 最后更新：2025-09-19</p>
+    </footer>
+  </main>
 
   <script>
-    // 经验系数：不同物种/绝育状态所需能量倍数
-    function mult(species, neutered){
-      if (species === 'dog') return neutered === 'yes' ? 1.6 : 1.8;
-      if (species === 'cat') return neutered === 'yes' ? 1.2 : 1.4;
-      return 1.0;
-    }
-    // 静息能量需求 RER = 70 * 体重^0.75
-    function rer(kg){ return 70 * Math.pow(kg, 0.75); }
+    // 计算逻辑（保留：与项目约定一致）
+    (function () {
+      var weight = document.getElementById('weight');
+      var species = document.getElementById('species'); // 预留，当前未区分公式，仅用于后续拓展
+      var neuter = document.getElementById('neuter');
+      var btn = document.getElementById('calcBtn');
 
-    function recalc(){
-      const species  = document.getElementById('species').value;
-      const neutered = document.getElementById('neutered').value;
-      const kgRaw    = Number(document.getElementById('weight').value || 0);
-      const kg       = Math.max(0.1, kgRaw);
+      var rerOut = document.getElementById('rerOut');
+      var kcalOut = document.getElementById('kcalOut');
+      var cupsOut = document.getElementById('cupsOut');
+      var gramsOut = document.getElementById('gramsOut');
+      var gramsLine = document.getElementById('gramsLine');
+      var res = document.getElementById('result');
 
-      const kcal = rer(kg) * mult(species, neutered);
-      document.getElementById('dailyKcal').textContent = Math.round(kcal);
+      // 同步显示当前配置
+      document.getElementById('cfgKcal').textContent = (window.KCAL_PER_CUP || 360);
+      document.getElementById('cfgGram').textContent = (window.GRAMS_PER_CUP || 100);
 
-      const byCupEl = document.getElementById('byCup');
-      const cupsEl  = document.getElementById('dailyCups');
-      const gramsEl = document.getElementById('dailyGrams');
+      function pow075(x){ return Math.pow(x, 0.75); }
+      function toFixed(n){ return (Math.round(n * 10) / 10).toFixed(1); }
 
-      if (window.KCAL_PER_CUP && Number(window.KCAL_PER_CUP) > 0){
-        const cups = kcal / Number(window.KCAL_PER_CUP);
-        cupsEl.textContent  = cups.toFixed(2);
+      btn.addEventListener('click', function () {
+        var w = parseFloat(weight.value);
+        if (!(w > 0)) { alert('请输入有效体重（kg）'); return; }
 
-        const gramsPerCup = Number(window.GRAMS_PER_CUP || 0);
-        gramsEl.textContent = gramsPerCup ? Math.round(cups * gramsPerCup) : '—';
-        byCupEl.style.display = '';
-      }else{
-        byCupEl.style.display = 'none';
-      }
-    }
+        var coef = parseFloat(neuter.value || '1.6');
+        var rer = 70 * pow075(w);        // RER
+        var kcal = rer * coef;           // 建议热量（根据系数）
+        var cups = kcal / (window.KCAL_PER_CUP || 360);
+        var grams = cups * (window.GRAMS_PER_CUP || 100);
 
-    ['change','input'].forEach(evt=>{
-      ['species','neutered','weight'].forEach(id=>{
-        document.getElementById(id).addEventListener(evt, recalc);
+        rerOut.textContent = toFixed(rer);
+        kcalOut.textContent = toFixed(kcal);
+        cupsOut.textContent = toFixed(cups);
+        gramsOut.textContent = toFixed(grams);
+
+        gramsLine.style.display = 'block';
+        res.style.display = 'grid';
       });
-    });
-    recalc();
+
+      // 回车快捷键
+      ['weight','species','neuter'].forEach(function(id){
+        var el = document.getElementById(id);
+        el && el.addEventListener('keydown', function(e){
+          if(e.key === 'Enter'){ btn.click(); }
+        });
+      });
+    })();
   </script>
 </body>
 </html>
