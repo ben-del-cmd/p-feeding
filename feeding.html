@@ -23,6 +23,7 @@
                  base-uri 'none';
                  frame-ancestors 'self';">
 
+  <!-- OG / Twitter -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="宠物A计划">
   <meta property="og:title" content="喂食计算器（简版）">
@@ -34,13 +35,19 @@
   <meta name="twitter:description" content="根据体重与系数估算 RER/kcal，并换算为杯数与克数。">
   <meta name="twitter:image" content="https://ben-del-cmd.github.io/p-feeding/cover.png?v=20250919">
 
+  <!-- 结构化数据 -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"喂食计算器（简版）","applicationCategory":"UtilitiesApplication","operatingSystem":"Web","url":"https://ben-del-cmd.github.io/p-feeding/feeding.html","description":"根据体重与系数估算 RER/kcal，并换算为杯数与克数。","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
 
   <!-- 轻量统计（Plausible） -->
   <script defer data-domain="ben-del-cmd.github.io" src="https://plausible.io/js/script.js"></script>
 
+  <!-- 配置位（仅需在这里改数字即可） -->
+  <script>
+    window.KCAL_PER_CUP = 360;  /* 每杯热量（kcal per cup） */
+    window.GRAMS_PER_CUP = 100; /* 每杯克数（g per cup）   */
+  </script>
+
   <style>:root{--bg:#0b0c0f;--card:#101318;--muted:#a7b0c0;--text:#e7ecf3;--primary:#8fd3ff;--border:#1b2430;--ok:#b3ffcc;--radius:16px}*{box-sizing:border-box}html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif}a{color:var(--primary);text-decoration:none}a:hover{text-decoration:underline}header,main,footer{max-width:720px;margin:0 auto;padding:0 16px}header{padding:28px 16px 12px}h1{font-size:24px;margin:0 0 6px}.muted{color:var(--muted)}.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px}.row{display:grid;grid-template-columns:1fr;gap:12px;margin:12px 0}label{font-size:14px;color:var(--muted)}input,select{width:100%;padding:12px 12px;background:#0e1217;border:1px solid var(--border);border-radius:12px;color:var(--text);outline:none}.btn{display:inline-block;padding:12px 16px;border:1px solid var(--border);border-radius:12px;background:#0f141a;color:var(--text);cursor:pointer}.btn:hover{border-color:#273246}.result{margin-top:12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.kpi{background:#0e141b;border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center}.kpi b{font-size:18px;display:block;margin-top:4px}.hint{font-size:13px;color:var(--muted);margin-top:8px}footer{color:var(--muted);margin:22px auto 36px}.hr{height:1px;background:var(--border);border:0;margin:20px 0}</style>
-  <script>window.KCAL_PER_CUP=360;window.GRAMS_PER_CUP=100;</script>
 </head>
 <body>
   <header><h1>喂食计算器（简版）</h1><p class="muted">根据体重与系数估算 RER/kcal，并换算为杯数与克数。移动端友好，便于分享。</p></header>
@@ -61,6 +68,54 @@
     <hr class="hr">
     <footer><p><a href="https://github.com/ben-del-cmd/p-feeding/issues" target="_blank" rel="noopener">反馈 / 提建议</a> ・ <a href="https://github.com/ben-del-cmd/p-feeding" target="_blank" rel="noopener">查看源码</a> ・ <a href="https://ben-del-cmd.github.io/p-feeding/" target="_blank" rel="noopener">返回工具索引</a></p><p class="muted">© 宠物A计划 · 最后更新：2025-09-20</p></footer>
   </main>
-  <script>(function(){var weight=document.getElementById('weight');var species=document.getElementById('species');var neuter=document.getElementById('neuter');var btn=document.getElementById('calcBtn');var rerOut=document.getElementById('rerOut');var kcalOut=document.getElementById('kcalOut');var cupsOut=document.getElementById('cupsOut');var gramsOut=document.getElementById('gramsOut');var gramsLine=document.getElementById('gramsLine');var res=document.getElementById('result');document.getElementById('cfgKcal').textContent=(window.KCAL_PER_CUP||360);document.getElementById('cfgGram').textContent=(window.GRAMS_PER_CUP||100);function pow075(x){return Math.pow(x,0.75)}function toFixed(n){return (Math.round(n*10)/10).toFixed(1)}btn.addEventListener('click',function(){var w=parseFloat(weight.value);if(!(w>0)){alert('请输入有效体重（kg）');return}var coef=parseFloat(neuter.value||'1.6');var rer=70*pow075(w);var kcal=rer*coef;var cups=kcal/(window.KCAL_PER_CUP||360);var grams=cups*(window.GRAMS_PER_CUP||100);rerOut.textContent=toFixed(rer);kcalOut.textContent=toFixed(kcal);cupsOut.textContent=toFixed(cups);gramsOut.textContent=toFixed(grams);gramsLine.style.display='block';res.style.display='grid';try{if(window.plausible){var bucket=w<3?'<3':w<10?'3-10':w<25?'10-25':'>=25';window.plausible('Calculate',{props:{coef:coef,w:bucket}})}}catch(e){}});['weight','species','neuter'].forEach(function(id){var el=document.getElementById(id);el&&el.addEventListener('keydown',function(e){if(e.key==='Enter'){btn.click()}})})})();</script>
+  <script>
+    // 初始化配置显示
+    document.getElementById('cfgKcal').textContent = (window.KCAL_PER_CUP||360);
+    document.getElementById('cfgGram').textContent = (window.GRAMS_PER_CUP||100);
+
+    (function(){
+      var weight=document.getElementById('weight');
+      var neuter=document.getElementById('neuter');
+      var btn=document.getElementById('calcBtn');
+      var rerOut=document.getElementById('rerOut');
+      var kcalOut=document.getElementById('kcalOut');
+      var cupsOut=document.getElementById('cupsOut');
+      var gramsOut=document.getElementById('gramsOut');
+      var gramsLine=document.getElementById('gramsLine');
+      var res=document.getElementById('result');
+
+      function pow075(x){return Math.pow(x,0.75)}
+      function toFixed(n){return (Math.round(n*10)/10).toFixed(1)}
+
+      btn.addEventListener('click',function(){
+        var w=parseFloat(weight.value);
+        if(!(w>0)){alert('请输入有效体重（kg）');return}
+        var coef=parseFloat(neuter.value||'1.6');
+        var rer=70*pow075(w);
+        var kcal=rer*coef;
+        var cups=kcal/(window.KCAL_PER_CUP||360);
+        var grams=cups*(window.GRAMS_PER_CUP||100);
+
+        rerOut.textContent=toFixed(rer);
+        kcalOut.textContent=toFixed(kcal);
+        cupsOut.textContent=toFixed(cups);
+        gramsOut.textContent=toFixed(grams);
+        gramsLine.style.display='block';
+        res.style.display='grid';
+
+        try{
+          if(window.plausible){
+            var bucket=w<3?'<3':w<10?'3-10':w<25?'10-25':'>=25';
+            window.plausible('Calculate',{props:{coef:coef,w:bucket}});
+          }
+        }catch(e){}
+      });
+
+      ['weight','neuter'].forEach(function(id){
+        var el=document.getElementById(id);
+        el&&el.addEventListener('keydown',function(e){ if(e.key==='Enter'){ btn.click(); } });
+      });
+    })();
+  </script>
 </body>
 </html>
