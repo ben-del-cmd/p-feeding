@@ -9,6 +9,21 @@
   <link rel="canonical" href="https://ben-del-cmd.github.io/p-feeding/">
   <link rel="icon" href="https://ben-del-cmd.github.io/p-feeding/cover.png?v=20250919">
   <link rel="apple-touch-icon" href="https://ben-del-cmd.github.io/p-feeding/cover.png?v=20250919">
+
+  <!-- 安全基线（Phase 1） -->
+  <meta name="theme-color" content="#0b0c0f">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self';
+                 img-src 'self' https: data:;
+                 script-src 'self' https://plausible.io 'unsafe-inline';
+                 style-src 'self' 'unsafe-inline';
+                 connect-src https://plausible.io;
+                 form-action 'self' https://github.com mailto:;
+                 base-uri 'none';
+                 frame-ancestors 'self';">
+
+  <!-- Open Graph / Twitter -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="宠物A计划">
   <meta property="og:title" content="宠物A计划｜工具索引">
@@ -19,9 +34,13 @@
   <meta name="twitter:title" content="宠物A计划｜工具索引">
   <meta name="twitter:description" content="轻量、可分享的宠物工具集合。当前可用：喂食计算器（简版）。">
   <meta name="twitter:image" content="https://ben-del-cmd.github.io/p-feeding/cover.png?v=20250919">
+
+  <!-- 结构化数据 -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"宠物A计划｜工具索引","url":"https://ben-del-cmd.github.io/p-feeding/","about":"轻量、可分享、可扩展的宠物工具集合","isPartOf":{"@type":"WebSite","name":"宠物A计划"},"hasPart":[{"@type":"SoftwareApplication","name":"喂食计算器（简版）","applicationCategory":"UtilitiesApplication","operatingSystem":"Web","url":"https://ben-del-cmd.github.io/p-feeding/feeding.html"}]}</script>
+
   <!-- 轻量统计（Plausible） -->
   <script defer data-domain="ben-del-cmd.github.io" src="https://plausible.io/js/script.js"></script>
+
   <style>
     :root { --bg:#0b0c0f; --card:#101318; --muted:#a7b0c0; --text:#e7ecf3; --primary:#8fd3ff; --border:#1b2430; --accent:#b3ffcc; --radius:16px; }
     *{box-sizing:border-box}
@@ -138,8 +157,9 @@
       }
       q.addEventListener('input', function (e) {
         filter(e.target.value);
-        try { if (window.plausible && e.target.value) { window.plausible('Search'); } } catch (err) {}
+        try { if (window.plausible && e.target.value) { window.plausible('Search', { props: { len: (e.target.value||'').length } }); } } catch (err) {}
       });
+
       var r = document.getElementById('redirect');
       if (r && getComputedStyle(r).display !== 'none') {
         var href = r.getAttribute('data-href') || '/p-feeding/feeding.html';
