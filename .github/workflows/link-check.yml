@@ -12,6 +12,17 @@ jobs:
       - name: Link Checker
         uses: lycheeverse/lychee-action@v1
         with:
-          args: --verbose --no-progress --timeout 20s --max-concurrency 8 --exclude-mail ./ -a
+          # 说明：
+          # --exclude-mail    跳过邮箱链接
+          # --exclude-file    读取根目录的 .lycheeignore
+          # 最后的 "." 表示检查整个仓库
+          args: >
+            --verbose
+            --no-progress
+            --timeout 20s
+            --max-concurrency 8
+            --exclude-mail
+            --exclude-file .lycheeignore
+            .
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
