@@ -49,6 +49,9 @@
   }
   </script>
 
+  <!-- 轻量统计（Plausible｜可选、无侵入） -->
+  <script defer data-domain="ben-del-cmd.github.io" src="https://plausible.io/js/script.js"></script>
+
   <style>
     :root {
       --bg: #0b0c0f;
@@ -193,7 +196,7 @@
   </footer>
 
   <script>
-    // 前端过滤：根据输入实时筛选卡片
+    // 前端过滤：根据输入实时筛选卡片，并触发轻量统计事件
     (function () {
       var q = document.getElementById('q');
       var grid = document.getElementById('tools');
@@ -207,7 +210,10 @@
           card.style.display = hit ? '' : 'none';
         });
       }
-      q.addEventListener('input', function (e) { filter(e.target.value); });
+      q.addEventListener('input', function (e) {
+        filter(e.target.value);
+        try { if (window.plausible && e.target.value) { window.plausible('Search'); } } catch (err) {}
+      });
 
       // （可选）恢复旧首页“自动跳转”行为：如需要，将 .redirect 区块 display 设为 block
       var r = document.getElementById('redirect');
