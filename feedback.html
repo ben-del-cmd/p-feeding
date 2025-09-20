@@ -8,6 +8,20 @@
   <link rel="canonical" href="https://ben-del-cmd.github.io/p-feeding/feedback.html">
   <link rel="icon" href="https://ben-del-cmd.github.io/p-feeding/cover.png?v=20250919">
   <link rel="apple-touch-icon" href="https://ben-del-cmd.github.io/p-feeding/cover.png?v=20250919">
+
+  <!-- 安全基线（Phase 1） -->
+  <meta name="theme-color" content="#0b0c0f">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self';
+                 img-src 'self' https: data:;
+                 script-src 'self' https://plausible.io 'unsafe-inline';
+                 style-src 'self' 'unsafe-inline';
+                 connect-src https://plausible.io;
+                 form-action 'self' https://github.com mailto:;
+                 base-uri 'none';
+                 frame-ancestors 'self';">
+
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="宠物A计划">
   <meta property="og:title" content="反馈 / 提建议">
@@ -18,7 +32,10 @@
   <meta name="twitter:title" content="反馈 / 提建议">
   <meta name="twitter:description" content="提交后跳转到 GitHub Issue 草稿，便于跟踪与协作。">
   <meta name="twitter:image" content="https://ben-del-cmd.github.io/p-feeding/cover.png?v=20250919">
+
+  <!-- 轻量统计（Plausible） -->
   <script defer data-domain="ben-del-cmd.github.io" src="https://plausible.io/js/script.js"></script>
+
   <style>
     :root { --bg:#0b0c0f; --card:#101318; --muted:#a7b0c0; --text:#e7ecf3; --primary:#8fd3ff; --border:#1b2430; --radius:16px; }
     *{box-sizing:border-box}
@@ -33,7 +50,7 @@
     input,textarea{width:100%;padding:12px;background:#0e1217;border:1px solid var(--border);border-radius:12px;color:var(--text);outline:none}
     textarea{min-height:140px;resize:vertical}
     .row{display:grid;grid-template-columns:1fr;gap:12px;margin:12px 0}
-    .btn{display:inline-block;padding:12px 16px;border:1px solid var(--border);border-radius:12px;background:#0f141a;color:var(--text);cursor:pointer}
+    .btn{display:inline-block;padding:12px 16px;border:1px solid var(--border);border-radius:12px;background:#0f141a;color:#fff;cursor:pointer}
     .btn:hover{border-color:#273246}
     .hint{font-size:13px;color:var(--muted);margin-top:8px}
     .hr{height:1px;background:var(--border);border:0;margin:20px 0}
@@ -94,12 +111,12 @@
       function buildIssueURL(title, body, contact){
         var repo = 'https://github.com/ben-del-cmd/p-feeding/issues/new';
         var fullBody = body;
-        if (contact) fullBody += '\\n\\n---\\n联系（可选）: ' + contact;
+        if (contact) fullBody += '\n\n---\n联系（可选）: ' + contact;
         return repo + '?title=' + enc(title) + '&body=' + enc(fullBody);
       }
       function buildMailto(title, body, contact){
         var to = 'mailto:?subject=' + enc('宠物A计划反馈：' + title);
-        var txt = body + (contact ? '\\n\\n联系（可选）：' + contact : '');
+        var txt = body + (contact ? '\n\n联系（可选）：' + contact : '');
         return to + '&body=' + enc(txt);
       }
       form.addEventListener('submit', function(e){
