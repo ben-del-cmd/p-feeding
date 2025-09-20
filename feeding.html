@@ -42,6 +42,9 @@
   }
   </script>
 
+  <!-- 轻量统计（Plausible｜可选、无侵入） -->
+  <script defer data-domain="ben-del-cmd.github.io" src="https://plausible.io/js/script.js"></script>
+
   <style>
     :root {
       --bg: #0b0c0f; --card:#101318; --muted:#a7b0c0; --text:#e7ecf3;
@@ -131,7 +134,7 @@
 
     <hr class="hr">
 
-    <!-- 页尾：反馈入口（新增，必须包含在整页底部） -->
+    <!-- 页尾：反馈入口 -->
     <footer>
       <p>
         <a href="https://github.com/ben-del-cmd/p-feeding/issues" target="_blank" rel="noopener">反馈 / 提建议</a>
@@ -181,6 +184,11 @@
 
         gramsLine.style.display = 'block';
         res.style.display = 'grid';
+
+        // Plausible 自定义事件（可选，不影响功能）
+        try {
+          if (window.plausible) { window.plausible('Calculate'); }
+        } catch (e) {}
       });
 
       // 回车快捷键
@@ -192,5 +200,10 @@
       });
     })();
   </script>
+
+  <!-- 如果未来想改用 Umami（自托管/更细粒度），把上面的 Plausible <script>删除，
+       并在这里换成（示例）：
+       <script defer src="https://umami.yourdomain.com/script.js" data-website-id="YOUR-UMAMI-ID"></script>
+       即可。 -->
 </body>
 </html>
