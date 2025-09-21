@@ -188,6 +188,16 @@
   // ---------------------------
   const STORAGE_KEY = 'i18n.lang';
 
+  // localStorage with try/catch (privacy modes safe)
+  function lsGet(key) {
+    try { return window.localStorage.getItem(key); }
+    catch (e) { return null; }
+  }
+  function lsSet(key, val) {
+    try { window.localStorage.setItem(key, val); }
+    catch (e) { /* no-op */ }
+  }
+
   function normalizeLang(code) {
     if (!code) return 'en-US';
     const c = String(code).toLowerCase();
@@ -201,7 +211,7 @@
     const url = new URL(location.href);
     const q = url.searchParams.get('lang');
     if (q) return normalizeLang(q);
-    const saved = localStorage.getItem(STORAGE_KEY);
+    const saved = lsGet(STORAGE_KEY);
     if (saved) return normalizeLang(saved);
     const nav = (navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage || 'en-US';
     return normalizeLang(nav);
@@ -246,12 +256,12 @@
 
   function setLang(lang) {
     const L = normalizeLang(lang);
-    localStorage.setItem(STORAGE_KEY, L);
+    lsSet(STORAGE_KEY, L);
     try { window.plausible && window.plausible('Lang', { props: { lang: L } }); } catch (e) {}
     applyI18n(L);
     const url = new URL(location.href);
     url.searchParams.set('lang', L);
-    history.replaceState(null, '', url.toString());
+    try { history.replaceState(null, '', url.toString()); } catch (e) {}
   }
 
   // ---------------------------
