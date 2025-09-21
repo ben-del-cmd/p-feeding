@@ -1,104 +1,99 @@
 <!doctype html>
-<html lang="en-US">
+<html lang="zh-CN">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title data-i18n="title.feedback">Feedback</title>
-  <meta name="description" content="提交问题或功能建议，将在 GitHub 中生成一条 Issue 草稿。">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title data-i18n="title.feedback">问题与建议｜Feedback</title>
+  <meta name="description" content="站内表单一键跳转到 GitHub Issue 草稿，便于提交问题或建议。">
   <link rel="canonical" href="https://ben-del-cmd.github.io/p-feeding/feedback.html">
   <link rel="icon" href="/p-feeding/cover.png?v=20250919">
 
   <!-- Open Graph / Twitter -->
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://ben-del-cmd.github.io/p-feeding/feedback.html">
   <meta property="og:title" content="问题与建议｜Feedback">
-  <meta property="og:description" content="提交问题或功能建议，将在 GitHub 中生成一条 Issue 草稿。">
+  <meta property="og:description" content="站内表单一键跳转到 GitHub Issue 草稿。">
+  <meta property="og:url" content="https://ben-del-cmd.github.io/p-feeding/feedback.html">
   <meta property="og:image" content="https://ben-del-cmd.github.io/p-feeding/cover.png?v=20250919">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="问题与建议｜Feedback">
-  <meta name="twitter:description" content="提交问题或功能建议，将在 GitHub 中生成一条 Issue 草稿。">
-  <meta name="twitter:image" content="https://ben-del-cmd.github.io/p-feeding/cover.png?v=20250919">
 
-  <!-- Phase 1 安全基线 -->
+  <!-- Phase 1 安全片段 -->
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https: data:; script-src 'self' https://plausible.io 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src https://plausible.io; form-action 'self' https://github.com mailto:; base-uri 'none'; frame-ancestors 'self';">
   <meta name="theme-color" content="#0b0c0f">
 
+  <!-- i18n -->
+  <script src="/p-feeding/i18n.js?v=20250920b" defer></script>
+
   <!-- Plausible -->
   <script defer data-domain="ben-del-cmd.github.io" src="https://plausible.io/js/script.js"></script>
 
-  <!-- i18n（加 defer） -->
-  <script defer src="/p-feeding/i18n.js?v=20250920"></script>
-
   <style>
-    body{max-width:720px;margin:0 auto;padding:24px;line-height:1.6;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,Helvetica,sans-serif}
-    a{color:#1d4ed8}
-    .card{border:1px solid #e5e7eb;border-radius:12px;padding:16px}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,'Noto Sans',sans-serif;background:#0b0c0f;color:#e6e6e6;margin:0;line-height:1.6}
+    .wrap{max-width:960px;margin:0 auto;padding:32px 16px}
+    a{color:#8ecaff;text-decoration:none}
     .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-    .row>label{min-width:100px}
-    input,select,textarea,button{padding:10px;border:1px solid #e5e7eb;border-radius:10px}
-    textarea{width:100%;min-height:140px}
-    button.primary{background:#0b0c0f;color:#fff;cursor:pointer}
-    header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+    .btn{padding:8px 12px;border-radius:10px;background:#1b2330;border:1px solid #2b3442;color:#e6e6e6}
+    .btn:hover{background:#223043}
+    .card{background:#11141a;border:1px solid #222833;border-radius:12px;padding:18px;margin:16px 0}
+    input,select,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #2b3442;background:#0e131b;color:#e6e6e6}
+    textarea{min-height:220px}
   </style>
 </head>
 <body>
-  <header>
-    <a href="/p-feeding/" data-i18n="nav.home" rel="noopener">Home</a>
-    <div>
-      <button onclick="__setLang('en-US')">English</button>
-      <button onclick="__setLang('es-419')">Español</button>
-      <button onclick="__setLang('zh-Hans')">中文(简)</button>
-      <button onclick="__setLang('fr-CA')">Français (Canada)</button>
-    </div>
-  </header>
+  <div class="wrap">
+    <p><a href="/p-feeding/" class="btn" data-i18n="nav.home">返回主页</a></p>
 
-  <h1 data-i18n="h1.feedback">Feedback</h1>
+    <div class="row" style="margin:6px 0 18px">
+      <button class="btn" onclick="__setLang('en-US')">English</button>
+      <button class="btn" onclick="__setLang('es-419')">Español</button>
+      <button class="btn" onclick="__setLang('zh-Hans')">中文(简)</button>
+      <button class="btn" onclick="__setLang('fr-CA')">Français (Canada)</button>
+    </div>
 
-  <section class="card">
-    <div class="row">
-      <label for="t" data-i18n="form.type">Type</label>
-      <select id="t">
-        <option value="bug" data-i18n="form.type.bug">Bug</option>
-        <option value="feature" data-i18n="form.type.feature">Feature Request</option>
-      </select>
-    </div>
-    <div class="row" style="margin-top:12px;">
-      <label for="s" data-i18n="form.summary">Summary</label>
-      <input id="s" type="text" maxlength="120" data-i18n-placeholder="form.summary.ph" placeholder="One-line summary…">
-    </div>
-    <div class="row" style="margin-top:12px;">
-      <label for="d" data-i18n="form.details">Details</label>
-      <textarea id="d" data-i18n-placeholder="form.details.ph" placeholder="Steps to reproduce, expected result, screenshots/device info…"></textarea>
-    </div>
-    <div class="row" style="margin-top:12px;">
-      <button id="go" class="primary" data-i18n="btn.preview">Preview Draft</button>
-    </div>
-    <p style="margin-top:8px;color:#6b7280;font-size:14px;" data-i18n="footer.note.feedback">You will be redirected to GitHub to review and submit.</p>
-  </section>
+    <h1 data-i18n="h1.feedback">问题与建议</h1>
 
-  <footer style="margin-top:24px;color:#6b7280;font-size:14px;">
-    <small>© p-feeding</small>
-  </footer>
+    <div class="card">
+      <div class="row">
+        <label for="type" style="min-width:64px" data-i18n="form.type">类型</label>
+        <select id="type" style="width:220px">
+          <option value="bug" data-i18n="form.type.bug">缺陷 / Bug</option>
+          <option value="feature" data-i18n="form.type.feature">功能建议</option>
+        </select>
+      </div>
+
+      <div style="margin-top:10px">
+        <label for="summary" data-i18n="form.summary">概要</label>
+        <input id="summary" data-i18n-placeholder="form.summary.ph" placeholder="一句话描述…">
+      </div>
+
+      <div style="margin-top:10px">
+        <label for="details" data-i18n="form.details">详细描述</label>
+        <textarea id="details" data-i18n-placeholder="form.details.ph" placeholder="可复现步骤、期望结果、截图/设备信息等…"></textarea>
+      </div>
+
+      <div class="row" style="margin-top:12px">
+        <button id="go" class="btn" data-i18n="btn.preview">预览草稿</button>
+      </div>
+    </div>
+
+    <p data-i18n="footer.note.feedback">提交将跳转到 GitHub，新窗口中可再次确认后发布。</p>
+  </div>
 
   <script>
-    (function(){
-      const repo = 'https://github.com/ben-del-cmd/p-feeding/issues/new';
-      document.getElementById('go').addEventListener('click', function(){
-        const lang = document.documentElement.lang || 'en-US';
-        const type = document.getElementById('t').value;
-        const summary = (document.getElementById('s').value||'').trim();
-        const details = (document.getElementById('d').value||'').trim();
-        const template = type==='bug' ? 'bug_report.yml' : 'feature_request.yml';
-        const body = details + '\n\n' + '— From p-feeding/feedback.html';
-        const params = new URLSearchParams();
-        params.set('template', template);
-        if(summary) params.set('title', summary);
-        if(body) params.set('body', body);
-        try{ window.plausible && window.plausible('Feedback', { props: { lang, type } }); }catch(e){}
-        location.href = repo + '?' + params.toString();
-      });
-    })();
+    function openDraft(){
+      const type = document.getElementById('type').value;
+      const title = (document.getElementById('summary').value||'').trim();
+      const body  = (document.getElementById('details').value||'').trim();
+
+      const labels = encodeURIComponent(type==='bug' ? 'bug' : 'enhancement');
+      const t = encodeURIComponent(title || '[No title]');
+      const b = encodeURIComponent(body || '');
+
+      // 跳转到 Issue 草稿（使用 Discussions/Issues 新建 URL）
+      const url = `https://github.com/ben-del-cmd/p-feeding/issues/new?labels=${labels}&title=${t}&body=${b}`;
+      try{ window.plausible && window.plausible('Feedback',{props:{type}});}catch(e){}
+      window.open(url, '_blank','noopener');
+    }
+    document.getElementById('go').addEventListener('click', openDraft);
   </script>
 </body>
 </html>
