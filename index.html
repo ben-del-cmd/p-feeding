@@ -2,58 +2,131 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Title will be replaced by i18n.js -->
   <title data-i18n="title.index">Pet Feeding Tools</title>
-  <link rel="icon" href="/p-feeding/cover.png" />
+
+  <!-- SEO: canonical will be set to the current ?lang via the small helper below -->
+  <link id="canon" rel="canonical" href="https://ben-del-cmd.github.io/p-feeding/?lang=en-US" />
+  <meta name="description" content="Simple, handy tools: feeding calculator, feedback, and more." />
+  <meta name="robots" content="index,follow" />
+
+  <!-- Open Graph / Twitter -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://ben-del-cmd.github.io/p-feeding/" />
+  <meta property="og:title" content="Pet Feeding Tools" />
+  <meta property="og:description" content="Simple, handy tools: feeding calculator, feedback, and more." />
+  <meta property="og:image" content="https://ben-del-cmd.github.io/p-feeding/cover.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Pet Feeding Tools" />
+  <meta name="twitter:description" content="Simple, handy tools: feeding calculator, feedback, and more." />
+  <meta name="twitter:image" content="https://ben-del-cmd.github.io/p-feeding/cover.png" />
+
+  <!-- i18n hreflang (四语言互相声明) -->
+  <link rel="alternate" href="https://ben-del-cmd.github.io/p-feeding/?lang=en-US" hreflang="en-US" />
+  <link rel="alternate" href="https://ben-del-cmd.github.io/p-feeding/?lang=es-419" hreflang="es-419" />
+  <link rel="alternate" href="https://ben-del-cmd.github.io/p-feeding/?lang=zh-Hans" hreflang="zh-Hans" />
+  <link rel="alternate" href="https://ben-del-cmd.github.io/p-feeding/?lang=fr-CA" hreflang="fr-CA" />
+  <link rel="alternate" href="https://ben-del-cmd.github.io/p-feeding/?lang=en-US" hreflang="x-default" />
+
+  <!-- JSON-LD: WebSite -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "inLanguage": "en-US",
+    "url": "https://ben-del-cmd.github.io/p-feeding/",
+    "name": "Pet Feeding Tools",
+    "description": "Simple, handy tools: feeding calculator, feedback, and more."
+  }
+  </script>
+
+  <!-- Plausible analytics (privacy-first) -->
+  <script defer data-domain="ben-del-cmd.github.io" src="https://plausible.io/js/script.js"></script>
+
+  <!-- Styles (very light) -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <style>
     :root { color-scheme: light dark; }
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji"; margin: 0 auto; padding: 24px; max-width: 960px; line-height: 1.6; }
-    h1 { font-size: 40px; line-height: 1.2; margin: 12px 0 8px; }
-    .nav { display:flex; gap:16px; margin: 24px 0; flex-wrap: wrap; }
-    .btn { padding:10px 16px; border-radius:10px; border:1px solid rgb(120 120 120 / 35%); background:transparent; cursor:pointer; font-weight:600;}
-    .btn:active { transform: translateY(1px); }
-    .card { border:1px solid rgb(120 120 120 / 25%); border-radius:14px; padding:16px; margin:20px 0; }
-    .lang-row { display:flex; gap:12px; margin-top:16px; flex-wrap: wrap; }
-    .pill { padding:8px 14px; border-radius:999px; border:1px solid rgb(120 120 120 / 35%); background:transparent; cursor:pointer; }
-    footer { margin-top: 28px; color: #888; font-size: 14px; }
-    .links { display:flex; gap:12px; margin-top:12px; flex-wrap:wrap; }
-    a { color: inherit; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, PingFang SC, Noto Sans, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji"; margin:0; padding:32px 16px; line-height:1.6; }
+    .wrap { max-width: 960px; margin: 0 auto; }
+    h1 { font-size: clamp(28px, 5vw, 48px); margin: 16px 0 8px; }
+    nav a { margin-right: 16px; }
+    .card { border: 1px solid color-mix(in oklab, CanvasText 15%, transparent); border-radius: 12px; padding: 20px; }
+    .row { margin: 28px 0; }
+    .btn { display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid color-mix(in oklab, CanvasText 15%, transparent); text-decoration:none; }
+    .langbar .btn { margin: 6px 8px 0 0; }
+    input[type="search"]{width:100%; padding:12px 14px; border-radius:10px; border:1px solid color-mix(in oklab, CanvasText 15%, transparent);}
+    .grid { display:grid; gap:12px; grid-template-columns: 1fr auto; }
+    footer { margin-top: 26px; font-size: 14px; opacity:.8; }
+    .links a { margin-right:12px; }
   </style>
-  <!-- i18n -->
-  <script src="/p-feeding/i18n.js?v=20250920b" defer></script>
+
+  <!-- i18n dictionaries -->
+  <script defer src="/p-feeding/i18n.js?v=20250920b"></script>
 </head>
 <body>
-  <h1 data-i18n="h1.index">Pet Feeding Tools</h1>
-  <p data-i18n="desc.index">Simple, handy tools: feeding calculator, feedback, and more.</p>
+  <div class="wrap">
+    <nav class="row">
+      <a class="btn" data-i18n="nav.feeding" href="/p-feeding/feeding.html" data-keep-lang="1">Feeding Calculator</a>
+      <a class="btn" data-i18n="nav.feedback" href="/p-feeding/feedback.html" data-keep-lang="1">Feedback</a>
+    </nav>
 
-  <div class="nav">
-    <a class="btn" href="/p-feeding/feeding.html" data-i18n="nav.feeding">Feeding Calculator</a>
-    <a class="btn" href="/p-feeding/feedback.html" data-i18n="nav.feedback">Feedback</a>
+    <header>
+      <h1 data-i18n="h1.index">Pet Feeding Tools</h1>
+      <p data-i18n="desc.index">Simple, handy tools: feeding calculator, feedback, and more.</p>
+    </header>
+
+    <section class="row card">
+      <label for="q" data-i18n="search.label">Site Search</label>
+      <div class="grid">
+        <input id="q" type="search" data-i18n-placeholder="search.placeholder" placeholder="Type a keyword…" />
+        <button class="btn" data-i18n="search.btn">Search</button>
+      </div>
+    </section>
+
+    <section class="row langbar">
+      <a class="btn" onclick="__setLang('en-US')">English</a>
+      <a class="btn" onclick="__setLang('es-419')">Español</a>
+      <a class="btn" onclick="__setLang('zh-Hans')">中文(简)</a>
+      <a class="btn" onclick="__setLang('fr-CA')">Français (Canada)</a>
+    </section>
+
+    <footer class="row">
+      <p data-i18n="footer.note">Anonymous analytics (Plausible) is enabled to improve the product.</p>
+      <p class="links">
+        <a class="btn" href="/p-feeding/robots.txt" target="_blank" rel="noopener">robots.txt</a>
+        <a class="btn" href="/p-feeding/sitemap.xml" target="_blank" rel="noopener">sitemap.xml</a>
+        <a class="btn" href="https://github.com/ben-del-cmd/p-feeding" target="_blank" rel="noopener">GitHub 仓库</a>
+      </p>
+    </footer>
   </div>
 
-  <div class="card">
-    <h3 data-i18n="search.label">Site Search</h3>
-    <div style="display:flex; gap:10px; align-items:center; flex-wrap: wrap">
-      <input type="search" style="flex:1; min-width:260px; padding:12px 14px; border-radius:10px; border:1px solid rgb(120 120 120 / 35%);"
-             data-i18n-placeholder="search.placeholder" placeholder="Type a keyword…" />
-      <button class="btn" data-i18n="search.btn">Search</button>
-    </div>
-
-    <div class="lang-row">
-      <button class="pill" onclick="__setLang('en-US')">English</button>
-      <button class="pill" onclick="__setLang('es-419')">Español</button>
-      <button class="pill" onclick="__setLang('zh-Hans')">中文(简)</button>
-      <button class="pill" onclick="__setLang('fr-CA')">Français (Canada)</button>
-    </div>
-  </div>
-
-  <footer>
-    <div data-i18n="footer.note">Anonymous analytics (Plausible) is enabled to improve the product.</div>
-    <div class="links">
-      <a class="pill" href="/p-feeding/robots.txt">robots.txt</a>
-      <a class="pill" href="/p-feeding/sitemap.xml">sitemap.xml</a>
-      <a class="pill" href="https://github.com/ben-del-cmd/p-feeding" target="_blank" rel="noopener">GitHub 仓库</a>
-    </div>
-  </footer>
+  <!-- Keep current lang on internal links + set canonical -->
+  <script>
+    (function () {
+      function currentLang() {
+        try { return (window.__i18n_get && __i18n_get().lang) || new URL(location).searchParams.get('lang') || 'en-US'; }
+        catch (_) { return 'en-US'; }
+      }
+      function applyKeepLang() {
+        var L = currentLang();
+        document.querySelectorAll('a[data-keep-lang="1"]').forEach(function(a){
+          try{ var u = new URL(a.getAttribute('href'), location);
+               u.searchParams.set('lang', L);
+               a.setAttribute('href', u.toString()); }catch(e){}
+        });
+        try{
+          var cu = new URL(location.href);
+          if (!cu.searchParams.get('lang')) cu.searchParams.set('lang', L);
+          var canon = document.getElementById('canon');
+          if (canon) canon.href = cu.toString();
+        }catch(e){}
+      }
+      // run after i18n applies
+      window.addEventListener('DOMContentLoaded', function(){ setTimeout(applyKeepLang, 0); });
+    })();
+  </script>
 </body>
 </html>
