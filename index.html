@@ -1,171 +1,66 @@
 <!doctype html>
-<html lang="zh-CN">
-<head>
-  <meta charset="utf-8">
-  <title>宠物A计划｜工具索引｜喂食计算器等轻量宠物工具</title>
-  <meta name="description" content="宠物A计划：轻量、可分享、可扩展的宠物工具集合。当前可用：喂食计算器（简版）。优先级：可用性 > 稳定性 > 可维护性 > 扩展性。">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="robots" content="index,follow">
-  <link rel="canonical" href="https://ben-del-cmd.github.io/p-feeding/">
-  <link rel="icon" href="https://ben-del-cmd.github.io/p-feeding/cover.png?v=20250919">
-  <link rel="apple-touch-icon" href="https://ben-del-cmd.github.io/p-feeding/cover.png?v=20250919">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="宠物喂食工具集｜Pet Feeding Tools">
+<meta name="twitter:description" content="简洁好用的宠物喂食小工具：喂食计算器、反馈入口与更多实验功能。">
+<meta name="twitter:image" content="https://ben-del-cmd.github.io/p-feeding/cover.png?v=20250919">
 
-  <!-- 安全基线（Phase 1） -->
-  <meta name="theme-color" content="#0b0c0f">
-  <meta name="referrer" content="strict-origin-when-cross-origin">
-  <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self';
-                 img-src 'self' https: data:;
-                 script-src 'self' https://plausible.io 'unsafe-inline';
-                 style-src 'self' 'unsafe-inline';
-                 connect-src https://plausible.io;
-                 form-action 'self' https://github.com mailto:;
-                 base-uri 'none';
-                 frame-ancestors 'self';">
 
-  <!-- OG / Twitter -->
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="宠物A计划">
-  <meta property="og:title" content="宠物A计划｜工具索引">
-  <meta property="og:description" content="轻量、可分享的宠物工具集合。当前可用：喂食计算器（简版）。">
-  <meta property="og:url" content="https://ben-del-cmd.github.io/p-feeding/">
-  <meta property="og:image" content="https://ben-del-cmd.github.io/p-feeding/cover.png?v=20250919">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="宠物A计划｜工具索引">
-  <meta name="twitter:description" content="轻量、可分享的宠物工具集合。当前可用：喂食计算器（简版）。">
-  <meta name="twitter:image" content="https://ben-del-cmd.github.io/p-feeding/cover.png?v=20250919">
+<!-- 安全基线 Phase 1 -->
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https: data:; script-src 'self' https://plausible.io 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src https://plausible.io; form-action 'self' https://github.com mailto:; base-uri 'none'; frame-ancestors 'self';">
+<meta name="theme-color" content="#0b0c0f">
 
-  <!-- 结构化数据 -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"宠物A计划｜工具索引","url":"https://ben-del-cmd.github.io/p-feeding/","about":"轻量、可分享、可扩展的宠物工具集合","isPartOf":{"@type":"WebSite","name":"宠物A计划"},"hasPart":[{"@type":"SoftwareApplication","name":"喂食计算器（简版）","applicationCategory":"UtilitiesApplication","operatingSystem":"Web","url":"https://ben-del-cmd.github.io/p-feeding/feeding.html"}]}</script>
 
-  <!-- 轻量统计（Plausible） -->
-  <script defer data-domain="ben-del-cmd.github.io" src="https://plausible.io/js/script.js"></script>
+<!-- Plausible -->
+<script defer data-domain="ben-del-cmd.github.io" src="https://plausible.io/js/script.js"></script>
 
-  <style>
-    :root { --bg:#0b0c0f; --card:#101318; --muted:#a7b0c0; --text:#e7ecf3; --primary:#8fd3ff; --border:#1b2430; --accent:#b3ffcc; --radius:16px; }
-    *{box-sizing:border-box}
-    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif}
-    a{color:var(--primary);text-decoration:none} a:hover{text-decoration:underline}
-    header{max-width:960px;margin:32px auto 12px;padding:0 16px}
-    .brand{display:flex;align-items:center;gap:12px}
-    .logo{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--accent));box-shadow:0 8px 30px rgba(143,211,255,0.25)}
-    h1{font-size:24px;margin:0}
-    .desc{margin:8px 0 0;color:var(--muted)}
-    main{max-width:960px;margin:12px auto 24px;padding:0 16px}
-    .search{display:flex;align-items:center;gap:12px;margin:20px 0 16px}
-    .search input{width:100%;padding:12px 14px;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:var(--radius);outline:none}
-    .tip{color:var(--muted);font-size:14px;margin:4px 2px 18px}
-    .grid{display:grid;grid-template-columns:1fr;gap:14px}
-    @media (min-width:720px){.grid{grid-template-columns:1fr 1fr}}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;transition:transform .12s ease,box-shadow .12s ease,border-color .12s ease}
-    .card:hover{transform:translateY(-2px);border-color:#273246;box-shadow:0 10px 30px rgba(0,0,0,.3)}
-    .card h2{margin:0 0 8px;font-size:18px;display:flex;align-items:center;justify-content:space-between;gap:8px}
-    .card p{margin:0;color:var(--muted)}
-    .pill{font-size:12px;padding:2px 8px;border:1px solid var(--border);border-radius:999px;color:var(--muted)}
-    .list{margin:12px 0 0;padding-left:18px;color:var(--muted);font-size:14px}
-    .list li{margin:4px 0}
-    footer{max-width:960px;margin:8px auto 40px;padding:0 16px;color:var(--muted)}
-    .links{display:flex;flex-wrap:wrap;gap:16px;margin-top:10px}
-    .small{font-size:13px}
-    .hr{height:1px;background:var(--border);margin:20px 0;border:0}
-    .redirect{display:none;background:#0e141b;border:1px dashed var(--border);border-radius:var(--radius);padding:12px;margin:16px 0;color:var(--muted)}
-  </style>
+
+<!-- i18n 四语字典（外部文件） -->
+<script src="/p-feeding/i18n.js?v=20250920"></script>
 </head>
+<body style="max-width:720px;margin:0 auto;padding:24px;line-height:1.6;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,Helvetica,sans-serif;">
+<header style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+<h1 data-i18n="h1.index" style="margin:0;">Pet Feeding Tools</h1>
+<nav style="display:flex;gap:8px;flex-wrap:wrap;">
+<a href="/p-feeding/feeding.html" data-i18n="nav.feeding" rel="noopener">Feeding Calculator</a>
+<a href="/p-feeding/feedback.html" data-i18n="nav.feedback" rel="noopener">Feedback</a>
+</nav>
+</header>
 
-<body>
-  <header>
-    <div class="brand" aria-label="站点标识">
-      <div class="logo" role="img" aria-label="宠物A计划"></div>
-      <div>
-        <h1>宠物A计划｜工具索引</h1>
-        <p class="desc">轻量、可分享、可扩展的宠物工具集合。当前可用：<strong>喂食计算器（简版）</strong>。</p>
-      </div>
-    </div>
-  </header>
 
-  <main>
-    <div class="redirect" id="redirect" data-href="/p-feeding/feeding.html" aria-live="polite">
-      正在跳转到 <a href="/p-feeding/feeding.html">喂食计算器（feeding.html）</a> … 若未自动跳转，请点击上面的链接。
-    </div>
+<p data-i18n="desc.index">Simple, handy tools: feeding calculator, feedback, and more.</p>
 
-    <div class="search" role="search">
-      <input id="q" type="search" placeholder="搜索工具…（例如：喂食、体重、记录）" aria-label="搜索工具">
-    </div>
-    <p class="tip">提示：可直接收藏 <code>https://ben-del-cmd.github.io/p-feeding/feeding.html</code> 进入喂食计算器。</p>
 
-    <section class="grid" id="tools" aria-label="工具列表">
-      <article class="card" data-keywords="喂食 计算器 feeding 食物 热量 卡路里 kcal 克 g 杯 cup">
-        <h2>
-          <a href="/p-feeding/feeding.html">喂食计算器（简版）</a>
-          <span class="pill">已上线</span>
-        </h2>
-        <p>根据体重与系数估算 RER / kcal，并换算成杯数与克数；已适配移动端，支持社交分享卡片。</p>
-        <ul class="list">
-          <li>页面：<code>/p-feeding/feeding.html</code></li>
-          <li>封面：<code>cover.png?v=20250919</code></li>
-        </ul>
-      </article>
+<section style="margin:16px 0;padding:12px;border:1px solid #e5e7eb;border-radius:12px;">
+<label for="q" data-i18n="search.label">Site Search</label>
+<div style="display:flex;gap:8px;margin-top:8px;">
+<input id="q" type="search" data-i18n-placeholder="search.placeholder" placeholder="Type a keyword…" aria-label="search" style="flex:1;padding:10px;border:1px solid #e5e7eb;border-radius:10px;">
+<button id="btn-search" data-i18n="search.btn" style="padding:10px 14px;border:1px solid #e5e7eb;border-radius:10px;background:#0b0c0f;color:#fff;cursor:pointer;">Search</button>
+</div>
+</section>
 
-      <article class="card" data-keywords="体重 weight 管理 追踪 记录" aria-hidden="true">
-        <h2><span>体重管理（开发计划）</span><span class="pill">规划中</span></h2>
-        <p>记录体重变化与目标区间，结合 RER 建议与提醒（占位，准备就绪后改为链接）。</p>
-        <ul class="list">
-          <li>计划页面：<code>/p-feeding/weight.html</code></li>
-          <li>收录策略：上线前 <code>robots.txt</code> 可保持 Disallow</li>
-        </ul>
-      </article>
 
-      <article class="card" data-keywords="体况 BCS 评分 评估" aria-hidden="true">
-        <h2><span>体况评分（规划）</span><span class="pill">规划中</span></h2>
-        <p>基于 BCS 量表的可视化自评助手，出分与建议（占位）。</p>
-      </article>
-    </section>
+<footer style="margin-top:24px;color:#6b7280;font-size:14px;">
+<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
+<span data-i18n="footer.note">Anonymous analytics (Plausible) is enabled to improve the product.</span>
+<div>
+<button onclick="__setLang('en-US')">English</button>
+<button onclick="__setLang('es-419')">Español</button>
+<button onclick="__setLang('zh-Hans')">中文(简)</button>
+<button onclick="__setLang('fr-CA')">Français (Canada)</button>
+</div>
+</div>
+</footer>
 
-    <hr class="hr">
 
-    <section aria-label="维护信息">
-      <p class="small">
-        <strong>维护约定：</strong>新增页面请同步更新 <code>sitemap.xml</code> 与本页索引；
-        不希望被收录的页面请在 <code>robots.txt</code> 添加 <code>Disallow</code>。
-      </p>
-    </section>
-  </main>
-
-  <footer>
-    <div class="links">
-      <a href="https://github.com/ben-del-cmd/p-feeding" target="_blank" rel="noopener">GitHub 仓库</a>
-      <a href="/p-feeding/feedback.html">反馈页</a>
-      <a href="https://ben-del-cmd.github.io/p-feeding/sitemap.xml" target="_blank" rel="noopener">站点地图</a>
-      <a href="https://ben-del-cmd.github.io/p-feeding/robots.txt" target="_blank" rel="noopener">robots.txt</a>
-    </div>
-    <p class="small" style="margin-top:10px">© 宠物A计划 · 最后更新：2025-09-20</p>
-  </footer>
-
-  <script>
-    (function () {
-      var q = document.getElementById('q');
-      var grid = document.getElementById('tools');
-      if (!q || !grid) return;
-      var cards = Array.prototype.slice.call(grid.querySelectorAll('.card'));
-      function filter (kw) {
-        var v = (kw || '').trim().toLowerCase();
-        cards.forEach(function (card) {
-          var text = (card.textContent + ' ' + (card.getAttribute('data-keywords') || '')).toLowerCase();
-          var hit = !v || text.indexOf(v) !== -1;
-          card.style.display = hit ? '' : 'none';
-        });
-      }
-      q.addEventListener('input', function (e) {
-        filter(e.target.value);
-        try { if (window.plausible && e.target.value) { window.plausible('Search', { props: { len: (e.target.value||'').length } }); } } catch (err) {}
-      });
-
-      var r = document.getElementById('redirect');
-      if (r && getComputedStyle(r).display !== 'none') {
-        var href = r.getAttribute('data-href') || '/p-feeding/feeding.html';
-        setTimeout(function () { location.href = href; }, 800);
-      }
-    })();
-  </script>
+<script>
+// 简单站内搜索：跳到 feeding 并带上语言与查询
+document.getElementById('btn-search').addEventListener('click', function(){
+const lang = document.documentElement.lang || 'en-US';
+const q = encodeURIComponent(document.getElementById('q').value.trim());
+try{ window.plausible && window.plausible('Search', { props: { q, lang } }); }catch(e){}
+if(q){ location.href = '/p-feeding/feeding.html?lang=' + encodeURIComponent(lang) + '#q=' + q; }
+});
+</script>
 </body>
 </html>
