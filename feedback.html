@@ -7,16 +7,23 @@
   <title data-i18n="title.feedback">Feedback</title>
   <meta name="description" content="Report a bug or suggest a feature. Draft will open on GitHub for final submission." />
   <link rel="canonical" href="https://ben-del-cmd.github.io/p-feeding/feedback.html" />
+  <link rel="icon" href="/p-feeding/cover.png">
+
+  <!-- Security baseline (Phase 1) -->
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https: data:; script-src 'self' https://plausible.io 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src https://plausible.io; form-action 'self' https://github.com mailto:; base-uri 'none'; frame-ancestors 'self';">
+  <meta name="theme-color" content="#0b0c0f">
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Pet Feeding Tools" />
   <meta property="og:title" content="Feedback" />
   <meta property="og:description" content="Report a bug or suggest a feature. Draft will open on GitHub for final submission." />
   <meta property="og:url" content="https://ben-del-cmd.github.io/p-feeding/feedback.html" />
+  <meta property="og:image" content="https://ben-del-cmd.github.io/p-feeding/cover.png?v=20250919" />
 
   <!-- Plausible -->
   <script defer data-domain="ben-del-cmd.github.io" src="https://plausible.io/js/script.js"></script>
-
   <!-- i18n -->
   <script src="/p-feeding/i18n.js?v=20250920b" defer></script>
 
@@ -80,13 +87,17 @@
   </main>
 
   <script>
-    // 简易草稿：跳到仓库的 issue 模板（你也可替换成自己的新 issue URL）
+    // 页面打开即上报 feedback_open
+    (function(){
+      try { plausible('feedback_open', { props: { path: location.pathname } }); } catch(e) {}
+    })();
+
+    // “预览草稿”按钮：跳到 GitHub 新 issue
     document.getElementById('go').addEventListener('click', function(){
       const type = document.getElementById('ftype').value;
       const title = (document.getElementById('summary').value || '').trim();
       const body = (document.getElementById('details').value || '').trim();
 
-      // 这里用 Discussions 的新主题/或 Issues 新建 URL 均可；演示用 Discussions（如需改为 Issues 请替换）
       const url = new URL('https://github.com/ben-del-cmd/p-feeding/issues/new');
       url.searchParams.set('title', title || '[Feedback]');
       url.searchParams.set('labels', type === 'bug' ? 'bug' : 'enhancement');
@@ -94,9 +105,7 @@
         `Type: ${type}\n\nSummary: ${title}\n\nDetails:\n${body}\n\n(from p-feeding/feedback.html)`
       );
 
-      // 可选：统计“点击预览草稿”
       try{ plausible('feedback_preview_click'); }catch(e){}
-
       window.open(url.toString(), '_blank','noopener');
     });
   </script>
