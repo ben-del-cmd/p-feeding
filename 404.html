@@ -4,6 +4,11 @@
 <title data-i18n="title.index">Pet Feeding Tools</title>
 <meta name="robots" content="noindex">
 <link rel="icon" href="/p-feeding/cover.png">
+
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https: data:; script-src 'self' https://plausible.io 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src https://plausible.io; form-action 'self' https://github.com mailto:; base-uri 'none'; frame-ancestors 'self';">
+<meta name="theme-color" content="#0b0c0f">
+
 <script defer data-domain="ben-del-cmd.github.io" src="https://plausible.io/js/script.js"></script>
 <script defer src="/p-feeding/i18n.js?v=20250920b"></script>
 <style>
@@ -18,4 +23,13 @@
   <p>404 — Page not found.</p>
   <p class="muted" data-i18n="footer.note">Anonymous analytics (Plausible) is enabled to improve the product.</p>
   <p><a class="btn" href="/p-feeding/" data-i18n="nav.home">Home</a></p>
+
+  <script>
+    // 上报 404 自定义事件（可在 Goals 里登记为 Custom Event: "404"）
+    try {
+      window.plausible && window.plausible('404', {
+        props: { path: location.pathname + location.search, referrer: document.referrer }
+      });
+    } catch(e) {}
+  </script>
 </body></html>
