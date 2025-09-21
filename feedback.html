@@ -1,99 +1,82 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title data-i18n="title.feedback">问题与建议｜Feedback</title>
-  <meta name="description" content="站内表单一键跳转到 GitHub Issue 草稿，便于提交问题或建议。">
-  <link rel="canonical" href="https://ben-del-cmd.github.io/p-feeding/feedback.html">
-  <link rel="icon" href="/p-feeding/cover.png?v=20250919">
-
-  <!-- Open Graph / Twitter -->
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="问题与建议｜Feedback">
-  <meta property="og:description" content="站内表单一键跳转到 GitHub Issue 草稿。">
-  <meta property="og:url" content="https://ben-del-cmd.github.io/p-feeding/feedback.html">
-  <meta property="og:image" content="https://ben-del-cmd.github.io/p-feeding/cover.png?v=20250919">
-
-  <!-- Phase 1 安全片段 -->
-  <meta name="referrer" content="strict-origin-when-cross-origin">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https: data:; script-src 'self' https://plausible.io 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src https://plausible.io; form-action 'self' https://github.com mailto:; base-uri 'none'; frame-ancestors 'self';">
-  <meta name="theme-color" content="#0b0c0f">
-
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title data-i18n="title.feedback">Feedback</title>
+  <link rel="icon" href="/p-feeding/cover.png"/>
+  <style>
+    :root { color-scheme: light dark; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,"Apple Color Emoji","Segoe UI Emoji"; margin:0 auto; padding:24px; max-width:960px; line-height:1.6; }
+    h1 { font-size:36px; margin:12px 0 18px; }
+    .top { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+    .lang-row { display:flex; gap:10px; flex-wrap:wrap; }
+    .pill { padding:8px 14px; border-radius:999px; border:1px solid rgb(120 120 120 / 35%); background:transparent; cursor:pointer; }
+    .card { border:1px solid rgb(120 120 120 / 25%); border-radius:14px; padding:16px; margin:20px 0; }
+    .row { display:grid; grid-template-columns: 120px 1fr; gap:12px; align-items:center; margin:12px 0; }
+    input, select, textarea { padding:10px 12px; border-radius:10px; border:1px solid rgb(120 120 120 / 35%); width:100%; }
+    textarea { min-height:220px; resize:vertical; }
+    .btn { padding:10px 16px; border-radius:10px; border:1px solid rgb(120 120 120 / 35%); background:transparent; cursor:pointer; font-weight:600;}
+    footer { margin-top: 28px; color:#888; font-size:14px; }
+  </style>
   <!-- i18n -->
   <script src="/p-feeding/i18n.js?v=20250920b" defer></script>
-
-  <!-- Plausible -->
-  <script defer data-domain="ben-del-cmd.github.io" src="https://plausible.io/js/script.js"></script>
-
-  <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,'Noto Sans',sans-serif;background:#0b0c0f;color:#e6e6e6;margin:0;line-height:1.6}
-    .wrap{max-width:960px;margin:0 auto;padding:32px 16px}
-    a{color:#8ecaff;text-decoration:none}
-    .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-    .btn{padding:8px 12px;border-radius:10px;background:#1b2330;border:1px solid #2b3442;color:#e6e6e6}
-    .btn:hover{background:#223043}
-    .card{background:#11141a;border:1px solid #222833;border-radius:12px;padding:18px;margin:16px 0}
-    input,select,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #2b3442;background:#0e131b;color:#e6e6e6}
-    textarea{min-height:220px}
-  </style>
 </head>
 <body>
-  <div class="wrap">
-    <p><a href="/p-feeding/" class="btn" data-i18n="nav.home">返回主页</a></p>
-
-    <div class="row" style="margin:6px 0 18px">
-      <button class="btn" onclick="__setLang('en-US')">English</button>
-      <button class="btn" onclick="__setLang('es-419')">Español</button>
-      <button class="btn" onclick="__setLang('zh-Hans')">中文(简)</button>
-      <button class="btn" onclick="__setLang('fr-CA')">Français (Canada)</button>
+  <div class="top">
+    <a href="/p-feeding/" data-i18n="nav.home">Home</a>
+    <div class="lang-row">
+      <button class="pill" onclick="__setLang('en-US')">English</button>
+      <button class="pill" onclick="__setLang('es-419')">Español</button>
+      <button class="pill" onclick="__setLang('zh-Hans')">中文(简)</button>
+      <button class="pill" onclick="__setLang('fr-CA')">Français (Canada)</button>
     </div>
-
-    <h1 data-i18n="h1.feedback">问题与建议</h1>
-
-    <div class="card">
-      <div class="row">
-        <label for="type" style="min-width:64px" data-i18n="form.type">类型</label>
-        <select id="type" style="width:220px">
-          <option value="bug" data-i18n="form.type.bug">缺陷 / Bug</option>
-          <option value="feature" data-i18n="form.type.feature">功能建议</option>
-        </select>
-      </div>
-
-      <div style="margin-top:10px">
-        <label for="summary" data-i18n="form.summary">概要</label>
-        <input id="summary" data-i18n-placeholder="form.summary.ph" placeholder="一句话描述…">
-      </div>
-
-      <div style="margin-top:10px">
-        <label for="details" data-i18n="form.details">详细描述</label>
-        <textarea id="details" data-i18n-placeholder="form.details.ph" placeholder="可复现步骤、期望结果、截图/设备信息等…"></textarea>
-      </div>
-
-      <div class="row" style="margin-top:12px">
-        <button id="go" class="btn" data-i18n="btn.preview">预览草稿</button>
-      </div>
-    </div>
-
-    <p data-i18n="footer.note.feedback">提交将跳转到 GitHub，新窗口中可再次确认后发布。</p>
   </div>
 
-  <script>
-    function openDraft(){
-      const type = document.getElementById('type').value;
-      const title = (document.getElementById('summary').value||'').trim();
-      const body  = (document.getElementById('details').value||'').trim();
+  <h1 data-i18n="h1.feedback">Feedback</h1>
 
-      const labels = encodeURIComponent(type==='bug' ? 'bug' : 'enhancement');
-      const t = encodeURIComponent(title || '[No title]');
-      const b = encodeURIComponent(body || '');
+  <div class="card">
+    <div class="row">
+      <label for="type" data-i18n="form.type">Type</label>
+      <select id="type">
+        <option value="bug" data-i18n="form.type.bug">Bug</option>
+        <option value="feature" data-i18n="form.type.feature">Feature Request</option>
+      </select>
+    </div>
 
-      // 跳转到 Issue 草稿（使用 Discussions/Issues 新建 URL）
-      const url = `https://github.com/ben-del-cmd/p-feeding/issues/new?labels=${labels}&title=${t}&body=${b}`;
-      try{ window.plausible && window.plausible('Feedback',{props:{type}});}catch(e){}
-      window.open(url, '_blank','noopener');
-    }
-    document.getElementById('go').addEventListener('click', openDraft);
-  </script>
+    <div class="row">
+      <label for="summary" data-i18n="form.summary">Summary</label>
+      <input id="summary" data-i18n-placeholder="form.summary.ph" placeholder="One-line summary…"/>
+    </div>
+
+    <div class="row">
+      <label for="details" data-i18n="form.details">Details</label>
+      <textarea id="details" data-i18n-placeholder="form.details.ph"
+        placeholder="Steps to reproduce, expected result, screenshots/device info…"></textarea>
+    </div>
+
+    <div class="row">
+      <div></div>
+      <button class="btn" id="preview" data-i18n="btn.preview">Preview Draft</button>
+    </div>
+  </div>
+
+  <footer data-i18n="footer.note.feedback">
+    You will be redirected to GitHub to review and submit.
+  </footer>
+
+<script>
+  // 打开 GitHub 新 issue 草稿页（带预填）
+  document.getElementById('preview').addEventListener('click', () => {
+    const repo = 'ben-del-cmd/p-feeding';
+    const type = document.getElementById('type').value === 'bug' ? '[Bug]' : '[Feature]';
+    const title = `${type} ${document.getElementById('summary').value || ''}`.trim();
+    const body  = document.getElementById('details').value || '';
+    const url = new URL(`https://github.com/${repo}/issues/new`);
+    url.searchParams.set('title', title);
+    url.searchParams.set('body', body);
+    window.open(url.toString(), '_blank');
+  });
+</script>
 </body>
 </html>
