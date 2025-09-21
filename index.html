@@ -1,66 +1,84 @@
 <!doctype html>
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="宠物喂食工具集｜Pet Feeding Tools">
-<meta name="twitter:description" content="简洁好用的宠物喂食小工具：喂食计算器、反馈入口与更多实验功能。">
-<meta name="twitter:image" content="https://ben-del-cmd.github.io/p-feeding/cover.png?v=20250919">
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-i18n="title.index">Pet Feeding Tools</title>
+  <meta name="description" content="简洁好用的宠物喂食小工具：喂食计算器、反馈入口与更多实验功能。">
+  <link rel="canonical" href="https://ben-del-cmd.github.io/p-feeding/">
+  <link rel="icon" href="/p-feeding/cover.png?v=20250919">
 
+  <!-- Open Graph / Twitter -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://ben-del-cmd.github.io/p-feeding/">
+  <meta property="og:title" content="宠物喂食工具集｜Pet Feeding Tools">
+  <meta property="og:description" content="简洁好用的宠物喂食小工具：喂食计算器、反馈入口与更多实验功能。">
+  <meta property="og:image" content="https://ben-del-cmd.github.io/p-feeding/cover.png?v=20250919">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="宠物喂食工具集｜Pet Feeding Tools">
+  <meta name="twitter:description" content="简洁好用的宠物喂食小工具：喂食计算器、反馈入口与更多实验功能。">
+  <meta name="twitter:image" content="https://ben-del-cmd.github.io/p-feeding/cover.png?v=20250919">
 
-<!-- 安全基线 Phase 1 -->
-<meta name="referrer" content="strict-origin-when-cross-origin">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https: data:; script-src 'self' https://plausible.io 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src https://plausible.io; form-action 'self' https://github.com mailto:; base-uri 'none'; frame-ancestors 'self';">
-<meta name="theme-color" content="#0b0c0f">
+  <!-- Phase 1 安全基线 -->
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https: data:; script-src 'self' https://plausible.io 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src https://plausible.io; form-action 'self' https://github.com mailto:; base-uri 'none'; frame-ancestors 'self';">
+  <meta name="theme-color" content="#0b0c0f">
 
+  <!-- Plausible -->
+  <script defer data-domain="ben-del-cmd.github.io" src="https://plausible.io/js/script.js"></script>
 
-<!-- Plausible -->
-<script defer data-domain="ben-del-cmd.github.io" src="https://plausible.io/js/script.js"></script>
+  <!-- i18n（加 defer，确保 DOM 就绪后替换） -->
+  <script defer src="/p-feeding/i18n.js?v=20250920"></script>
 
-
-<!-- i18n 四语字典（外部文件） -->
-<script src="/p-feeding/i18n.js?v=20250920"></script>
+  <style>
+    body{max-width:720px;margin:0 auto;padding:24px;line-height:1.6;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,Helvetica,sans-serif}
+    a{color:#1d4ed8}
+    input,button{padding:10px;border:1px solid #e5e7eb;border-radius:10px}
+    button{cursor:pointer}
+    .card{border:1px solid #e5e7eb;border-radius:12px;padding:16px}
+    header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+    nav{display:flex;gap:12px;flex-wrap:wrap}
+  </style>
 </head>
-<body style="max-width:720px;margin:0 auto;padding:24px;line-height:1.6;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,Helvetica,sans-serif;">
-<header style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
-<h1 data-i18n="h1.index" style="margin:0;">Pet Feeding Tools</h1>
-<nav style="display:flex;gap:8px;flex-wrap:wrap;">
-<a href="/p-feeding/feeding.html" data-i18n="nav.feeding" rel="noopener">Feeding Calculator</a>
-<a href="/p-feeding/feedback.html" data-i18n="nav.feedback" rel="noopener">Feedback</a>
-</nav>
-</header>
+<body>
+  <header>
+    <h1 data-i18n="h1.index" style="margin:0;">Pet Feeding Tools</h1>
+    <nav>
+      <a href="/p-feeding/feeding.html" data-i18n="nav.feeding" rel="noopener">Feeding Calculator</a>
+      <a href="/p-feeding/feedback.html" data-i18n="nav.feedback" rel="noopener">Feedback</a>
+    </nav>
+  </header>
 
+  <p data-i18n="desc.index">Simple, handy tools: feeding calculator, feedback, and more.</p>
 
-<p data-i18n="desc.index">Simple, handy tools: feeding calculator, feedback, and more.</p>
+  <section class="card">
+    <label for="q" data-i18n="search.label">Site Search</label>
+    <div style="display:flex;gap:8px;margin-top:8px;">
+      <input id="q" type="search" data-i18n-placeholder="search.placeholder" placeholder="Type a keyword…" aria-label="search" style="flex:1;">
+      <button id="btn-search" data-i18n="search.btn">Search</button>
+    </div>
+  </section>
 
+  <footer style="margin-top:24px;color:#6b7280;font-size:14px;">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
+      <span data-i18n="footer.note">Anonymous analytics (Plausible) is enabled to improve the product.</span>
+      <div>
+        <button onclick="__setLang('en-US')">English</button>
+        <button onclick="__setLang('es-419')">Español</button>
+        <button onclick="__setLang('zh-Hans')">中文(简)</button>
+        <button onclick="__setLang('fr-CA')">Français (Canada)</button>
+      </div>
+    </div>
+  </footer>
 
-<section style="margin:16px 0;padding:12px;border:1px solid #e5e7eb;border-radius:12px;">
-<label for="q" data-i18n="search.label">Site Search</label>
-<div style="display:flex;gap:8px;margin-top:8px;">
-<input id="q" type="search" data-i18n-placeholder="search.placeholder" placeholder="Type a keyword…" aria-label="search" style="flex:1;padding:10px;border:1px solid #e5e7eb;border-radius:10px;">
-<button id="btn-search" data-i18n="search.btn" style="padding:10px 14px;border:1px solid #e5e7eb;border-radius:10px;background:#0b0c0f;color:#fff;cursor:pointer;">Search</button>
-</div>
-</section>
-
-
-<footer style="margin-top:24px;color:#6b7280;font-size:14px;">
-<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
-<span data-i18n="footer.note">Anonymous analytics (Plausible) is enabled to improve the product.</span>
-<div>
-<button onclick="__setLang('en-US')">English</button>
-<button onclick="__setLang('es-419')">Español</button>
-<button onclick="__setLang('zh-Hans')">中文(简)</button>
-<button onclick="__setLang('fr-CA')">Français (Canada)</button>
-</div>
-</div>
-</footer>
-
-
-<script>
-// 简单站内搜索：跳到 feeding 并带上语言与查询
-document.getElementById('btn-search').addEventListener('click', function(){
-const lang = document.documentElement.lang || 'en-US';
-const q = encodeURIComponent(document.getElementById('q').value.trim());
-try{ window.plausible && window.plausible('Search', { props: { q, lang } }); }catch(e){}
-if(q){ location.href = '/p-feeding/feeding.html?lang=' + encodeURIComponent(lang) + '#q=' + q; }
-});
-</script>
+  <script>
+    // 站内搜索：跳到 feeding 并带上语言与查询
+    document.getElementById('btn-search').addEventListener('click', function(){
+      const lang = document.documentElement.lang || 'en-US';
+      const q = encodeURIComponent((document.getElementById('q').value||'').trim());
+      try{ window.plausible && window.plausible('Search', { props: { q, lang } }); }catch(e){}
+      if(q){ location.href = '/p-feeding/feeding.html?lang=' + encodeURIComponent(lang) + '#q=' + q; }
+    });
+  </script>
 </body>
 </html>
