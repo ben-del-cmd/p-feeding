@@ -1,6 +1,6 @@
 /* i18n.js — four languages (en-US, es-419, zh-Hans, fr-CA)
- * Usage in HTML: <script src="/p-feeding/i18n.js?v=20250920"></script>
- * - Auto-pick by ?lang / localStorage / navigator.language
+ * Usage in HTML: <script src="/p-feeding/i18n.js?v=20250920b"></script>
+ * - Auto-pick by ?lang / localStorage(i18n.lang) / navigator.languages[0] / navigator.language
  * - Apply to: [data-i18n], [data-i18n-placeholder], [data-i18n-value]
  * - Exposes: window.__setLang(lang), window.__i18n_get()
  */
@@ -186,6 +186,8 @@
   // ---------------------------
   // Helpers
   // ---------------------------
+  const STORAGE_KEY = 'i18n.lang';
+
   function normalizeLang(code) {
     if (!code) return 'en-US';
     const c = String(code).toLowerCase();
@@ -199,9 +201,10 @@
     const url = new URL(location.href);
     const q = url.searchParams.get('lang');
     if (q) return normalizeLang(q);
-    const saved = localStorage.getItem('lang');
+    const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) return normalizeLang(saved);
-    return normalizeLang(navigator.language || navigator.userLanguage || 'en-US');
+    const nav = (navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage || 'en-US';
+    return normalizeLang(nav);
   }
 
   function dictFor(lang) {
@@ -243,7 +246,7 @@
 
   function setLang(lang) {
     const L = normalizeLang(lang);
-    localStorage.setItem('lang', L);
+    localStorage.setItem(STORAGE_KEY, L);
     try { window.plausible && window.plausible('Lang', { props: { lang: L } }); } catch (e) {}
     applyI18n(L);
     const url = new URL(location.href);
@@ -252,14 +255,21 @@
   }
 
   // ---------------------------
-  // Init
+  // Safe Init (runs even if script tag forgets "defer")
   // ---------------------------
-  const L = pickLang();
-  applyI18n(L);
+  function init() {
+    const L = pickLang();
+    applyI18n(L);
+    // expose
+    window.__setLang = setLang;
+    window.__i18n_get = function () {
+      return { lang: document.documentElement.getAttribute('lang') || L, DICT };
+    };
+  }
 
-  // expose
-  window.__setLang = setLang;
-  window.__i18n_get = function () {
-    return { lang: document.documentElement.getAttribute('lang') || L, DICT };
-  };
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    init();
+  } else {
+    document.addEventListener('DOMContentLoaded', init, { once: true });
+  }
 })();
