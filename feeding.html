@@ -1,61 +1,87 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <!-- 基础与 SEO -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title data-i18n="title.feeding">Feeding Calculator</title>
+  <meta name="description" content="Calculate daily pet food portions by weight and activity." />
+  <link rel="canonical" href="https://ben-del-cmd.github.io/p-feeding/feeding.html" />
+  <meta name="robots" content="index,follow" />
+  <meta name="theme-color" content="#0b0c0f" />
 
-  <!-- Plausible (匿名统计) -->
+  <!-- 安全（Phase 1 基线） -->
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self';
+                 img-src 'self' https: data:;
+                 script-src 'self' https://plausible.io 'unsafe-inline';
+                 style-src 'self' 'unsafe-inline';
+                 connect-src https://plausible.io;
+                 form-action 'self' https://github.com mailto:;
+                 base-uri 'none';
+                 frame-ancestors 'self';">
+
+  <!-- Open Graph / Twitter -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://ben-del-cmd.github.io/p-feeding/feeding.html" />
+  <meta property="og:title" content="Feeding Calculator" />
+  <meta property="og:description" content="Calculate daily pet food portions by weight and activity." />
+  <meta property="og:image" content="https://ben-del-cmd.github.io/p-feeding/cover.png?v=20250919" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Feeding Calculator" />
+  <meta name="twitter:description" content="Calculate daily pet food portions by weight and activity." />
+  <meta name="twitter:image" content="https://ben-del-cmd.github.io/p-feeding/cover.png?v=20250919" />
+
+  <!-- Plausible（匿名统计） -->
   <script defer data-domain="ben-del-cmd.github.io" src="https://plausible.io/js/script.js"></script>
 
-  <!-- 站内多语言 -->
+  <!-- 多语言与事件（版本号用于防缓存） -->
   <script src="/p-feeding/i18n.js?v=20250920b" defer></script>
-  <!-- 事件埋点（点击“反馈”等） -->
   <script src="/p-feeding/events.js?v=1" defer></script>
 
+  <!-- 轻量样式 -->
   <style>
-    :root { --fg:#111; --muted:#6b7280; --bd:#e5e7eb; --bg:#fff; }
-    html,body { margin:0; padding:0; background:var(--bg); color:var(--fg); font:16px/1.6 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, PingFang SC, Noto Sans, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji"; }
+    :root { --fg:#111; --muted:#6b7280; --bd:#e5e7eb; --bg:#fff; --card:#fff; }
+    html,body { margin:0; padding:0; background:var(--bg); color:var(--fg);
+      font:16px/1.6 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, PingFang SC, Noto Sans, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji"; }
     .wrap { max-width:960px; margin:0 auto; padding:24px 16px 56px; }
-    .row { margin:16px 0; }
-    .muted { color:var(--muted); }
+    .topbar { display:flex; gap:12px; align-items:center; justify-content:space-between; margin-bottom:12px; }
+    .pill { display:inline-flex; gap:10px; }
+    .btn, button, input, select { font:inherit; border:1px solid var(--bd); border-radius:12px; background:#fff; color:var(--fg); }
+    .btn { padding:8px 12px; cursor:pointer; }
+    .btn-ghost { background:#fff; }
     h1 { font-size:clamp(28px, 4vw, 40px); margin:8px 0 24px; }
-    input, select, button {
-      font:inherit; padding:10px 12px; border:1px solid var(--bd); border-radius:10px; background:#fff; outline:0;
-    }
-    input, select { width:220px; }
-    button {
-      cursor:pointer; border-radius:14px; padding:12px 16px; min-width:200px;
-      background:#111; color:#fff; border:1px solid #111;
-    }
-    button:hover { opacity:.92; }
-    .btn-ghost { background:#fff; color:#111; border:1px solid var(--bd); }
+    .muted { color:var(--muted); }
+    .card { border:1px solid var(--bd); border-radius:16px; padding:18px; background:var(--card); }
+    .row { margin:16px 0; }
+    input, select { padding:10px 12px; min-width:220px; }
+    button.primary { padding:12px 16px; min-width:200px; border-radius:14px; background:#111; color:#fff; border-color:#111; cursor:pointer; }
+    button.primary:hover { opacity:.92; }
     .grid { display:grid; grid-template-columns:1fr; gap:16px; }
     @media (min-width:680px){ .grid-2 { grid-template-columns: 1fr 1fr; } }
-    .card { border:1px solid var(--bd); border-radius:16px; padding:18px; background:#fff; }
-    .pill { display:inline-flex; gap:10px; }
-    .pill button { padding:8px 12px; border-radius:999px; min-width:auto; }
-    .topbar { display:flex; gap:12px; align-items:center; justify-content:space-between; margin-bottom:12px; }
-    .topbar .left { display:flex; gap:8px; align-items:center; }
-    .topbar a { text-decoration:none; }
-    .link { color:#111; }
-    .link:hover { text-decoration:underline; }
     .res-line { font-size:18px; }
     .res-num { font-weight:700; }
+    a.link { color:#111; text-decoration:none; }
+    a.link:hover { text-decoration:underline; }
   </style>
 </head>
 <body>
+  <!-- 顶部“配置位”（数字仅改这里；一定保留） -->
+  <script>
+    window.KCAL_PER_CUP = 360;   // 每杯千卡
+    window.GRAMS_PER_CUP = 100;  // 每杯克数
+  </script>
+
   <div class="wrap">
     <!-- 顶部导航 -->
     <div class="topbar">
-      <div class="left">
-        <a href="/p-feeding/" class="btn-ghost" style="padding:8px 12px;border-radius:10px" data-i18n="nav.home">返回主页</a>
-      </div>
+      <a class="btn btn-ghost" href="/p-feeding/" data-i18n="nav.home" rel="noopener">返回主页</a>
       <div class="pill">
-        <button class="btn-ghost" onclick="window.__setLang && __setLang('en-US')">English</button>
-        <button class="btn-ghost" onclick="window.__setLang && __setLang('es-419')">Español</button>
-        <button class="btn-ghost" onclick="window.__setLang && __setLang('zh-Hans')">中文(简)</button>
-        <button class="btn-ghost" onclick="window.__setLang && __setLang('fr-CA')">Français (Canada)</button>
+        <button class="btn btn-ghost" onclick="window.__setLang && __setLang('en-US')">English</button>
+        <button class="btn btn-ghost" onclick="window.__setLang && __setLang('es-419')">Español</button>
+        <button class="btn btn-ghost" onclick="window.__setLang && __setLang('zh-Hans')">中文(简)</button>
+        <button class="btn btn-ghost" onclick="window.__setLang && __setLang('fr-CA')">Français (Canada)</button>
       </div>
     </div>
 
@@ -87,7 +113,7 @@
         </div>
 
         <div class="row" style="display:flex;align-items:flex-end">
-          <button id="btn" data-i18n="feeding.calc">计算</button>
+          <button id="btn" class="primary" data-i18n="feeding.calc">计算</button>
         </div>
       </div>
     </div>
@@ -105,11 +131,12 @@
     </div>
 
     <div style="margin-top:16px">
-      <a class="link" href="/p-feeding/feedback.html" data-event="feedback_click" data-i18n="nav.feedback">问题与建议</a>
+      <!-- events.js 会自动识别链接并上报 feedback_click -->
+      <a class="link" href="/p-feeding/feedback.html" data-i18n="nav.feedback" rel="noopener">问题与建议</a>
     </div>
   </div>
 
-  <!-- 计算逻辑 -->
+  <!-- 计算逻辑（使用“配置位”） -->
   <script>
     (function () {
       var wEl = document.getElementById('w');
@@ -133,10 +160,6 @@
         return 1.6; // mid
       }
 
-      // 约定：每杯 ~350 kcal；每克 ~3.6 kcal（= 360 kcal/100g）
-      var KCAL_PER_CUP = 350;
-      var KCAL_PER_GRAM = 3.6;
-
       function calc() {
         var kg = toKg(wEl.value, unitEl.value);
         var m = multiplier(actEl.value);
@@ -145,13 +168,15 @@
         var rer = kg > 0 ? 70 * Math.pow(kg, 0.75) : 0;
         var kcal = rer * m;
 
-        // 派生为杯/克
-        var cups = kcal / KCAL_PER_CUP;
-        var grams = kcal / KCAL_PER_GRAM;
+        // 读取“配置位”
+        var KCAL_PER_CUP = Number(window.KCAL_PER_CUP || 360);
+        var GRAMS_PER_CUP = Number(window.GRAMS_PER_CUP || 100);
+        var KCAL_PER_GRAM = KCAL_PER_CUP / GRAMS_PER_CUP;
 
-        // 展示为 1 位小数
+        var cups = KCAL_PER_CUP > 0 ? (kcal / KCAL_PER_CUP) : 0;
+        var grams = KCAL_PER_GRAM > 0 ? (kcal / KCAL_PER_GRAM) : 0;
+
         function fmt(x) { return (Math.round(x * 10) / 10).toFixed(1); }
-
         rKcal.textContent = fmt(kcal);
         rCup.textContent = fmt(cups);
         rGram.textContent = fmt(grams);
