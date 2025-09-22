@@ -1,41 +1,32 @@
 <!doctype html>
 <html lang="zh-CN">
-<!-- Pet Scan · Feedback · v20250922d -->
+<!-- Pet Scan · Feedback · v20250922h -->
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pet Scan · 意见反馈（信息性建议）</title>
-  <meta name="description" content="提交命中/错误/可用性/建议等反馈，帮助我们提升命中率与解释易读性。信息性建议，非医疗。" />
+  <title>Pet Scan</title>
+  <meta name="description" content="Pet Scan feedback" />
   <meta name="robots" content="index,follow" />
 
-  <!-- Plausible：运行时按真实域名注入，无需手改 data-domain -->
   <link rel="preconnect" href="https://plausible.io" crossorigin />
   <link rel="dns-prefetch" href="https://plausible.io" />
+
   <script>
   (function(){
     var domain = (location && location.hostname) ? location.hostname : 'localhost';
-    var s = document.createElement('script');
-    s.defer = true;
-    s.setAttribute('data-domain', domain);
-    s.src = 'https://plausible.io/js/script.js';
+    var s = document.createElement('script'); s.defer = true;
+    s.setAttribute('data-domain', domain); s.src = 'https://plausible.io/js/script.js';
     document.head.appendChild(s);
   })();
   </script>
 
-  <!-- 多语言（可选，与首页同一份） -->
-  <script defer src="i18n.js?v=20250922d"></script>
-
-  <!-- 统一事件模块：自动上报 visit_feedback_page / feedback_open / feedback_click -->
-  <script type="module" src="assets/js/events.js?v=20250922d"></script>
+  <script defer src="i18n.js?v=20250922h"></script>
+  <script type="module" src="assets/js/events.js?v=20250922h"></script>
 
   <style>
-    :root{
-      --bg:#0b0d12;--fg:#e5e7eb;--muted:#9ca3af;--card:#111827;--btn:#10b981;--btnfg:#0b0d12;
-      --outline:rgba(255,255,255,.08);--danger:#ef4444;--br:16px
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0;background:linear-gradient(180deg,#0b0d12,#0f172a);color:var(--fg);font:15px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"PingFang SC","Microsoft Yahei","Noto Sans",sans-serif}
+    :root{--bg:#0b0d12;--fg:#e5e7eb;--muted:#9ca3af;--card:#111827;--btn:#10b981;--btnfg:#0b0d12;--outline:rgba(255,255,255,.08);--br:16px}
+    *{box-sizing:border-box} html,body{height:100%}
+    body{margin:0;background:linear-gradient(180deg,#0b0d12,#0f172a);color:var(--fg);font:15px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"PingFang SC","Microsoft Yahei","Noto Sans",sans-serif}
     .wrap{max-width:980px;margin:0 auto;padding:28px}
     header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
     .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;color:#fff;text-decoration:none}
@@ -43,11 +34,9 @@
     .nav a{color:var(--muted);text-decoration:none;margin-left:16px}
     .lang{margin-left:16px;padding:6px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:transparent;color:#cbd5e1;cursor:pointer}
     .page{background:rgba(17,24,39,.6);border:1px solid var(--outline);border-radius:var(--br);padding:24px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
-    h1{margin:0 0 6px;font-size:22px}
-    p.lead{margin:0 0 16px;color:#cbd5e1}
+    h1{margin:0 0 6px;font-size:22px} p.lead{margin:0 0 16px;color:#cbd5e1}
     .card{background:var(--card);border:1px solid var(--outline);border-radius:14px;padding:16px}
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-    @media (max-width:900px){.grid{grid-template-columns:1fr}}
     label{display:block;margin:10px 0 6px;color:#cbd5e1}
     input,select,textarea{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--outline);background:#0f172a;color:#e5e7eb}
     textarea{min-height:140px;resize:vertical}
@@ -59,100 +48,95 @@
     .note{margin-top:12px;color:#94a3b8;font-size:13px}
     .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
     footer{margin:28px 0 8px;color:#94a3b8;font-size:12px}
-    .ok{color:#bbf7d0}
-    .warn{color:#fecaca}
+    @media (max-width:900px){.grid{grid-template-columns:1fr}}
   </style>
 </head>
 
 <body>
 <div class="wrap">
-  <!-- 顶部导航 -->
   <header>
     <a class="logo" href="./">
       <span class="logo-badge">PS</span> <span>Pet Scan</span>
     </a>
     <nav class="nav">
-      <a href="./">首页</a>
-      <a href="feeding.html">喂食计算器</a>
-      <a href="cards/transition-7.html?v=20250922c" rel="nofollow">7天换粮卡</a>
-      <button id="langToggle" class="lang" type="button" onclick="PS_I18N && PS_I18N.setLang(window.__PS_LANG__==='en'?'zh-CN':'en')">中/EN</button>
+      <a href="./"><span data-i18n="nav_home">首页</span></a>
+      <a href="feeding.html"><span data-i18n="nav_feeding">喂食计算器</span></a>
+      <a href="cards/transition-7.html?v=20250922h" rel="nofollow"><span data-i18n="nav_card7">7天换粮卡</span></a>
+      <button id="langToggle" class="lang" type="button">中</button>
     </nav>
   </header>
 
-  <!-- 内容 -->
   <main class="page" data-page="feedback">
-    <h1>意见反馈</h1>
-    <p class="lead">帮助我们提升命中率与解释易读性；导购披露保持中立。<strong>信息性建议，非医疗。</strong></p>
+    <h1 data-i18n="fb_title">意见反馈</h1>
+    <p class="lead" data-i18n="fb_lead">帮助我们提升命中率与解释易读性…</p>
 
     <div class="grid">
       <!-- 左：提交区 -->
       <section class="card">
-        <h3>填写信息</h3>
+        <h3 data-i18n="fb_form_title">填写信息</h3>
 
         <div class="row">
           <div>
-            <label>类别</label>
+            <label for="cat" data-i18n="fb_cat">类别</label>
             <select id="cat">
-              <option value="hit">命中</option>
-              <option value="mismatch">识别错误/不一致</option>
-              <option value="ux">可用性问题</option>
-              <option value="suggest">功能建议</option>
-              <option value="other">其他</option>
+              <option value="hit" data-i18n="fb_opt_hit">命中</option>
+              <option value="mismatch" data-i18n="fb_opt_mismatch">识别错误/不一致</option>
+              <option value="ux" data-i18n="fb_opt_ux">可用性问题</option>
+              <option value="suggest" data-i18n="fb_opt_suggest">功能建议</option>
+              <option value="other" data-i18n="fb_opt_other">其他</option>
             </select>
           </div>
           <div>
-            <label>是否允许联系你（可选）</label>
+            <label for="contact" data-i18n="fb_allow_contact">是否允许联系你（可选）</label>
             <select id="contact">
-              <option value="no" selected>否</option>
-              <option value="yes">是</option>
+              <option value="no" selected data-i18n="fb_allow_no">否</option>
+              <option value="yes" data-i18n="fb_allow_yes">是</option>
             </select>
           </div>
         </div>
 
         <div class="row">
           <div>
-            <label>品牌（可选）</label>
-            <input id="brand" placeholder="例如：Brand A" />
+            <label for="brand" data-i18n="fb_brand">品牌（可选）</label>
+            <input id="brand" data-i18n="fb_brand_ph" data-i18n-attr="placeholder" placeholder="例如：Brand A" />
           </div>
           <div>
-            <label>产品/口味（可选）</label>
-            <input id="product" placeholder="例如：Adult Chicken" />
+            <label for="product" data-i18n="fb_product">产品/口味（可选）</label>
+            <input id="product" data-i18n="fb_product_ph" data-i18n-attr="placeholder" placeholder="例如：Adult Chicken" />
           </div>
         </div>
 
-        <label>相关链接/图片（可选）</label>
-        <input id="link" placeholder="SKU/页面/图片链接" />
+        <label for="link" data-i18n="fb_link">相关链接/图片（可选）</label>
+        <input id="link" data-i18n="fb_link_ph" data-i18n-attr="placeholder" placeholder="SKU/页面/图片链接" />
 
-        <label>详细描述（必填）</label>
-        <textarea id="desc" placeholder="请尽量描述可复现的步骤或具体内容…"></textarea>
-        <div class="muted"><span id="counter">0</span> / 1000</div>
+        <label for="desc" data-i18n="fb_desc">详细描述（必填）</label>
+        <textarea id="desc" data-i18n="fb_desc_ph" data-i18n-attr="placeholder" placeholder="请尽量描述…"></textarea>
+        <div class="muted"><span id="counter">0</span> <span data-i18n="fb_desc_count_unit">字</span></div>
 
         <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn" id="sendBtn">发邮件</button>
-          <button class="btn sec" id="copyBtn">复制反馈文本</button>
-          <a class="btn ghost" href="./" id="backHome">返回首页</a>
+          <button class="btn" id="sendBtn" data-i18n="fb_send">发邮件</button>
+          <button class="btn sec" id="copyBtn" data-i18n="fb_copy">复制反馈文本</button>
+          <a class="btn ghost" href="./" id="backHome" data-i18n="fb_back">返回首页</a>
           <span id="tip" class="muted"></span>
         </div>
 
-        <div class="note">
-          我们默认会在匿名聚合层面使用反馈数据，只用于改善产品体验；
-          若勾选允许联系，可能在必要时向你追问细节（不做营销）。
+        <div class="note" data-i18n="fb_note">
+          我们默认会在匿名聚合层面使用反馈数据……
         </div>
       </section>
 
       <!-- 右：说明区 -->
       <section class="card">
-        <h3>说明</h3>
+        <h3 data-i18n="fb_right_title">说明</h3>
         <ul style="margin:0 0 8px 18px">
-          <li>命中：识别正确、建议可用；欢迎补充你认为有价值的说明。</li>
-          <li>识别错误/不一致：请尽量提供商品图、包装 GA、成分表或营养声明、能量密度等。</li>
-          <li>可用性问题：例如页面加载、动线、名词理解、交互卡顿等。</li>
-          <li>功能建议：比如混喂/周报/家庭协作/SDK 等优先级诉求。</li>
+          <li data-i18n="fb_right_hit">命中…</li>
+          <li data-i18n="fb_right_mis">识别错误/不一致…</li>
+          <li data-i18n="fb_right_ux">可用性问题…</li>
+          <li data-i18n="fb_right_sug">功能建议…</li>
         </ul>
-
         <div class="note">
-          <div>安全与边界：不提供医疗建议；涉及处方/疾病请咨询兽医。</div>
-          <div>中立性：广告与中立信息强隔离；如含推广链接，会显式披露。</div>
+          <div data-i18n="fb_right_safety">安全与边界…</div>
+          <div data-i18n="fb_right_neutral">中立性…</div>
           <div id="metaLine" class="muted" style="margin-top:6px"></div>
         </div>
       </section>
@@ -160,17 +144,15 @@
   </main>
 
   <footer>
-    © <span class="mono">Pet Scan</span> · <span class="muted">信息性建议（非医疗）</span>
+    <div class="i18n-footer">© <span class="mono">Pet Scan</span> · <span class="muted">信息性建议（非医疗）</span></div>
   </footer>
 </div>
 
 <script>
-  // 字数统计
   const desc = document.getElementById('desc');
   const counter = document.getElementById('counter');
   desc.addEventListener('input', ()=>{ counter.textContent = Math.min(1000, desc.value.length); });
 
-  // 统一生成纯文本负载
   function payload(){
     const d = new Date().toISOString().replace('T',' ').replace('Z',' UTC');
     const data = {
@@ -182,7 +164,7 @@
       link: document.getElementById('link').value.trim(),
       desc: desc.value.trim(),
       ts: d,
-      ver: 'v20250922d'
+      ver: 'v20250922h'
     };
     return (
 `[Pet Scan 反馈]
@@ -201,40 +183,34 @@ ${data.desc || '(未填写)'}
 版本: ${data.ver}`);
   }
 
-  // 复制按钮
   document.getElementById('copyBtn').addEventListener('click', async ()=>{
     const text = payload();
     try{
       await navigator.clipboard.writeText(text);
-      document.getElementById('tip').textContent = '已复制到剪贴板 ✅';
-      document.getElementById('tip').className = 'muted ok';
+      document.getElementById('tip').textContent = (window.__PS_FB_COPY_OK__ || 'Copied to clipboard ✅');
+      document.getElementById('tip').className = 'muted';
       try{ window.plausible && window.plausible('feedback_click', { props:{ action:'copy' } }); }catch(e){}
     }catch(e){
-      document.getElementById('tip').textContent = '复制失败，请手动选择文本复制';
-      document.getElementById('tip').className = 'muted warn';
+      document.getElementById('tip').textContent = (window.__PS_FB_COPY_FAIL__ || 'Copy failed');
+      document.getElementById('tip').className = 'muted';
     }
   });
 
-  // 发邮件（mailto 协议，用户自行选择邮箱客户端）
   document.getElementById('sendBtn').addEventListener('click', ()=>{
     const text = payload();
     const body = encodeURIComponent(text);
     const subject = encodeURIComponent('Pet Scan 反馈');
-    // 你可以将空收件人替换为你的接收邮箱，比如：mailto:team@example.com
     const url = `mailto:?subject=${subject}&body=${body}`;
     try{ window.plausible && window.plausible('feedback_click', { props:{ action:'mailto' } }); }catch(e){}
-    // open 新窗口，避免阻塞回退
     window.location.href = url;
   });
 
-  // 元数据行（时间戳/版本）
   (function(){
     const ts = new Date().toISOString().replace('T',' ').replace('Z',' UTC');
     document.getElementById('metaLine').textContent =
-      '数据与中立披露已启用；时间戳 ' + ts + '；版本 v20250922d。';
+      '数据与中立披露已启用；时间戳 ' + ts + '；版本 v20250922h。';
   })();
 
-  // 进入页面后，主动上报一次 feedback_open（兜底）
   try{ window.plausible && window.plausible('feedback_open', { props:{ from: document.referrer ? 'referrer' : 'direct' } }); }catch(e){}
 </script>
 </body>
