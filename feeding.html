@@ -1,19 +1,16 @@
 <!doctype html>
 <html lang="zh-CN">
-<!-- Pet Scan · Feeding Calculator · 一键可用（v=20250922c | 自动域名 + 事件上报 | 相对路径版） -->
+<!-- Pet Scan · Feeding Calculator · v20250922d -->
 <head>
-  <!-- 基础 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>喂食计算器 · Pet Scan（信息性建议，非医疗）</title>
-  <meta name="description" content="根据 RER/MER 与食品能量密度，计算每日建议喂食量（杯/克/罐）；页面显式来源与时间戳（信息性建议，非医疗）。" />
+  <title>Pet Scan · 喂食计算器（信息性建议）</title>
+  <meta name="description" content="RER/MER 计算；按能量密度换算为克/杯；支持混喂与零食占比提示。信息性建议，非医疗。" />
   <meta name="robots" content="index,follow" />
 
-  <!-- 性能预取 -->
+  <!-- Plausible：运行时用真实域名注入，无需手改 data-domain -->
   <link rel="preconnect" href="https://plausible.io" crossorigin />
   <link rel="dns-prefetch" href="https://plausible.io" />
-
-  <!-- 自动注入 Plausible（使用真实域名，无需手改） -->
   <script>
   (function(){
     var domain = (location && location.hostname) ? location.hostname : 'localhost';
@@ -25,144 +22,269 @@
   })();
   </script>
 
-  <!-- 统一事件模块（自动上报 visit_feeding_page / calc_click） -->
-  <script type="module" src="assets/js/events.js?v=20250922c"></script>
+  <!-- 多语言（可选）：与首页同一份 i18n.js -->
+  <script defer src="i18n.js?v=20250922d"></script>
 
-  <!-- 样式（极简） -->
+  <!-- 统一事件模块：自动上报 visit_feeding_page / calc_click 等 -->
+  <script type="module" src="assets/js/events.js?v=20250922d"></script>
+
   <style>
-    :root{--bg:#0b0d12;--fg:#e5e7eb;--muted:#9ca3af;--card:#111827;--br:16px;--line:#1f2937;--accent:#10b981}
+    :root{
+      --bg:#0b0d12;--fg:#e5e7eb;--muted:#9ca3af;--card:#111827;--btn:#10b981;--btnfg:#0b0d12;
+      --danger:#ef4444;--outline:rgba(255,255,255,.08);--br:16px
+    }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;background:linear-gradient(180deg,#0b0d12,#0f172a);color:var(--fg);font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"PingFang SC","Microsoft Yahei","Noto Sans",sans-serif}
-    .wrap{max-width:920px;margin:0 auto;padding:28px}
-    a{color:#93c5fd;text-decoration:none}
+    body{margin:0;background:linear-gradient(180deg,#0b0d12,#0f172a);color:var(--fg);font:15px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"PingFang SC","Microsoft Yahei","Noto Sans",sans-serif}
+    .wrap{max-width:980px;margin:0 auto;padding:28px}
     header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
     .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;color:#fff;text-decoration:none}
     .logo-badge{width:28px;height:28px;border-radius:8px;background:#10b981;display:inline-grid;place-items:center;color:#0b0d12;font-weight:900}
-    .nav a{color:#9ca3af;margin-left:16px}
-    .card{background:rgba(17,24,39,.6);border:1px solid rgba(255,255,255,.06);border-radius:var(--br);padding:20px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
-    h1{margin:0 0 8px;font-size:22px}
-    .muted{color:#9ca3af;font-size:12px}
-    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-    .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-    label{display:block;font-size:12px;color:#cbd5e1;margin-bottom:6px}
-    input,select{width:100%;padding:10px;border:1px solid #253046;border-radius:12px;background:#0f172a;color:#e5e7eb}
-    .btn{display:inline-block;padding:10px 14px;border-radius:12px;background:var(--accent);color:#0b0d12;font-weight:700;border:0;cursor:pointer}
-    .out{margin-top:14px;border-top:1px dashed #253046;padding-top:12px}
-    .row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px dashed #253046}
-    .row:last-child{border-bottom:0}
-    .kpi{display:inline-block;padding:4px 8px;border-radius:999px;background:#0b1720;color:#86efac;border:1px solid #064e3b;font-size:12px}
+    .nav a{color:var(--muted);text-decoration:none;margin-left:16px}
+    .lang{margin-left:16px;padding:6px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:transparent;color:#cbd5e1;cursor:pointer}
+    .page{background:rgba(17,24,39,.6);border:1px solid var(--outline);border-radius:var(--br);padding:24px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+    h1{margin:0 0 6px;font-size:22px}
+    p.lead{margin:0 0 16px;color:#cbd5e1}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .card{background:var(--card);border:1px solid var(--outline);border-radius:14px;padding:16px}
+    .card h3{margin:0 0 10px;font-size:16px}
+    label{display:block;margin:10px 0 6px;color:#cbd5e1}
+    input,select{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--outline);background:#0f172a;color:#e5e7eb}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .btn{display:inline-block;padding:12px 16px;border-radius:12px;background:var(--btn);color:var(--btnfg);font-weight:800;border:0;cursor:pointer}
+    .btn.sec{background:#374151;color:#e5e7eb}
+    .muted{color:var(--muted);font-size:12px}
+    .note{margin-top:12px;color:#94a3b8;font-size:13px}
+    .warn{color:#fecaca}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+    table{width:100%;border-collapse:collapse;margin-top:8px}
+    th,td{border:1px solid var(--outline);padding:8px;border-radius:8px}
+    th{text-align:left;color:#cbd5e1;background:rgba(255,255,255,.02)}
     footer{margin:28px 0 8px;color:#94a3b8;font-size:12px}
-    @media (max-width:860px){.grid{grid-template-columns:1fr}.grid2{grid-template-columns:1fr}}
+    @media (max-width:900px){.grid{grid-template-columns:1fr}}
   </style>
 </head>
 
 <body>
-  <div class="wrap" data-page="feeding">
-    <header>
-      <a class="logo" href="index.html"><span class="logo-badge">PS</span> Pet Scan</a>
-      <nav class="nav">
-        <a href="index.html">首页</a>
-        <a href="feedback.html">反馈</a>
-        <a href="cards/transition-7.html?v=20250922c" rel="nofollow">7天换粮卡</a>
-      </nav>
-    </header>
+<div class="wrap">
+  <!-- 顶部导航 -->
+  <header>
+    <a class="logo" href="./">
+      <span class="logo-badge">PS</span> <span data-i18n="brand">Pet Scan</span>
+    </a>
+    <nav class="nav">
+      <a href="./" data-i18n="brand">首页</a>
+      <a href="feedback.html" data-i18n="nav_feedback">反馈</a>
+      <a href="cards/transition-7.html?v=20250922c" rel="nofollow" data-i18n="nav_transition">7天换粮卡</a>
+      <button id="langToggle" class="lang" type="button" onclick="PS_I18N && PS_I18N.setLang(window.__PS_LANG__==='en'?'zh-CN':'en')">中/EN</button>
+    </nav>
+  </header>
 
-    <main class="card">
-      <h1>喂食计算器</h1>
-      <p class="muted">RER = 70 × 体重(kg)<sup>0.75</sup>；MER = RER × 系数（按物种/活动）。输出为<strong>信息性建议</strong>，不代替医疗。</p>
+  <!-- 页面主体 -->
+  <main class="page" data-page="feeding">
+    <h1>喂食计算器</h1>
+    <p class="lead">RER/MER → kcal/天 → 克/杯；支持零食占比提示。<strong>信息性建议，非医疗。</strong></p>
 
-      <!-- 输入区 -->
-      <div class="grid" style="margin-top:12px">
-        <div>
-          <label>物种</label>
-          <select id="species">
-            <option value="dog" selected>犬</option>
-            <option value="cat">猫</option>
-          </select>
+    <div class="grid">
+      <!-- 左：输入 -->
+      <section class="card">
+        <h3>基本信息</h3>
+        <div class="row">
+          <div>
+            <label>物种</label>
+            <select id="species">
+              <option value="dog">犬</option>
+              <option value="cat">猫</option>
+            </select>
+          </div>
+          <div>
+            <label>体重</label>
+            <div class="row">
+              <input id="weight" type="number" step="0.01" placeholder="例如 5.2" />
+              <select id="unit">
+                <option value="kg">kg</option>
+                <option value="lb">lb</option>
+              </select>
+            </div>
+          </div>
         </div>
-        <div>
-          <label>体重（kg）</label>
-          <input id="weight" type="number" min="0.5" step="0.1" value="10" />
-        </div>
-        <div>
-          <label>活动系数（MER）</label>
-          <select id="mer">
-            <option value="1.4">成犬：1.4</option>
-            <option value="1.6">成犬：1.6</option>
-            <option value="1.0">成猫：1.0</option>
-            <option value="1.2">成猫：1.2</option>
-          </select>
-        </div>
-      </div>
 
-      <div class="grid2" style="margin-top:12px">
-        <div>
-          <label>能量密度（kcal/100g）</label>
-          <input id="me100" type="number" min="200" step="1" value="350" />
+        <div class="row">
+          <div>
+            <label>活动/状况因子（MER）</label>
+            <select id="factor">
+              <option value="1.0">静息 / 肥胖管理（1.0）</option>
+              <option value="1.2">低活动（1.2）</option>
+              <option value="1.4" selected>普通成体（1.4）</option>
+              <option value="1.6">活跃（1.6）</option>
+              <option value="2.0">高活动/幼年（2.0）</option>
+            </select>
+          </div>
+          <div>
+            <label>零食占比（% 能量）</label>
+            <input id="treats" type="number" step="1" min="0" max="30" value="0" />
+          </div>
         </div>
-        <div>
-          <label>每杯克数（g/cup）</label>
-          <input id="gpercup" type="number" min="50" step="1" value="100" />
+
+        <h3 style="margin-top:18px">食品能量密度 & 杯换算</h3>
+        <div class="row">
+          <div>
+            <label>食物 A：kcal / 100 g</label>
+            <input id="kcal100a" type="number" step="1" placeholder="例如 380" />
+          </div>
+          <div>
+            <label>（可选）食物 B：kcal / 100 g</label>
+            <input id="kcal100b" type="number" step="1" placeholder="如混喂，填这项" />
+          </div>
         </div>
-      </div>
+        <div class="row">
+          <div>
+            <label>克/杯（g per cup）</label>
+            <input id="gPerCup" type="number" step="1" placeholder="干粮常见 ~ 100–120" value="110" />
+          </div>
+          <div>
+            <label>混喂比例（A 的 %）</label>
+            <input id="mixA" type="number" step="1" min="0" max="100" value="100" />
+          </div>
+        </div>
 
-      <div style="margin-top:14px">
-        <button class="btn" id="calcBtn">计算</button>
-        <span class="kpi" id="kcalDayBadge" style="margin-left:10px">kcal/天：—</span>
-      </div>
-
-      <!-- 输出区 -->
-      <section class="out" id="out">
-        <div class="row"><span>推荐热量：</span><strong id="kcalDay">—</strong> kcal/天</div>
-        <div class="row"><span>喂食总量（克/天）：</span><strong id="gDay">—</strong> g</div>
-        <div class="row"><span>喂食总量（杯/天）：</span><strong id="cupDay">—</strong> 杯</div>
-        <div class="row"><span>零食建议上限：</span><strong id="treatsMax">≤ 10%</strong>（按 DER）</div>
-        <div class="row"><span>换粮卡：</span><a href="cards/transition-7.html?v=20250922c" class="kpi" rel="nofollow">7天过渡表</a></div>
+        <div style="margin-top:16px;display:flex;gap:10px;align-items:center">
+          <button class="btn" id="calcSubmit">计算</button>
+          <button class="btn sec" id="clearBtn">清空</button>
+          <span class="muted">口径：RER=70×BW^0.75；MER=RER×因子；零食从 MER 扣减。</span>
+        </div>
       </section>
 
-      <p class="muted" style="margin-top:10px">
-        口径提示：以 ME（kcal/100g）为基准，杯数按“每杯克数”换算；as-fed / dry matter 的换算与 GA（保证分析）请在结果页查看溯源。
-      </p>
-    </main>
+      <!-- 右：结果 -->
+      <section class="card" id="resultCard">
+        <h3>结果</h3>
+        <div id="resultEmpty" class="muted">填写左侧并点击「计算」，结果将显示于此。</div>
+        <div id="resultArea" style="display:none">
+          <table>
+            <tbody>
+              <tr><th>RER（kcal/天）</th><td class="mono" id="outRER">-</td></tr>
+              <tr><th>MER（kcal/天）</th><td class="mono" id="outMER">-</td></tr>
+              <tr><th>零食预留（kcal/天）</th><td class="mono" id="outTreats">-</td></tr>
+              <tr><th>用于正餐（kcal/天）</th><td class="mono" id="outMeals">-</td></tr>
+            </tbody>
+          </table>
 
-    <footer>
-      <strong>信息性提示：</strong>本工具基于公开信息与通用标准（如 AAFCO/NRC）给出参考建议，不构成医疗或诊断意见。涉及疾病/处方需求请咨询持证兽医。
-      <br />数据可能因配方/包装更新而变化；页面已标注来源与时间戳/版本以供核验。
-      <br />如含推广链接，可能获得佣金（已披露）；这不影响信息的中立性。
-    </footer>
-  </div>
+          <h4 style="margin:14px 0 6px">建议喂量（按克/杯）</h4>
+          <table>
+            <thead><tr><th>项</th><th>克/天</th><th>杯/天</th></tr></thead>
+            <tbody>
+              <tr><td>A（或单粮）</td><td class="mono" id="outGa">-</td><td class="mono" id="outCa">-</td></tr>
+              <tr><td>（可选）B</td><td class="mono" id="outGb">-</td><td class="mono" id="outCb">-</td></tr>
+              <tr><td><strong>合计</strong></td><td class="mono" id="outG">-</td><td class="mono" id="outC">-</td></tr>
+            </tbody>
+          </table>
 
-  <!-- 计算逻辑（纯前端） -->
-  <script>
-  (function(){
-    const $ = (id)=> document.getElementById(id);
-    function calc(){
-      const weight = parseFloat($('weight').value || 0);
-      const mer = parseFloat($('mer').value || 1.4);
-      const me100 = parseFloat($('me100').value || 350);
-      const gpercup = parseFloat($('gpercup').value || 100);
+          <div class="note">
+            <div>单位换算：1 lb = 0.453592 kg。若为湿粮，请改用实际能量密度。</div>
+            <div class="warn">信息性建议，非医疗；若有疾病/处方需求，请咨询兽医。</div>
+            <div id="metaLine" class="muted" style="margin-top:6px"></div>
+          </div>
+        </div>
+      </section>
+    </div>
 
-      if (weight <= 0 || me100 <= 0 || gpercup <= 0) return;
+    <div class="note">
+      数据可信三件套：页面显式来源/时间戳/版本；计算口径可追溯（RER/MER 标准公式；AAFCO/NRC 常用口径）。如含推广链接，已披露且不影响中立。
+    </div>
+  </main>
 
-      const RER = 70 * Math.pow(weight, 0.75);
-      const kcalDay = RER * mer;
-      const gDay = kcalDay / (me100 / 100);
-      const cupsDay = gDay / gpercup;
+  <footer>
+    © <span class="mono">Pet Scan</span> · <span class="muted">信息性建议（非医疗）</span>
+  </footer>
+</div>
 
-      $('kcalDayBadge').textContent = 'kcal/天：' + Math.round(kcalDay);
-      $('kcalDay').textContent = Math.round(kcalDay);
-      $('gDay').textContent = Math.round(gDay);
-      $('cupDay').textContent = cupsDay.toFixed(2);
+<script>
+  // —— 计算逻辑（纯前端；信息性建议） ————————————————
+  function kgFrom(val, unit){ if(!val) return 0; return unit==='lb' ? val*0.45359237 : val*1.0; }
+  function round(x, n=1){ const m=Math.pow(10,n); return Math.round((x+m*1e-12)*m)/m; }
+  function safe(v){ return (isFinite(v) && !isNaN(v)) ? v : 0; }
 
-      // 触发 calc_click（若全局 PS 存在）
-      try { window.PS && window.PS.track && window.PS.track('calc_click'); } catch(_) {}
-    }
+  const el = (id)=>document.getElementById(id);
+  const btnCalc = el('calcSubmit');
+  const btnClear = el('clearBtn');
 
-    $('calcBtn').addEventListener('click', calc, {passive:true});
-    // 初始计算一次便于展示
-    calc();
-  })();
-  </script>
+  function calc(){
+    const species = el('species').value;
+    const weightVal = parseFloat(el('weight').value);
+    const unit = el('unit').value;
+    const kg = kgFrom(weightVal, unit);
+    const factor = parseFloat(el('factor').value)||1.0;
+    const treatsPct = Math.min(30, Math.max(0, parseFloat(el('treats').value)||0));
+    const kcal100a = parseFloat(el('kcal100a').value);
+    const kcal100b = parseFloat(el('kcal100b').value);
+    const gPerCup = parseFloat(el('gPerCup').value)||110;
+    const mixA = Math.min(100, Math.max(0, parseFloat(el('mixA').value)||100)); // A %
+
+    // 基础
+    const RER = 70 * Math.pow(kg, 0.75);
+    const MER = RER * factor;
+    const treatsKcal = MER * (treatsPct/100);
+    const mealKcal = MER - treatsKcal;
+
+    // 能量密度（kcal/100g → kcal/g）
+    const ka = (parseFloat(kcal100a)>0) ? (kcal100a/100) : 0;
+    const kb = (parseFloat(kcal100b)>0) ? (kcal100b/100) : 0;
+
+    // 分配到 A/B
+    const ratioA = (ka>0 && kb>0) ? (mixA/100) : 1.0; // 只有单粮或未填B时，全部给A
+    const ratioB = (ka>0 && kb>0) ? (1 - ratioA) : 0;
+
+    const kcalA = mealKcal * ratioA;
+    const kcalB = mealKcal * ratioB;
+
+    const gA = (ka>0) ? (kcalA / ka) : 0;
+    const gB = (kb>0) ? (kcalB / kb) : 0;
+    const gTotal = gA + gB;
+
+    const cupA = (gPerCup>0) ? (gA / gPerCup) : 0;
+    const cupB = (gPerCup>0) ? (gB / gPerCup) : 0;
+    const cupTotal = (gPerCup>0) ? (gTotal / gPerCup) : 0;
+
+    // 输出
+    el('resultEmpty').style.display = 'none';
+    el('resultArea').style.display = 'block';
+
+    el('outRER').textContent = round(safe(RER),1);
+    el('outMER').textContent = round(safe(MER),1);
+    el('outTreats').textContent = round(safe(treatsKcal),1);
+    el('outMeals').textContent = round(safe(mealKcal),1);
+
+    el('outGa').textContent = ka>0 ? round(safe(gA),0) : '-';
+    el('outGb').textContent = kb>0 ? round(safe(gB),0) : '-';
+    el('outG').textContent  = round(safe(gTotal),0);
+
+    el('outCa').textContent = ka>0 ? round(safe(cupA),2) : '-';
+    el('outCb').textContent = kb>0 ? round(safe(cupB),2) : '-';
+    el('outC').textContent  = round(safe(cupTotal),2);
+
+    const ts = new Date().toISOString().replace('T',' ').replace('Z',' UTC');
+    el('metaLine').textContent =
+      '来源/口径：RER=70×BW^0.75；MER=RER×因子；换算按所填能量密度与 g/杯；时间戳 ' + ts + '；版本 v20250922d。';
+
+    // 事件：calc_click（统一模块也会兜底）
+    try { window.plausible && window.plausible('calc_click', { props: { species, unit } }); } catch(e){}
+  }
+
+  btnCalc.addEventListener('click', calc);
+
+  btnClear.addEventListener('click', ()=>{
+    ['weight','treats','kcal100a','kcal100b','gPerCup','mixA'].forEach(id=>{
+      const node = el(id);
+      if(id==='gPerCup') node.value = 110; else node.value='';
+    });
+    el('resultArea').style.display='none';
+    el('resultEmpty').style.display='block';
+  });
+
+  // 回车提交
+  document.addEventListener('keydown', (e)=>{
+    if(e.key==='Enter') calc();
+  });
+</script>
 </body>
 </html>
