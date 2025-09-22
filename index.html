@@ -1,8 +1,7 @@
 <!doctype html>
 <html lang="zh-CN">
-<!-- Pet Scan · Home · 一键可用（v=20250922c | 自动识别域名注入 Plausible） -->
+<!-- Pet Scan · Home · v20250922e | 相对路径 + Plausible + i18n + 统一埋点 -->
 <head>
-  <!-- 基础 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Pet Scan · 信息性建议（非医疗）</title>
@@ -13,7 +12,7 @@
   <link rel="preconnect" href="https://plausible.io" crossorigin />
   <link rel="dns-prefetch" href="https://plausible.io" />
 
-  <!-- 自动注入 Plausible：运行时用当前真实域名设置 data-domain，无需手动改 -->
+  <!-- Plausible：运行时按真实域名注入，无需手改 data-domain -->
   <script>
   (function(){
     var domain = (location && location.hostname) ? location.hostname : 'localhost';
@@ -25,11 +24,13 @@
   })();
   </script>
 
-  <!-- 统一事件模块（自动上报 visit_* / calc_click / feedback_* / wash_*） -->
-  <!-- 注意：移除了开头的 / ，改为项目内相对路径 -->
-  <script type="module" src="assets/js/events.js?v=20250922c"></script>
+  <!-- 多语言（与 feeding/feedback 共用一份） -->
+  <script defer src="i18n.js?v=20250922e"></script>
 
-  <!-- 站点样式（极简） -->
+  <!-- 统一事件模块（自动上报 visit_* / feedback_* / calc_click 等） -->
+  <script type="module" src="assets/js/events.js?v=20250922e"></script>
+
+  <!-- 样式 -->
   <style>
     :root{--bg:#0b0d12;--fg:#e5e7eb;--muted:#9ca3af;--card:#111827;--btn:#10b981;--btnfg:#0b0d12;--br:16px}
     *{box-sizing:border-box}
@@ -40,6 +41,7 @@
     .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;color:#fff;text-decoration:none}
     .logo-badge{width:28px;height:28px;border-radius:8px;background:#10b981;display:inline-grid;place-items:center;color:#0b0d12;font-weight:900}
     .nav a{color:var(--muted);text-decoration:none;margin-left:16px}
+    .lang{margin-left:16px;padding:6px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:transparent;color:#cbd5e1;cursor:pointer}
     .hero{background:rgba(17,24,39,.6);border:1px solid rgba(255,255,255,.06);border-radius:var(--br);padding:28px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
     h1{margin:0 0 8px;font-size:24px}
     p.lead{margin:0 0 16px;color:#cbd5e1}
@@ -56,36 +58,45 @@
 
 <body>
   <div class="wrap">
+    <!-- 顶部导航 -->
     <header>
-      <!-- 改为相对链接：回到项目首页 -->
       <a class="logo" href="./">
-        <span class="logo-badge">PS</span> Pet Scan
+        <span class="logo-badge">PS</span> <span>Pet Scan</span>
       </a>
       <nav class="nav">
-        <!-- 全部移除开头的 / -->
-        <a href="feeding.html">喂食计算器</a>
-        <a href="feedback.html">反馈</a>
-        <a href="cards/transition-7.html?v=20250922c" rel="nofollow">7天换粮卡</a>
+        <!-- 全部为相对路径，避免 GitHub Pages 根路径 404 -->
+        <a href="feeding.html" data-i18n="nav_feeding">喂食计算器</a>
+        <a href="feedback.html" data-i18n="nav_feedback">反馈</a>
+        <a href="cards/transition-7.html?v=20250922e" rel="nofollow" data-i18n="nav_card7">7天换粮卡</a>
+        <!-- 语言切换：中/EN -->
+        <button id="langToggle" class="lang" type="button"
+          onclick="PS_I18N && PS_I18N.setLang(window.__PS_LANG__==='en'?'zh-CN':'en')">中/EN</button>
       </nav>
     </header>
 
+    <!-- 主体 -->
     <main class="hero" data-page="home">
       <h1>把难懂的标签 → 变成可执行建议</h1>
-      <p class="lead">扫描/录入宠物食品与洗护信息，统一口径（ME、GA、as-fed/DM），秒出喂量/换粮卡；页面显式来源与时间戳。<strong>信息性建议，非医疗。</strong></p>
+      <p class="lead">
+        扫描/录入宠物食品与洗护信息，统一口径（ME、GA、as-fed/DM），秒出喂量/换粮卡；页面显式来源与时间戳。<strong>信息性建议，非医疗。</strong>
+      </p>
 
       <div class="grid">
+        <!-- 卡片 1：喂食计算器 -->
         <section class="card">
           <h3>① 喂食计算器</h3>
           <p class="muted">RER/MER → kcal/天 → 杯/克；支持混喂与零食占比提示。</p>
           <a class="btn" href="feeding.html" id="calcBtn">打开计算器</a>
         </section>
 
+        <!-- 卡片 2：7 天换粮卡 -->
         <section class="card">
           <h3>② 7 天换粮卡</h3>
           <p class="muted">90/10 → 0/100 的过渡表，自动按能量密度换算。</p>
-          <a class="btn sec" href="cards/transition-7.html?v=20250922c" rel="nofollow">查看换粮卡</a>
+          <a class="btn sec" href="cards/transition-7.html?v=20250922e" rel="nofollow">查看换粮卡</a>
         </section>
 
+        <!-- 卡片 3：意见反馈 -->
         <section class="card">
           <h3>③ 意见反馈</h3>
           <p class="muted">帮助我们提高命中率与解释易读性；导购披露保持中立。</p>
