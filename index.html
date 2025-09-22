@@ -26,7 +26,8 @@
   </script>
 
   <!-- 统一事件模块（自动上报 visit_* / calc_click / feedback_* / wash_*） -->
-  <script type="module" src="/assets/js/events.js?v=20250922c"></script>
+  <!-- 注意：移除了开头的 / ，改为项目内相对路径 -->
+  <script type="module" src="assets/js/events.js?v=20250922c"></script>
 
   <!-- 站点样式（极简） -->
   <style>
@@ -56,13 +57,15 @@
 <body>
   <div class="wrap">
     <header>
-      <a class="logo" href="/">
+      <!-- 改为相对链接：回到项目首页 -->
+      <a class="logo" href="./">
         <span class="logo-badge">PS</span> Pet Scan
       </a>
       <nav class="nav">
-        <a href="/feeding.html">喂食计算器</a>
-        <a href="/feedback.html">反馈</a>
-        <a href="/cards/transition-7.html?v=20250922c" rel="nofollow">7天换粮卡</a>
+        <!-- 全部移除开头的 / -->
+        <a href="feeding.html">喂食计算器</a>
+        <a href="feedback.html">反馈</a>
+        <a href="cards/transition-7.html?v=20250922c" rel="nofollow">7天换粮卡</a>
       </nav>
     </header>
 
@@ -74,19 +77,19 @@
         <section class="card">
           <h3>① 喂食计算器</h3>
           <p class="muted">RER/MER → kcal/天 → 杯/克；支持混喂与零食占比提示。</p>
-          <a class="btn" href="/feeding.html" id="calcBtn">打开计算器</a>
+          <a class="btn" href="feeding.html" id="calcBtn">打开计算器</a>
         </section>
 
         <section class="card">
           <h3>② 7 天换粮卡</h3>
           <p class="muted">90/10 → 0/100 的过渡表，自动按能量密度换算。</p>
-          <a class="btn sec" href="/cards/transition-7.html?v=20250922c" rel="nofollow">查看换粮卡</a>
+          <a class="btn sec" href="cards/transition-7.html?v=20250922c" rel="nofollow">查看换粮卡</a>
         </section>
 
         <section class="card">
           <h3>③ 意见反馈</h3>
           <p class="muted">帮助我们提高命中率与解释易读性；导购披露保持中立。</p>
-          <a class="btn" href="/feedback.html" id="feedbackOpen">去反馈</a>
+          <a class="btn" href="feedback.html" id="feedbackOpen">去反馈</a>
         </section>
       </div>
 
