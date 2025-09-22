@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-CN">
-<!-- Pet Scan · Feeding Calculator · 一键可用（v=20250922c | 自动域名 + 事件上报） -->
+<!-- Pet Scan · Feeding Calculator · 一键可用（v=20250922c | 自动域名 + 事件上报 | 相对路径版） -->
 <head>
   <!-- 基础 -->
   <meta charset="utf-8" />
@@ -26,7 +26,7 @@
   </script>
 
   <!-- 统一事件模块（自动上报 visit_feeding_page / calc_click） -->
-  <script type="module" src="/assets/js/events.js?v=20250922c"></script>
+  <script type="module" src="assets/js/events.js?v=20250922c"></script>
 
   <!-- 样式（极简） -->
   <style>
@@ -60,17 +60,17 @@
 <body>
   <div class="wrap" data-page="feeding">
     <header>
-      <a class="logo" href="/"><span class="logo-badge">PS</span> Pet Scan</a>
+      <a class="logo" href="index.html"><span class="logo-badge">PS</span> Pet Scan</a>
       <nav class="nav">
-        <a href="/index.html">首页</a>
-        <a href="/feedback.html">反馈</a>
-        <a href="/cards/transition-7.html?v=20250922c" rel="nofollow">7天换粮卡</a>
+        <a href="index.html">首页</a>
+        <a href="feedback.html">反馈</a>
+        <a href="cards/transition-7.html?v=20250922c" rel="nofollow">7天换粮卡</a>
       </nav>
     </header>
 
     <main class="card">
       <h1>喂食计算器</h1>
-      <p class="muted">RER = 70 × 体重(kg)<sup>0.75</sup>；MER = RER × 系数（按物种/活动）。输出为**信息性建议**，不代替医疗。</p>
+      <p class="muted">RER = 70 × 体重(kg)<sup>0.75</sup>；MER = RER × 系数（按物种/活动）。输出为<strong>信息性建议</strong>，不代替医疗。</p>
 
       <!-- 输入区 -->
       <div class="grid" style="margin-top:12px">
@@ -118,7 +118,7 @@
         <div class="row"><span>喂食总量（克/天）：</span><strong id="gDay">—</strong> g</div>
         <div class="row"><span>喂食总量（杯/天）：</span><strong id="cupDay">—</strong> 杯</div>
         <div class="row"><span>零食建议上限：</span><strong id="treatsMax">≤ 10%</strong>（按 DER）</div>
-        <div class="row"><span>换粮卡：</span><a href="/cards/transition-7.html?v=20250922c" class="kpi" rel="nofollow">7天过渡表</a></div>
+        <div class="row"><span>换粮卡：</span><a href="cards/transition-7.html?v=20250922c" class="kpi" rel="nofollow">7天过渡表</a></div>
       </section>
 
       <p class="muted" style="margin-top:10px">
@@ -154,12 +154,13 @@
       $('kcalDay').textContent = Math.round(kcalDay);
       $('gDay').textContent = Math.round(gDay);
       $('cupDay').textContent = cupsDay.toFixed(2);
-      // 事件上报（若全局 PS 存在，则触发 calc_click；脚本已在 /assets/js/events.js 实现）
+
+      // 触发 calc_click（若全局 PS 存在）
       try { window.PS && window.PS.track && window.PS.track('calc_click'); } catch(_) {}
     }
 
     $('calcBtn').addEventListener('click', calc, {passive:true});
-    // 初始计算一次，便于展示
+    // 初始计算一次便于展示
     calc();
   })();
   </script>
