@@ -1,285 +1,103 @@
-/* i18n.js — four languages (en-US, es-419, zh-Hans, fr-CA)
- * Usage in HTML: <script src="/p-feeding/i18n.js?v=20250920b"></script>
- * - Auto-pick by ?lang / localStorage(i18n.lang) / navigator.languages[0] / navigator.language
- * - Apply to: [data-i18n], [data-i18n-placeholder], [data-i18n-value]
- * - Exposes: window.__setLang(lang), window.__i18n_get()
- */
-
+/* i18n.js · 简易多语言（zh-CN / en）v20250922d */
 (function () {
-  // ---------------------------
-  // Dictionaries
-  // ---------------------------
-  const DICT = {
-    'en-US': {
-      // index
-      'title.index': 'Pet Feeding Tools',
-      'h1.index': 'Pet Feeding Tools',
-      'desc.index': 'Simple, handy tools: feeding calculator, feedback, and more.',
-      'nav.feeding': 'Feeding Calculator',
-      'nav.feedback': 'Feedback',
-      'search.label': 'Site Search',
-      'search.placeholder': 'Type a keyword…',
-      'search.btn': 'Search',
-      'footer.note': 'Anonymous analytics (Plausible) is enabled to improve the product.',
-      // feeding
-      'title.feeding': 'Feeding Calculator',
-      'h1.feeding': 'Feeding Calculator',
-      'feeding.weight': 'Weight',
-      'feeding.unit': 'Unit',
-      'feeding.kg': 'Kilogram (kg)',
-      'feeding.lb': 'Pound (lb)',
-      'feeding.activity': 'Activity',
-      'feeding.low': 'Low',
-      'feeding.mid': 'Medium',
-      'feeding.high': 'High',
-      'feeding.calc': 'Calculate',
-      'feeding.result': 'Result',
-      'feeding.kcal.day': 'kcal/day',
-      'feeding.cup.day': 'cup/day',
-      'feeding.g.day': 'g/day',
-      'nav.home': 'Home',
-      'footer.note.feeding': 'Note: For reference only. Consult your vet.',
-      // feedback
-      'title.feedback': 'Feedback',
-      'h1.feedback': 'Feedback',
-      'form.type': 'Type',
-      'form.type.bug': 'Bug',
-      'form.type.feature': 'Feature Request',
-      'form.summary': 'Summary',
-      'form.summary.ph': 'One-line summary…',
-      'form.details': 'Details',
-      'form.details.ph': 'Steps to reproduce, expected result, screenshots/device info…',
-      'btn.preview': 'Preview Draft',
-      'footer.note.feedback': 'You will be redirected to GitHub to review and submit.'
-    },
+  'use strict';
 
-    'es-419': {
-      // index
-      'title.index': 'Herramientas de Alimentación para Mascotas',
-      'h1.index': 'Herramientas de Alimentación',
-      'desc.index': 'Herramientas sencillas: calculadora de ración, sugerencias y más.',
-      'nav.feeding': 'Calculadora de Ración',
-      'nav.feedback': 'Sugerencias',
-      'search.label': 'Búsqueda en el sitio',
-      'search.placeholder': 'Escribe una palabra clave…',
-      'search.btn': 'Buscar',
-      'footer.note': 'Analítica anónima (Plausible) activada para mejorar el producto.',
-      // feeding
-      'title.feeding': 'Calculadora de Ración',
-      'h1.feeding': 'Calculadora de Ración',
-      'feeding.weight': 'Peso',
-      'feeding.unit': 'Unidad',
-      'feeding.kg': 'Kilogramo (kg)',
-      'feeding.lb': 'Libra (lb)',
-      'feeding.activity': 'Actividad',
-      'feeding.low': 'Baja',
-      'feeding.mid': 'Media',
-      'feeding.high': 'Alta',
-      'feeding.calc': 'Calcular',
-      'feeding.result': 'Resultado',
-      'feeding.kcal.day': 'kcal/día',
-      'feeding.cup.day': 'taza/día',
-      'feeding.g.day': 'g/día',
-      'nav.home': 'Inicio',
-      'footer.note.feeding': 'Nota: Solo referencia. Consulte a su veterinario.',
-      // feedback
-      'title.feedback': 'Sugerencias',
-      'h1.feedback': 'Sugerencias',
-      'form.type': 'Tipo',
-      'form.type.bug': 'Error / Bug',
-      'form.type.feature': 'Solicitud de función',
-      'form.summary': 'Resumen',
-      'form.summary.ph': 'Resumen en una línea…',
-      'form.details': 'Detalles',
-      'form.details.ph': 'Pasos para reproducir, resultado esperado, capturas/dispositivo…',
-      'btn.preview': 'Vista previa',
-      'footer.note.feedback': 'Serás redirigido a GitHub para revisar y enviar.'
-    },
+  const STORE_KEY = 'ps_lang';
+  const fallback = 'zh-CN';
+  const supported = ['zh-CN', 'en'];
 
-    'zh-Hans': {
-      // index
-      'title.index': '宠物喂食工具集｜Pet Feeding Tools',
-      'h1.index': '宠物喂食工具集',
-      'desc.index': '简洁好用的宠物喂食小工具：喂食计算器、反馈入口与更多实验功能。',
-      'nav.feeding': '喂食计算器',
-      'nav.feedback': '问题与建议',
-      'search.label': '站内搜索',
-      'search.placeholder': '输入关键词…',
-      'search.btn': '搜索',
-      'footer.note': '本页启用匿名统计（Plausible），仅用于改进产品体验。',
-      // feeding
-      'title.feeding': '喂食计算器｜Feeding Calculator',
-      'h1.feeding': '喂食计算器',
-      'feeding.weight': '体重',
-      'feeding.unit': '单位',
-      'feeding.kg': '千克(kg)',
-      'feeding.lb': '磅(lb)',
-      'feeding.activity': '活动水平',
-      'feeding.low': '低',
-      'feeding.mid': '中',
-      'feeding.high': '高',
-      'feeding.calc': '计算',
-      'feeding.result': '结果',
-      'feeding.kcal.day': '千卡/天',
-      'feeding.cup.day': '杯/天',
-      'feeding.g.day': '克/天',
-      'nav.home': '返回主页',
-      'footer.note.feeding': '提示：结果仅供参考，请结合兽医建议。',
-      // feedback
-      'title.feedback': '问题与建议｜Feedback',
-      'h1.feedback': '问题与建议',
-      'form.type': '类型',
-      'form.type.bug': '缺陷 / Bug',
-      'form.type.feature': '功能建议',
-      'form.summary': '概要',
-      'form.summary.ph': '一句话描述…',
-      'form.details': '详细描述',
-      'form.details.ph': '可复现步骤、期望结果、截图/设备信息等…',
-      'btn.preview': '预览草稿',
-      'footer.note.feedback': '提交将跳转到 GitHub，新窗口中可再次确认后发布。'
+  const dict = {
+    'zh-CN': {
+      brand: 'Pet Scan',
+      nav_feeding: '喂食计算器',
+      nav_feedback: '反馈',
+      nav_transition: '7天换粮卡',
+      hero_title: '把难懂的标签 → 变成可执行建议',
+      hero_lead:
+        '扫描/录入宠物食品与洗护信息，统一口径（ME、GA、as-fed/DM），秒出喂量/换粮卡；页面显式来源与时间戳。信息性建议，非医疗。',
+      card1_title: '① 喂食计算器',
+      card1_desc: 'RER/MER → kcal/天 → 杯/克；支持混喂与零食占比提示。',
+      card1_btn: '打开计算器',
+      card2_title: '② 7 天换粮卡',
+      card2_desc: '90/10 → 0/100 的过渡表，自动按能量密度换算。',
+      card2_btn: '查看换粮卡',
+      card3_title: '③ 意见反馈',
+      card3_desc: '帮助我们提高命中率与解释易读性；导购披露保持中立。',
+      card3_btn: '去反馈',
+      metrics_hint:
+        '指标监测：visit_home / visit_feeding_page / visit_feedback_page / feedback_open / calc_click / wash_*。',
+      footer_line1:
+        '信息性提示：本工具基于公开信息与通用标准（如 AAFCO/NRC）给出参考建议，不构成医疗或诊断意见。涉及疾病/处方需求请咨询持证兽医。',
+      footer_line2:
+        '数据可能因配方/包装更新而变化；页面已标注来源/时间戳/版本以供核验。',
+      footer_line3: '如含推广链接，可能获得佣金（已披露）；这不影响信息的中立性。',
+      switch_label: '中/EN',
     },
-
-    'fr-CA': {
-      // index
-      'title.index': 'Outils d’alimentation pour animaux',
-      'h1.index': 'Outils d’alimentation',
-      'desc.index': 'Des outils simples : calculateur de ration, retours et plus.',
-      'nav.feeding': 'Calculateur de ration',
-      'nav.feedback': 'Retours',
-      'search.label': 'Recherche du site',
-      'search.placeholder': 'Saisir un mot-clé…',
-      'search.btn': 'Rechercher',
-      'footer.note': 'Analytique anonyme (Plausible) activée pour améliorer le produit.',
-      // feeding
-      'title.feeding': 'Calculateur de ration',
-      'h1.feeding': 'Calculateur de ration',
-      'feeding.weight': 'Poids',
-      'feeding.unit': 'Unité',
-      'feeding.kg': 'Kilogramme (kg)',
-      'feeding.lb': 'Livre (lb)',
-      'feeding.activity': 'Niveau d’activité',
-      'feeding.low': 'Faible',
-      'feeding.mid': 'Moyen',
-      'feeding.high': 'Élevé',
-      'feeding.calc': 'Calculer',
-      'feeding.result': 'Résultat',
-      'feeding.kcal.day': 'kcal/jour',
-      'feeding.cup.day': 'tasse/jour',
-      'feeding.g.day': 'g/jour',
-      'nav.home': 'Accueil',
-      'footer.note.feeding': 'Remarque : à titre indicatif. Consultez votre vétérinaire.',
-      // feedback
-      'title.feedback': 'Retours',
-      'h1.feedback': 'Retours',
-      'form.type': 'Type',
-      'form.type.bug': 'Bug',
-      'form.type.feature': 'Demande de fonctionnalité',
-      'form.summary': 'Résumé',
-      'form.summary.ph': 'Résumé en une ligne…',
-      'form.details': 'Détails',
-      'form.details.ph': 'Étapes de reproduction, résultat attendu, captures/appareil…',
-      'btn.preview': 'Aperçu du brouillon',
-      'footer.note.feedback': 'Redirection vers GitHub pour vérifier et soumettre.'
-    }
+    en: {
+      brand: 'Pet Scan',
+      nav_feeding: 'Feeding Calculator',
+      nav_feedback: 'Feedback',
+      nav_transition: '7-day Transition',
+      hero_title: 'Turn confusing labels → actionable advice',
+      hero_lead:
+        'Scan/input pet food & wash-care info, unify ME/GA/as-fed/DM, get portions & transition card in seconds; sources & timestamps shown. Informational, not medical.',
+      card1_title: '① Feeding Calculator',
+      card1_desc: 'RER/MER → kcal/day → cups/grams; supports mixed feeding & treats ratio tips.',
+      card1_btn: 'Open Calculator',
+      card2_title: '② 7-day Transition',
+      card2_desc: '90/10 → 0/100 schedule; auto converts by energy density.',
+      card2_btn: 'View Transition Card',
+      card3_title: '③ Feedback',
+      card3_desc: 'Help improve hit rate & explainability; affiliate disclosure remains neutral.',
+      card3_btn: 'Give Feedback',
+      metrics_hint:
+        'Tracked: visit_home / visit_feeding_page / visit_feedback_page / feedback_open / calc_click / wash_*.',
+      footer_line1:
+        'Notice: This tool provides informational suggestions based on public standards (e.g., AAFCO/NRC) and is not medical advice.',
+      footer_line2:
+        'Formulas/packaging may change; pages show sources, timestamps and versions.',
+      footer_line3: 'Affiliate links may appear (disclosed) without affecting neutrality.',
+      switch_label: '中/EN',
+    },
   };
 
-  // ---------------------------
-  // Helpers
-  // ---------------------------
-  const STORAGE_KEY = 'i18n.lang';
-
-  // localStorage with try/catch (privacy modes safe)
-  function lsGet(key) {
-    try { return window.localStorage.getItem(key); }
-    catch (e) { return null; }
-  }
-  function lsSet(key, val) {
-    try { window.localStorage.setItem(key, val); }
-    catch (e) { /* no-op */ }
+  function getLang() {
+    const saved = localStorage.getItem(STORE_KEY);
+    if (saved && supported.includes(saved)) return saved;
+    const nav = (navigator.language || '').toLowerCase();
+    if (nav.startsWith('zh')) return 'zh-CN';
+    return 'en';
   }
 
-  function normalizeLang(code) {
-    if (!code) return 'en-US';
-    const c = String(code).toLowerCase();
-    if (c.startsWith('es')) return 'es-419';
-    if (c.startsWith('zh')) return 'zh-Hans';
-    if (c.startsWith('fr')) return 'fr-CA';
-    return 'en-US';
+  function t(key) {
+    const lang = window.__PS_LANG__ || fallback;
+    return (dict[lang] && dict[lang][key]) || (dict[fallback] && dict[fallback][key]) || key;
   }
 
-  function pickLang() {
-    const url = new URL(location.href);
-    const q = url.searchParams.get('lang');
-    if (q) return normalizeLang(q);
-    const saved = lsGet(STORAGE_KEY);
-    if (saved) return normalizeLang(saved);
-    const nav = (navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage || 'en-US';
-    return normalizeLang(nav);
-  }
-
-  function dictFor(lang) {
-    return DICT[lang] || DICT['en-US'];
-  }
-
-  function applyI18n(lang) {
-    const d = dictFor(lang);
-    document.documentElement.setAttribute('lang', lang);
-
-    // text nodes
-    document.querySelectorAll('[data-i18n]').forEach((el) => {
+  function apply() {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
       const key = el.getAttribute('data-i18n');
-      if (d[key]) {
-        el.textContent = d[key];
-        if (el.tagName === 'TITLE') document.title = d[key];
-      }
+      const attr = el.getAttribute('data-i18n-attr');
+      const value = t(key);
+      if (attr) el.setAttribute(attr, value);
+      else el.textContent = value;
     });
-
-    // placeholders
-    document.querySelectorAll('[data-i18n-placeholder]').forEach((el) => {
-      const key = el.getAttribute('data-i18n-placeholder');
-      if (d[key]) el.setAttribute('placeholder', d[key]);
-    });
-
-    // values (for option/select)
-    document.querySelectorAll('[data-i18n-value]').forEach((el) => {
-      const key = el.getAttribute('data-i18n-value');
-      if (d[key]) el.value = d[key];
-    });
-
-    // best effort: if page has any [data-i18n^="title."]
-    const titleEl = document.querySelector('[data-i18n^="title."]');
-    if (titleEl) {
-      const key = titleEl.getAttribute('data-i18n');
-      if (d[key]) document.title = d[key];
-    }
+    const btn = document.getElementById('langToggle');
+    if (btn) btn.textContent = t('switch_label');
+    document.title = 'Pet Scan · ' + (window.__PS_LANG__ === 'en' ? 'Informational advice' : '信息性建议（非医疗）');
   }
 
   function setLang(lang) {
-    const L = normalizeLang(lang);
-    lsSet(STORAGE_KEY, L);
-    try { window.plausible && window.plausible('Lang', { props: { lang: L } }); } catch (e) {}
-    applyI18n(L);
-    const url = new URL(location.href);
-    url.searchParams.set('lang', L);
-    try { history.replaceState(null, '', url.toString()); } catch (e) {}
+    if (!supported.includes(lang)) lang = fallback;
+    window.__PS_LANG__ = lang;
+    localStorage.setItem(STORE_KEY, lang);
+    apply();
   }
 
-  // ---------------------------
-  // Safe Init (runs even if script tag forgets "defer")
-  // ---------------------------
-  function init() {
-    const L = pickLang();
-    applyI18n(L);
-    // expose
-    window.__setLang = setLang;
-    window.__i18n_get = function () {
-      return { lang: document.documentElement.getAttribute('lang') || L, DICT };
-    };
-  }
+  // expose
+  window.__PS_LANG__ = getLang();
+  window.PS_I18N = { setLang, apply, t };
 
-  if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    init();
-  } else {
-    document.addEventListener('DOMContentLoaded', init, { once: true });
-  }
+  // init
+  document.addEventListener('DOMContentLoaded', apply);
 })();
