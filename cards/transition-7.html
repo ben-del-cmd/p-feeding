@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-CN">
+<!-- Pet Scan · 7天换粮卡 · 一键可用（v=20250922c | 自动域名 + 相对路径 + 事件脚本） -->
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>7 天换粮卡 · Pet Scan（信息性建议，非医疗）</title>
+  <meta name="description" content="7天从旧粮过渡到新粮的配比卡；支持按目标热量与能量密度自动换算克数。信息性建议，非医疗。" />
+  <meta name="robots" content="index,follow" />
+
+  <!-- Plausible 自动注入（根据真实域名） -->
+  <script>
+  (function(){
+    var domain = (location && location.hostname) ? location.hostname : 'localhost';
+    var s = document.createElement('script');
+    s.defer = true;
+    s.setAttribute('data-domain', domain);
+    s.src = 'https://plausible.io/js/script.js';
+    document.head.appendChild(s);
+  })();
+  </script>
+
+  <!-- 统一事件脚本（相对路径：从 /cards/ 到 /assets/） -->
+  <script type="module" src="../assets/js/events.js?v=20250922c"></script>
+
+  <style>
+    :root{--bg:#0b0d12;--fg:#e5e7eb;--muted:#9ca3af;--card:#111827;--line:#253046;--accent:#10b981;--br:16px}
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:linear-gradient(180deg,#0b0d12,#0f172a);color:var(--fg);font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"PingFang SC","Microsoft Yahei","Noto Sans",sans-serif}
+    .wrap{max-width:900px;margin:0 auto;padding:28px}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+    .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;color:#fff;text-decoration:none}
+    .logo-badge{width:28px;height:28px;border-radius:8px;background:#10b981;display:inline-grid;place-items:center;color:#0b0d12;font-weight:900}
+    .nav a{color:#9ca3af;margin-left:16px;text-decoration:none}
+    .card{background:rgba(17,24,39,.6);border:1px solid rgba(255,255,255,.06);border-radius:var(--br);padding:20px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+    h1{margin:0 0 8px;font-size:22px}
+    .muted{color:#9ca3af;font-size:12px}
+    label{display:block;font-size:12px;color:#cbd5e1;margin-bottom:6px}
+    input{width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;background:#0f172a;color:#e5e7eb}
+    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    table{width:100%;border-collapse:collapse;margin-top:14px}
+    th,td{border-bottom:1px dashed var(--line);padding:10px 8px;text-align:center}
+    th{color:#cbd5e1;font-weight:600}
+    .old{color:#93c5fd}
+    .nw{color:#86efac}
+    .btn{display:inline-block;padding:10px 14px;border-radius:12px;background:var(--accent);color:#0b0d12;font-weight:700;border:0;cursor:pointer}
+    footer{margin:28px 0 8px;color:#94a3b8;font-size:12px}
+    @media (max-width:820px){.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+
+<body>
+  <div class="wrap" data-page="transition">
+    <header>
+      <a class="logo" href="../index.html"><span class="logo-badge">PS</span> Pet Scan</a>
+      <nav class="nav">
+        <a href="../index.html">首页</a>
+        <a href="../feeding.html">喂食计算器</a>
+        <a href="../feedback.html">反馈</a>
+      </nav>
+    </header>
+
+    <main class="card">
+      <h1>7 天换粮卡</h1>
+      <p class="muted">按热量法换算：目标 kcal/天 → 克/天；再按每日配比拆成“旧粮克数 / 新粮克数”。默认配比：90/10 → 80/20 → 70/30 → 60/40 → 50/50 → 30/70 → 0/100。</p>
+
+      <!-- 输入区 -->
+      <div class="grid" style="margin-top:12px">
+        <div>
+          <label>目标热量（kcal/天）</label>
+          <input id="kcalDay" type="number" min="50" step="1" value="600" />
+        </div>
+        <div>
+          <label>旧粮能量密度（kcal/100g）</label>
+          <input id="meOld" type="number" min="200" step="1" value="350" />
+        </div>
+        <div>
+          <label>新粮能量密度（kcal/100g）</label>
+          <input id="meNew" type="number" min="200" step="1" value="380" />
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <button class="btn" id="calcBtn">重新计算</button>
+      </div>
+
+      <!-- 表格 -->
+      <table>
+        <thead>
+          <tr>
+            <th>天数</th>
+            <th>配比（旧/新）</th>
+            <th>旧粮（g/天）</th>
+            <th>新粮（g/天）</th>
+            <th>总量（g/天）</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+
+      <p class="muted" style="margin-top:10px">
+        说明：克数根据热量换算，计算公式为 <code>g = kcal ÷ (ME/100)</code>；ME 单位为 kcal/100g。若有湿粮/混喂，请分别按各自能量密度换算并合并。
+      </p>
+    </main>
+
+    <footer>
+      <strong>信息性提示：</strong>本页提供参考建议，不构成医疗或诊断意见。涉及疾病/处方需求请咨询持证兽医。配方/包装更新可能导致数据变化，请以包装标签为准。
+    </footer>
+  </div>
+
+  <script>
+  (function(){
+    const $ = (id)=> document.getElementById(id);
+
+    // 7 天配比（旧/新）
+    const MIX = [
+      [90,10],[80,20],[70,30],[60,40],[50,50],[30,70],[0,100]
+    ];
+
+    function gramsByKcal(kcal, me100){ // me100: kcal/100g
+      if (!kcal || !me100) return 0;
+      return kcal / (me100 / 100);
+    }
+
+    function calc(){
+      const kcalDay = parseFloat($('kcalDay').value || 0);
+      const meOld = parseFloat($('meOld').value || 0);
+      const meNew = parseFloat($('meNew').value || 0);
+      const tbody = $('tbody');
+      tbody.innerHTML = '';
+
+      MIX.forEach((pair, i) => {
+        const [oldPct, newPct] = pair;
+        // 按热量比例拆分
+        const kcalOld = kcalDay * (oldPct/100);
+        const kcalNew = kcalDay * (newPct/100);
+        const gOld = gramsByKcal(kcalOld, meOld);
+        const gNew = gramsByKcal(kcalNew, meNew);
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>第 ${i+1} 天</td>
+          <td><span class="old">${oldPct}%</span> / <span class="nw">${newPct}%</span></td>
+          <td>${gOld>0 ? Math.round(gOld) : '—'}</td>
+          <td>${gNew>0 ? Math.round(gNew) : '—'}</td>
+          <td>${gOld+gNew>0 ? Math.round(gOld+gNew) : '—'}</td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      // 埋点：点击计算
+      try { window.PS && window.PS.track && window.PS.track('calc_click', {page:'transition'}); } catch(_) {}
+    }
+
+    document.getElementById('calcBtn').addEventListener('click', calc, {passive:true});
+    // 首次渲染
+    calc();
+  })();
+  </script>
+</body>
+</html>
