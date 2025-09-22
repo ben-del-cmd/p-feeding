@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-CN">
-<!-- Pet Scan · Feeding Calculator · v20250922d -->
+<!-- Pet Scan · Feeding Calculator · v20250922e | 相对路径 + Plausible + i18n + 统一埋点 -->
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -8,7 +8,7 @@
   <meta name="description" content="RER/MER 计算；按能量密度换算为克/杯；支持混喂与零食占比提示。信息性建议，非医疗。" />
   <meta name="robots" content="index,follow" />
 
-  <!-- Plausible：运行时用真实域名注入，无需手改 data-domain -->
+  <!-- Plausible：运行时按真实域名注入，无需手改 data-domain -->
   <link rel="preconnect" href="https://plausible.io" crossorigin />
   <link rel="dns-prefetch" href="https://plausible.io" />
   <script>
@@ -22,12 +22,13 @@
   })();
   </script>
 
-  <!-- 多语言（可选）：与首页同一份 i18n.js -->
-  <script defer src="i18n.js?v=20250922d"></script>
+  <!-- 多语言（与首页/反馈共用一份） -->
+  <script defer src="i18n.js?v=20250922e"></script>
 
-  <!-- 统一事件模块：自动上报 visit_feeding_page / calc_click 等 -->
-  <script type="module" src="assets/js/events.js?v=20250922d"></script>
+  <!-- 统一事件模块（自动上报 visit_feeding_page / calc_click 等） -->
+  <script type="module" src="assets/js/events.js?v=20250922e"></script>
 
+  <!-- 样式 -->
   <style>
     :root{
       --bg:#0b0d12;--fg:#e5e7eb;--muted:#9ca3af;--card:#111827;--btn:#10b981;--btnfg:#0b0d12;
@@ -70,20 +71,21 @@
   <!-- 顶部导航 -->
   <header>
     <a class="logo" href="./">
-      <span class="logo-badge">PS</span> <span data-i18n="brand">Pet Scan</span>
+      <span class="logo-badge">PS</span> <span>Pet Scan</span>
     </a>
     <nav class="nav">
-      <a href="./" data-i18n="brand">首页</a>
+      <a href="./" data-i18n="nav_home">首页</a>
       <a href="feedback.html" data-i18n="nav_feedback">反馈</a>
-      <a href="cards/transition-7.html?v=20250922c" rel="nofollow" data-i18n="nav_transition">7天换粮卡</a>
-      <button id="langToggle" class="lang" type="button" onclick="PS_I18N && PS_I18N.setLang(window.__PS_LANG__==='en'?'zh-CN':'en')">中/EN</button>
+      <a href="cards/transition-7.html?v=20250922e" rel="nofollow" data-i18n="nav_card7">7天换粮卡</a>
+      <button id="langToggle" class="lang" type="button"
+              onclick="PS_I18N && PS_I18N.setLang(window.__PS_LANG__==='en'?'zh-CN':'en')">中/EN</button>
     </nav>
   </header>
 
   <!-- 页面主体 -->
   <main class="page" data-page="feeding">
     <h1>喂食计算器</h1>
-    <p class="lead">RER/MER → kcal/天 → 克/杯；支持零食占比提示。<strong>信息性建议，非医疗。</strong></p>
+    <p class="lead">根据 RER/MER 计算日需能量与喂量，支持混喂与零食占比提示（信息性建议，非医疗）。</p>
 
     <div class="grid">
       <!-- 左：输入 -->
@@ -91,14 +93,14 @@
         <h3>基本信息</h3>
         <div class="row">
           <div>
-            <label>物种</label>
+            <label for="species">物种</label>
             <select id="species">
               <option value="dog">犬</option>
               <option value="cat">猫</option>
             </select>
           </div>
           <div>
-            <label>体重</label>
+            <label for="weight">体重</label>
             <div class="row">
               <input id="weight" type="number" step="0.01" placeholder="例如 5.2" />
               <select id="unit">
@@ -111,7 +113,7 @@
 
         <div class="row">
           <div>
-            <label>活动/状况因子（MER）</label>
+            <label for="factor">活动/状况因子（MER）</label>
             <select id="factor">
               <option value="1.0">静息 / 肥胖管理（1.0）</option>
               <option value="1.2">低活动（1.2）</option>
@@ -121,7 +123,7 @@
             </select>
           </div>
           <div>
-            <label>零食占比（% 能量）</label>
+            <label for="treats">零食占比（% 能量）</label>
             <input id="treats" type="number" step="1" min="0" max="30" value="0" />
           </div>
         </div>
@@ -129,35 +131,35 @@
         <h3 style="margin-top:18px">食品能量密度 & 杯换算</h3>
         <div class="row">
           <div>
-            <label>食物 A：kcal / 100 g</label>
+            <label for="kcal100a">食物 A：kcal / 100 g</label>
             <input id="kcal100a" type="number" step="1" placeholder="例如 380" />
           </div>
           <div>
-            <label>（可选）食物 B：kcal / 100 g</label>
+            <label for="kcal100b">（可选）食物 B：kcal / 100 g</label>
             <input id="kcal100b" type="number" step="1" placeholder="如混喂，填这项" />
           </div>
         </div>
         <div class="row">
           <div>
-            <label>克/杯（g per cup）</label>
+            <label for="gPerCup">克/杯（g per cup）</label>
             <input id="gPerCup" type="number" step="1" placeholder="干粮常见 ~ 100–120" value="110" />
           </div>
           <div>
-            <label>混喂比例（A 的 %）</label>
+            <label for="mixA">混喂比例（A 的 %）</label>
             <input id="mixA" type="number" step="1" min="0" max="100" value="100" />
           </div>
         </div>
 
         <div style="margin-top:16px;display:flex;gap:10px;align-items:center">
-          <button class="btn" id="calcSubmit">计算</button>
-          <button class="btn sec" id="clearBtn">清空</button>
+          <button class="btn" id="calcBtn" data-role="calc">计算</button>
+          <button class="btn sec" id="resetBtn" data-role="reset">重置</button>
           <span class="muted">口径：RER=70×BW^0.75；MER=RER×因子；零食从 MER 扣减。</span>
         </div>
       </section>
 
       <!-- 右：结果 -->
       <section class="card" id="resultCard">
-        <h3>结果</h3>
+        <h3 class="result-title">结果</h3>
         <div id="resultEmpty" class="muted">填写左侧并点击「计算」，结果将显示于此。</div>
         <div id="resultArea" style="display:none">
           <table>
@@ -180,8 +182,7 @@
           </table>
 
           <div class="note">
-            <div>单位换算：1 lb = 0.453592 kg。若为湿粮，请改用实际能量密度。</div>
-            <div class="warn">信息性建议，非医疗；若有疾病/处方需求，请咨询兽医。</div>
+            <div class="notice">本页仅提供信息性建议；涉及处方/疾病请咨询兽医。</div>
             <div id="metaLine" class="muted" style="margin-top:6px"></div>
           </div>
         </div>
@@ -198,40 +199,34 @@
   </footer>
 </div>
 
+<!-- 计算逻辑（纯前端；信息性建议） -->
 <script>
-  // —— 计算逻辑（纯前端；信息性建议） ————————————————
   function kgFrom(val, unit){ if(!val) return 0; return unit==='lb' ? val*0.45359237 : val*1.0; }
   function round(x, n=1){ const m=Math.pow(10,n); return Math.round((x+m*1e-12)*m)/m; }
   function safe(v){ return (isFinite(v) && !isNaN(v)) ? v : 0; }
-
-  const el = (id)=>document.getElementById(id);
-  const btnCalc = el('calcSubmit');
-  const btnClear = el('clearBtn');
+  const $ = (id)=>document.getElementById(id);
 
   function calc(){
-    const species = el('species').value;
-    const weightVal = parseFloat(el('weight').value);
-    const unit = el('unit').value;
+    const species = $('species').value;
+    const weightVal = parseFloat($('weight').value);
+    const unit = $('unit').value;
     const kg = kgFrom(weightVal, unit);
-    const factor = parseFloat(el('factor').value)||1.0;
-    const treatsPct = Math.min(30, Math.max(0, parseFloat(el('treats').value)||0));
-    const kcal100a = parseFloat(el('kcal100a').value);
-    const kcal100b = parseFloat(el('kcal100b').value);
-    const gPerCup = parseFloat(el('gPerCup').value)||110;
-    const mixA = Math.min(100, Math.max(0, parseFloat(el('mixA').value)||100)); // A %
+    const factor = parseFloat($('factor').value)||1.0;
+    const treatsPct = Math.min(30, Math.max(0, parseFloat($('treats').value)||0));
+    const kcal100a = parseFloat($('kcal100a').value);
+    const kcal100b = parseFloat($('kcal100b').value);
+    const gPerCup = parseFloat($('gPerCup').value)||110;
+    const mixA = Math.min(100, Math.max(0, parseFloat($('mixA').value)||100)); // A %
 
-    // 基础
     const RER = 70 * Math.pow(kg, 0.75);
     const MER = RER * factor;
     const treatsKcal = MER * (treatsPct/100);
     const mealKcal = MER - treatsKcal;
 
-    // 能量密度（kcal/100g → kcal/g）
     const ka = (parseFloat(kcal100a)>0) ? (kcal100a/100) : 0;
     const kb = (parseFloat(kcal100b)>0) ? (kcal100b/100) : 0;
 
-    // 分配到 A/B
-    const ratioA = (ka>0 && kb>0) ? (mixA/100) : 1.0; // 只有单粮或未填B时，全部给A
+    const ratioA = (ka>0 && kb>0) ? (mixA/100) : 1.0;
     const ratioB = (ka>0 && kb>0) ? (1 - ratioA) : 0;
 
     const kcalA = mealKcal * ratioA;
@@ -245,46 +240,42 @@
     const cupB = (gPerCup>0) ? (gB / gPerCup) : 0;
     const cupTotal = (gPerCup>0) ? (gTotal / gPerCup) : 0;
 
-    // 输出
-    el('resultEmpty').style.display = 'none';
-    el('resultArea').style.display = 'block';
+    $('resultEmpty').style.display = 'none';
+    $('resultArea').style.display = 'block';
 
-    el('outRER').textContent = round(safe(RER),1);
-    el('outMER').textContent = round(safe(MER),1);
-    el('outTreats').textContent = round(safe(treatsKcal),1);
-    el('outMeals').textContent = round(safe(mealKcal),1);
+    $('outRER').textContent = round(safe(RER),1);
+    $('outMER').textContent = round(safe(MER),1);
+    $('outTreats').textContent = round(safe(treatsKcal),1);
+    $('outMeals').textContent = round(safe(mealKcal),1);
 
-    el('outGa').textContent = ka>0 ? round(safe(gA),0) : '-';
-    el('outGb').textContent = kb>0 ? round(safe(gB),0) : '-';
-    el('outG').textContent  = round(safe(gTotal),0);
+    $('outGa').textContent = ka>0 ? round(safe(gA),0) : '-';
+    $('outGb').textContent = kb>0 ? round(safe(gB),0) : '-';
+    $('outG').textContent  = round(safe(gTotal),0);
 
-    el('outCa').textContent = ka>0 ? round(safe(cupA),2) : '-';
-    el('outCb').textContent = kb>0 ? round(safe(cupB),2) : '-';
-    el('outC').textContent  = round(safe(cupTotal),2);
+    $('outCa').textContent = ka>0 ? round(safe(cupA),2) : '-';
+    $('outCb').textContent = kb>0 ? round(safe(cupB),2) : '-';
+    $('outC').textContent  = round(safe(cupTotal),2);
 
     const ts = new Date().toISOString().replace('T',' ').replace('Z',' UTC');
-    el('metaLine').textContent =
-      '来源/口径：RER=70×BW^0.75；MER=RER×因子；换算按所填能量密度与 g/杯；时间戳 ' + ts + '；版本 v20250922d。';
+    $('metaLine').textContent = '来源/口径：RER=70×BW^0.75；MER=RER×因子；换算按所填能量密度与 g/杯；时间戳 ' + ts + '；版本 v20250922e。';
 
-    // 事件：calc_click（统一模块也会兜底）
+    // 埋点：calc_click（统一模块也会兜底）
     try { window.plausible && window.plausible('calc_click', { props: { species, unit } }); } catch(e){}
   }
 
-  btnCalc.addEventListener('click', calc);
+  $('calcBtn').addEventListener('click', calc);
 
-  btnClear.addEventListener('click', ()=>{
+  $('resetBtn').addEventListener('click', ()=>{
     ['weight','treats','kcal100a','kcal100b','gPerCup','mixA'].forEach(id=>{
-      const node = el(id);
-      if(id==='gPerCup') node.value = 110; else node.value='';
+      const node = $(id);
+      if(id==='gPerCup') node.value = 110; else node.value = '';
     });
-    el('resultArea').style.display='none';
-    el('resultEmpty').style.display='block';
+    $('resultArea').style.display='none';
+    $('resultEmpty').style.display='block';
   });
 
   // 回车提交
-  document.addEventListener('keydown', (e)=>{
-    if(e.key==='Enter') calc();
-  });
+  document.addEventListener('keydown', (e)=>{ if(e.key==='Enter') calc(); });
 </script>
 </body>
 </html>
