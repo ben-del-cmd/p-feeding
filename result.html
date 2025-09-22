@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="zh-CN">
+<!-- Pet Scan · Result · 一键可用（v=20250922c | 自动域名 + 事件 + 洗护安全占位） -->
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>结果页 · Pet Scan（信息性建议，非医疗）</title>
+  <meta name="description" content="展示统一口径后的产品信息、喂食建议与洗护安全提示；显式来源、时间戳与版本，供溯源核验。" />
+  <meta name="robots" content="index,follow" />
+
+  <!-- Plausible 自动注入（用真实域名，不需手改） -->
+  <script>
+  (function(){
+    var domain = (location && location.hostname) ? location.hostname : 'localhost';
+    var s = document.createElement('script');
+    s.defer = true;
+    s.setAttribute('data-domain', domain);
+    s.src = 'https://plausible.io/js/script.js';
+    document.head.appendChild(s);
+  })();
+  </script>
+
+  <!-- 统一事件模块（提供 PS.track / PS.WashEvents） -->
+  <script type="module" src="/assets/js/events.js?v=20250922c"></script>
+
+  <style>
+    :root{--bg:#0b0d12;--fg:#e5e7eb;--muted:#9ca3af;--card:#111827;--br:16px;--line:#1f2937;--accent:#10b981}
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:linear-gradient(180deg,#0b0d12,#0f172a);color:var(--fg);font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"PingFang SC","Microsoft Yahei","Noto Sans",sans-serif}
+    .wrap{max-width:960px;margin:0 auto;padding:28px}
+    a{color:#93c5fd;text-decoration:none}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+    .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;color:#fff;text-decoration:none}
+    .logo-badge{width:28px;height:28px;border-radius:8px;background:#10b981;display:inline-grid;place-items:center;color:#0b0d12;font-weight:900}
+    .nav a{color:#9ca3af;margin-left:16px}
+    .card{background:rgba(17,24,39,.6);border:1px solid rgba(255,255,255,.06);border-radius:var(--br);padding:20px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+    h1{margin:0 0 8px;font-size:22px}
+    h2{margin:14px 0 8px;font-size:16px}
+    .muted{color:#9ca3af;font-size:12px}
+    .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px dashed #253046}
+    .row:last-child{border-bottom:0}
+    .badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#eef2ff;color:#1f2937;font-size:12px}
+    .warn{padding:10px;border:1px solid #312e81;background:#1e1b4b;border-radius:12px;color:#e0e7ff}
+    details{background:#0f172a;border:1px solid #253046;border-radius:12px;padding:10px}
+    summary{cursor:pointer}
+    footer{margin:28px 0 8px;color:#94a3b8;font-size:12px}
+    @media (max-width:820px){.grid2{grid-template-columns:1fr}}
+  </style>
+</head>
+
+<body>
+  <div class="wrap" data-page="result">
+    <header>
+      <a class="logo" href="/"><span class="logo-badge">PS</span> Pet Scan</a>
+      <nav class="nav">
+        <a href="/index.html">首页</a>
+        <a href="/feeding.html">喂食计算器</a>
+        <a href="/feedback.html">反馈</a>
+      </nav>
+    </header>
+
+    <main class="card" id="main">
+      <h1 id="title">产品结果</h1>
+      <p class="muted" id="subtitle">统一口径（ME / GA / as-fed ↔ dry-matter），并显示来源与时间戳；信息性建议，非医疗。</p>
+
+      <!-- 洗护安全：类别徽章 + 标签红线（迭代A占位） -->
+      <div id="washBadge" style="display:none;margin:12px 0;">
+        <span id="washBadgeText" class="badge"></span>
+        <span class="muted" style="margin-left:8px">Label is the law · 按标签使用</span>
+      </div>
+
+      <details id="washWarnings" style="display:none;margin:12px 0;">
+        <summary>标签红线（点击展开）</summary>
+        <div id="washWarningsBody" style="padding:8px 0;"></div>
+      </details>
+
+      <!-- 基础信息 -->
+      <section>
+        <h2>基础信息</h2>
+        <div class="grid2">
+          <div class="row"><span>品牌</span><strong id="brand">—</strong></div>
+          <div class="row"><span>名称</span><strong id="name">—</strong></div>
+          <div class="row"><span>物种</span><strong id="species">—</strong></div>
+          <div class="row"><span>形态</span><strong id="form">—</strong></div>
+          <div class="row"><span>版本号</span><strong id="payloadVersion">—</strong></div>
+        </div>
+      </section>
+
+      <!-- 能量与 GA -->
+      <section>
+        <h2>营养与口径</h2>
+        <div class="grid2">
+          <div class="row"><span>ME（kcal/kg）</span><strong id="me_kg">—</strong></div>
+          <div class="row"><span>kcal/杯</span><strong id="kcal_cup">—</strong></div>
+          <div class="row"><span>GA：蛋白%</span><strong id="ga_protein">—</strong></div>
+          <div class="row"><span>GA：脂肪%</span><strong id="ga_fat">—</strong></div>
+          <div class="row"><span>GA：纤维%</span><strong id="ga_fiber">—</strong></div>
+          <div class="row"><span>GA：水分%</span><strong id="ga_moisture">—</strong></div>
+        </div>
+      </section>
+
+      <!-- 溯源与时间戳 -->
+      <section>
+        <h2>来源与时间戳</h2>
+        <div id="sources" class="muted">—</div>
+      </section>
+
+      <!-- 友链：换粮卡/反馈 -->
+      <section>
+        <h2>下一步</h2>
+        <p>
+          <a class="badge" href="/cards/transition-7.html?v=20250922c" rel="nofollow">7天换粮卡</a>
+          &nbsp;&nbsp;
+          <a class="badge" href="/feedback.html" id="feedbackOpen">反馈问题</a>
+        </p>
+      </section>
+
+      <section class="warn">
+        <strong>信息性提示：</strong>本页仅提供参考建议，不构成医疗或诊断意见。涉及疾病/处方需求请咨询持证兽医。
+      </section>
+    </main>
+
+    <footer>
+      数据可能因配方/包装更新而变化；本页已标注来源与时间戳/版本以供核验。如含推广链接，可能获得佣金（已披露）；这不影响信息的中立性。
+    </footer>
+  </div>
+
+  <!-- 渲染逻辑（支持“假数据演示”或“真实接口”两种模式） -->
+  <script>
+  (function(){
+    // —— 配置区：两种模式二选一 ——
+    const USE_DEMO = true;  // true: 使用假数据演示；false: 从真实接口拉取
+    // 当 USE_DEMO = false 时，按需实现 fetchFact(product_id) 返回类似 demo 的结构
+
+    // 从 URL 取 product_id，例如 /result.html?product_id=0123456789012:us:v2025-09
+    const params = new URLSearchParams(location.search);
+    const productId = params.get('product_id') || '0123456789012:us:v2025-09';
+
+    function $(id){ return document.getElementById(id); }
+
+    // —— DEMO 数据（与我们在 Supabase 示例中插入的结构类似） ——
+    const DEMO = {
+      product_id: '0123456789012:us:v2025-09',
+      brand: 'BrandX',
+      name: 'Adult Chicken Recipe',
+      species: 'dog',
+      form: 'dry',
+      payload_version: 'v20250915a',
+      payload_json: {
+        category: 'food',
+        me: { kcal_per_kg: 3600, kcal_per_cup: 360 },
+        ga: { protein_pct: 26, fat_pct: 15, fiber_pct: 3, moisture_pct: 10 }
+      },
+      sources_json: [
+        {source:'label', url:'https://brand.example/dog-adult', captured_at:'2025-09-15T12:00:00Z'}
+      ]
+    };
+
+    // —— 若你切换到真实接口，这里实现真实拉取 ——
+    async function fetchFact(pid){
+      // 示例：假设你有 /api/fact?product_id=... 返回与 DEMO 同结构
+      const url = '/api/fact?product_id=' + encodeURIComponent(pid);
+      const r = await fetch(url);
+      if(!r.ok) throw new Error('fetch fact failed');
+      return await r.json();
+    }
+
+    function renderWashSafety(payload){
+      if (payload?.category !== 'wash') return;
+      const badge = $('washBadge'), badgeText = $('washBadgeText');
+      const warn = $('washWarnings'), body = $('washWarningsBody');
+      const cat = payload.regulatory || 'general';
+      const label = (cat==='EPA'?'EPA 农药类':(cat==='FDA'?'动物药':'普通洗护'));
+      badgeText.textContent = label;
+      badge.style.display = 'block';
+      try { window.PS && PS.WashEvents && PS.WashEvents.category(cat); } catch(_) {}
+
+      if (payload.label_redlines){
+        const l = payload.label_redlines;
+        const list = [
+          l.species?`适用物种：${l.species}`:null,
+          l.age_min_weeks?`最低周龄：≥${l.age_min_weeks} 周`:null,
+          l.contact_time?`接触/作用时间：${l.contact_time}`:null,
+          ...(l.warnings||[]).map(w=>`⚠️ ${w}`)
+        ].filter(Boolean).map(x=>`<div>• ${x}</div>`).join('');
+        body.innerHTML = list || '（无）';
+        warn.style.display = 'block';
+        warn.addEventListener('toggle', e=>{ if(e.target.open){ try{ PS.WashEvents.warningView(); }catch(_){}} }, {once:true});
+      }
+    }
+
+    function renderFact(fact){
+      $('title').textContent = (fact.brand || '-') + ' · ' + (fact.name || '-') + ' · 结果';
+      $('brand').textContent = fact.brand || '—';
+      $('name').textContent = fact.name || '—';
+      $('species').textContent = fact.species || '—';
+      $('form').textContent = fact.form || '—';
+      $('payloadVersion').textContent = fact.payload_version || '—';
+
+      const p = fact.payload_json || {};
+      const me = p.me || {}, ga = p.ga || {};
+      $('me_kg').textContent = me.kcal_per_kg ?? '—';
+      $('kcal_cup').textContent = me.kcal_per_cup ?? '—';
+      $('ga_protein').textContent = ga.protein_pct ?? '—';
+      $('ga_fat').textContent = ga.fat_pct ?? '—';
+      $('ga_fiber').textContent = ga.fiber_pct ?? '—';
+      $('ga_moisture').textContent = ga.moisture_pct ?? '—';
+
+      // 来源/时间戳
+      const src = (fact.sources_json || []).map(s=>{
+        const t = (s.captured_at||'').replace('T',' ').replace('Z',' UTC');
+        const u = s.url ? `<a href="${s.url}" target="_blank" rel="nofollow">${s.source||'source'}</a>` : (s.source||'source');
+        return `· ${u} ｜ ${t}`;
+      }).join('<br>');
+      $('sources').innerHTML = src || '（暂无来源信息）';
+
+      // 洗护安全占位（仅当 category=wash 时展示）
+      renderWashSafety(p);
+    }
+
+    async function boot(){
+      try{
+        if (USE_DEMO){
+          renderFact(DEMO);
+        } else {
+          const data = await fetchFact(productId);
+          renderFact(data);
+        }
+      } catch(e){
+        console.error(e);
+        document.getElementById('main').insertAdjacentHTML('beforeend',
+          '<p class="muted" style="margin-top:10px">加载失败，请稍后重试或检查接口。</p>');
+      }
+    }
+
+    boot();
+  })();
+  </script>
+</body>
+</html>
