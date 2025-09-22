@@ -1,17 +1,46 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <!-- 基础与 SEO -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title data-i18n="title.feedback">Feedback</title>
+  <meta name="description" content="Tell us your ideas or report an issue for Pet Feeding Tools." />
+  <link rel="canonical" href="https://ben-del-cmd.github.io/p-feeding/feedback.html" />
+  <meta name="robots" content="index,follow" />
+  <meta name="theme-color" content="#0b0c0f" />
+
+  <!-- 安全（Phase 1） -->
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self';
+                 img-src 'self' https: data:;
+                 script-src 'self' https://plausible.io 'unsafe-inline';
+                 style-src 'self' 'unsafe-inline';
+                 connect-src https://plausible.io;
+                 form-action 'self' https://github.com mailto:;
+                 base-uri 'none';
+                 frame-ancestors 'self';">
+
+  <!-- Open Graph / Twitter -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://ben-del-cmd.github.io/p-feeding/feedback.html" />
+  <meta property="og:title" content="Pet Feeding Tools — Feedback" />
+  <meta property="og:description" content="Tell us your ideas or report an issue for Pet Feeding Tools." />
+  <meta property="og:image" content="https://ben-del-cmd.github.io/p-feeding/cover.png?v=20250919" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Pet Feeding Tools — Feedback" />
+  <meta name="twitter:description" content="Tell us your ideas or report an issue for Pet Feeding Tools." />
+  <meta name="twitter:image" content="https://ben-del-cmd.github.io/p-feeding/cover.png?v=20250919" />
 
   <!-- Plausible（匿名统计） -->
   <script defer data-domain="ben-del-cmd.github.io" src="https://plausible.io/js/script.js"></script>
 
-  <!-- 多语言与事件埋点 -->
+  <!-- 多语言与事件（版本号用于防缓存） -->
   <script src="/p-feeding/i18n.js?v=20250920b" defer></script>
   <script src="/p-feeding/events.js?v=1" defer></script>
 
+  <!-- 简样式 -->
   <style>
     :root { --fg:#111; --muted:#6b7280; --bd:#e5e7eb; --bg:#fff; }
     html,body { margin:0; padding:0; background:var(--bg); color:var(--fg);
@@ -33,17 +62,17 @@
     input, select { padding:10px 12px; min-width:260px; }
     textarea { width:100%; min-height:220px; padding:12px; resize:vertical; }
     label { display:block; margin-bottom:6px; font-weight:600; }
-    a { color:#111; }
+    a { color:#111; text-decoration:none; }
     a:hover { text-decoration:underline; }
   </style>
 </head>
 
-<!-- 关键点：仅需在 <body> 上加此属性，用于自动触发 feedback_open 事件 -->
-<body data-feedback-open>
+<!-- 关键：用于自动触发 feedback_open（由 /p-feeding/events.js 探测） -->
+<body data-page-feedback>
   <div class="wrap">
     <!-- 顶部 -->
     <div class="topbar">
-      <a class="btn btn-ghost" href="/p-feeding/" data-i18n="nav.home">返回主页</a>
+      <a class="btn btn-ghost" href="/p-feeding/" data-i18n="nav.home" rel="noopener">返回主页</a>
       <div class="pill">
         <button class="btn btn-ghost" onclick="window.__setLang && __setLang('en-US')">English</button>
         <button class="btn btn-ghost" onclick="window.__setLang && __setLang('es-419')">Español</button>
@@ -84,8 +113,8 @@
     </div>
   </div>
 
+  <!-- 预览到 GitHub Issues（新窗口） -->
   <script>
-    // 简单的“预览至 GitHub Issue”逻辑
     (function () {
       var btn = document.getElementById('preview');
       btn.addEventListener('click', function () {
@@ -93,13 +122,11 @@
         var title = (document.getElementById('summary').value || '').trim();
         var body = (document.getElementById('details').value || '').trim();
 
-        // 最低限度的内容兜底
         if (!title) title = '[No title]';
         if (!body) body = '(No further details)';
 
-        // 你可以换成自己仓库的 issues 新建链接
-        // 这里使用通用 query：title / body
-        var url = new URL('https://github.com/ben-del-cmd/ben-del-cmd.github.io/issues/new');
+        // 指向 ben-del-cmd/p-feeding 仓库创建 Issue
+        var url = new URL('https://github.com/ben-del-cmd/p-feeding/issues/new');
         var lines = [];
         lines.push('**Type**: ' + type);
         lines.push('');
@@ -109,16 +136,14 @@
         lines.push('**Details**');
         lines.push(body);
         lines.push('');
-        // 附带当前页面来源
         try { lines.push('From: ' + location.href); } catch (e) {}
 
         url.searchParams.set('title', '[' + type + '] ' + title);
         url.searchParams.set('body', lines.join('\n'));
 
-        // 打开新窗口
         window.open(url.toString(), '_blank', 'noopener,noreferrer');
 
-        // （可选）记一次点击（如果你想分别统计“点击预览”）
+        // 可选：点预览也记一次点击
         try { window.plausible && window.plausible('feedback_click'); } catch (e) {}
       });
     })();
