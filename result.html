@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-CN">
-<!-- Pet Scan · Result · 一键可用（v=20250922c | 自动域名 + 事件 + 洗护安全占位） -->
+<!-- Pet Scan · Result · 一键可用（v=20250922c | 自动域名 + 事件 + 洗护安全占位 | 相对路径版） -->
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -21,7 +21,7 @@
   </script>
 
   <!-- 统一事件模块（提供 PS.track / PS.WashEvents） -->
-  <script type="module" src="/assets/js/events.js?v=20250922c"></script>
+  <script type="module" src="assets/js/events.js?v=20250922c"></script>
 
   <style>
     :root{--bg:#0b0d12;--fg:#e5e7eb;--muted:#9ca3af;--card:#111827;--br:16px;--line:#1f2937;--accent:#10b981}
@@ -53,11 +53,11 @@
 <body>
   <div class="wrap" data-page="result">
     <header>
-      <a class="logo" href="/"><span class="logo-badge">PS</span> Pet Scan</a>
+      <a class="logo" href="index.html"><span class="logo-badge">PS</span> Pet Scan</a>
       <nav class="nav">
-        <a href="/index.html">首页</a>
-        <a href="/feeding.html">喂食计算器</a>
-        <a href="/feedback.html">反馈</a>
+        <a href="index.html">首页</a>
+        <a href="feeding.html">喂食计算器</a>
+        <a href="feedback.html">反馈</a>
       </nav>
     </header>
 
@@ -107,13 +107,13 @@
         <div id="sources" class="muted">—</div>
       </section>
 
-      <!-- 友链：换粮卡/反馈 -->
+      <!-- 友链：换粮卡/反馈（✅ 改为相对路径） -->
       <section>
         <h2>下一步</h2>
         <p>
-          <a class="badge" href="/cards/transition-7.html?v=20250922c" rel="nofollow">7天换粮卡</a>
+          <a class="badge" href="cards/transition-7.html?v=20250922c" rel="nofollow">7天换粮卡</a>
           &nbsp;&nbsp;
-          <a class="badge" href="/feedback.html" id="feedbackOpen">反馈问题</a>
+          <a class="badge" href="feedback.html" id="feedbackOpen">反馈问题</a>
         </p>
       </section>
 
@@ -140,7 +140,7 @@
 
     function $(id){ return document.getElementById(id); }
 
-    // —— DEMO 数据（与我们在 Supabase 示例中插入的结构类似） ——
+    // —— DEMO 数据 ——
     const DEMO = {
       product_id: '0123456789012:us:v2025-09',
       brand: 'BrandX',
@@ -158,7 +158,6 @@
       ]
     };
 
-    // —— 若你切换到真实接口，这里实现真实拉取 ——
     async function fetchFact(pid){
       // 示例：假设你有 /api/fact?product_id=... 返回与 DEMO 同结构
       const url = '/api/fact?product_id=' + encodeURIComponent(pid);
@@ -192,7 +191,7 @@
     }
 
     function renderFact(fact){
-      $('title').textContent = (fact.brand || '-') + ' · ' + (fact.name || '-') + ' · 结果';
+      document.title = (fact.brand || '-') + ' · ' + (fact.name || '-') + ' · 结果';
       $('brand').textContent = fact.brand || '—';
       $('name').textContent = fact.name || '—';
       $('species').textContent = fact.species || '—';
@@ -208,7 +207,6 @@
       $('ga_fiber').textContent = ga.fiber_pct ?? '—';
       $('ga_moisture').textContent = ga.moisture_pct ?? '—';
 
-      // 来源/时间戳
       const src = (fact.sources_json || []).map(s=>{
         const t = (s.captured_at||'').replace('T',' ').replace('Z',' UTC');
         const u = s.url ? `<a href="${s.url}" target="_blank" rel="nofollow">${s.source||'source'}</a>` : (s.source||'source');
@@ -234,7 +232,6 @@
           '<p class="muted" style="margin-top:10px">加载失败，请稍后重试或检查接口。</p>');
       }
     }
-
     boot();
   })();
   </script>
