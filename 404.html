@@ -6,7 +6,7 @@
   <title>宠物喂食工具集 · 404</title>
   <meta name="robots" content="noindex" />
   <meta name="referrer" content="strict-origin-when-cross-origin" />
-  <!-- CSP：允许本域 & plausible.io；允许内联样式/脚本（本页少量脚本需要） -->
+  <!-- CSP -->
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self';
     img-src 'self' https: data:;
@@ -18,7 +18,6 @@
     frame-ancestors 'self';
   ">
   <meta name="theme-color" content="#0b0c0f" />
-  <!-- 占位 favicon，会在脚本里动态指向 {base}/cover.png -->
   <link id="favicon" rel="icon" href="data:,">
   <style>
     :root{color-scheme:light dark}
@@ -34,39 +33,36 @@
   <p><a id="homeBtn" class="btn" href="#">返回主页</a></p>
 
   <script>
-    (function () {
-      // 1) 计算项目根（GitHub Pages 项目站：/owner/<repo>/... → 取第2段）
-      var seg = (location.pathname || '/').split('/').filter(Boolean);
-      var repo = seg.length ? seg[0] : 'p-feeding';     // e.g. "p-feeding"
-      var base = '/' + repo + '/';
+  (function () {
+    // —— 计算项目根（适配 GitHub Pages 项目站） ——
+    var seg = (location.pathname || '/').split('/').filter(Boolean);
+    var repo = seg.length ? seg[0] : 'p-feeding';     // e.g. "p-feeding"
+    var base = '/' + repo + '/';
 
-      // 2) 修正“返回主页”链接 & favicon & i18n
-      var home = document.getElementById('homeBtn');
-      if (home) home.href = base;
-      var fav = document.getElementById('favicon');
-      if (fav) fav.href = base + 'cover.png';
+    // 修正“返回主页” & favicon & i18n（存在就加载）
+    var home = document.getElementById('homeBtn'); if (home) home.href = base;
+    var fav  = document.getElementById('favicon'); if (fav)  fav.href  = base + 'cover.png';
+    var i18n = document.createElement('script');   i18n.defer = true; i18n.src = base + 'i18n.js?v=20250920b';
+    i18n.onerror = function(){}; document.head.appendChild(i18n);
 
-      // 可选：如果你有 i18n.js，就按项目根自动加载（没有则忽略 404）
-      var i18n = document.createElement('script');
-      i18n.defer = true;
-      i18n.src = base + 'i18n.js?v=20250920b';
-      i18n.onerror = function(){ /* ignore if not present */ };
-      document.head.appendChild(i18n);
+    // —— 注入 Plausible，并在脚本 ready 后再发 404 事件 ——
+    var props = { path: location.pathname + location.search, referrer: document.referrer };
+    function send404(){
+      try { window.plausible && window.plausible('404', { props }); } catch(e) {}
+    }
 
-      // 3) 自动注入 Plausible（以当前真实域名为 data-domain）
-      var s = document.createElement('script');
-      s.defer = true;
-      s.setAttribute('data-domain', location.hostname || 'localhost');
-      s.src = 'https://plausible.io/js/script.js';
-      document.head.appendChild(s);
+    var s = document.createElement('script');
+    s.defer = true;
+    s.setAttribute('data-domain', location.hostname || 'localhost');
+    s.src = 'https://plausible.io/js/script.js';
+    s.addEventListener('load', send404);   // 主路径：脚本加载完成后发送
+    document.head.appendChild(s);
 
-      // 4) 上报自定义 404 事件（可在 Goals 里登记 Custom Event: "404"）
-      try {
-        window.plausible && window.plausible('404', {
-          props: { path: location.pathname + location.search, referrer: document.referrer }
-        });
-      } catch (e) {}
-    })();
+    // 兜底：最多轮询 5 秒，直到 window.plausible 可用再发送一次
+    var tries = 0, t = setInterval(function(){
+      if (window.plausible || ++tries > 50) { clearInterval(t); send404(); }
+    }, 100);
+  })();
   </script>
 </body>
 </html>
