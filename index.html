@@ -1,18 +1,17 @@
 <!doctype html>
 <html lang="zh-CN">
-<!-- Pet Scan · Home · v20250922e | 相对路径 + Plausible + i18n + 统一埋点 -->
+<!-- Pet Scan · Home · v20250922h -->
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pet Scan · 信息性建议（非医疗）</title>
-  <meta name="description" content="扫描/录入宠物食品与洗护信息，统一口径并生成可执行建议；结果页显式来源与时间戳（信息性建议，非医疗）。" />
+  <title>Pet Scan</title>
+  <meta name="description" content="Pet Scan · 信息性建议（非医疗）" />
   <meta name="robots" content="index,follow" />
 
-  <!-- 性能预取 -->
   <link rel="preconnect" href="https://plausible.io" crossorigin />
   <link rel="dns-prefetch" href="https://plausible.io" />
 
-  <!-- Plausible：运行时按真实域名注入，无需手改 data-domain -->
+  <!-- Plausible 自动注入（按真实域名） -->
   <script>
   (function(){
     var domain = (location && location.hostname) ? location.hostname : 'localhost';
@@ -24,13 +23,9 @@
   })();
   </script>
 
-  <!-- 多语言（与 feeding/feedback 共用一份） -->
-  <script defer src="i18n.js?v=20250922e"></script>
+  <script defer src="i18n.js?v=20250922h"></script>
+  <script type="module" src="assets/js/events.js?v=20250922h"></script>
 
-  <!-- 统一事件模块（自动上报 visit_* / feedback_* / calc_click 等） -->
-  <script type="module" src="assets/js/events.js?v=20250922e"></script>
-
-  <!-- 样式 -->
   <style>
     :root{--bg:#0b0d12;--fg:#e5e7eb;--muted:#9ca3af;--card:#111827;--btn:#10b981;--btnfg:#0b0d12;--br:16px}
     *{box-sizing:border-box}
@@ -58,61 +53,51 @@
 
 <body>
   <div class="wrap">
-    <!-- 顶部导航 -->
     <header>
       <a class="logo" href="./">
         <span class="logo-badge">PS</span> <span>Pet Scan</span>
       </a>
       <nav class="nav">
-        <!-- 全部为相对路径，避免 GitHub Pages 根路径 404 -->
-        <a href="feeding.html" data-i18n="nav_feeding">喂食计算器</a>
-        <a href="feedback.html" data-i18n="nav_feedback">反馈</a>
-        <a href="cards/transition-7.html?v=20250922e" rel="nofollow" data-i18n="nav_card7">7天换粮卡</a>
-        <!-- 语言切换：中/EN -->
-        <button id="langToggle" class="lang" type="button"
-          onclick="PS_I18N && PS_I18N.setLang(window.__PS_LANG__==='en'?'zh-CN':'en')">中/EN</button>
+        <a href="feeding.html"><span data-i18n="nav_feeding">喂食计算器</span></a>
+        <a href="feedback.html"><span data-i18n="nav_feedback">反馈</span></a>
+        <a href="cards/transition-7.html?v=20250922h" rel="nofollow"><span data-i18n="nav_card7">7天换粮卡</span></a>
+        <button id="langToggle" class="lang" type="button">中</button>
       </nav>
     </header>
 
-    <!-- 主体 -->
     <main class="hero" data-page="home">
-      <h1>把难懂的标签 → 变成可执行建议</h1>
-      <p class="lead">
-        扫描/录入宠物食品与洗护信息，统一口径（ME、GA、as-fed/DM），秒出喂量/换粮卡；页面显式来源与时间戳。<strong>信息性建议，非医疗。</strong>
+      <h1 data-i18n="home_title">把难懂的标签 → 变成可执行建议</h1>
+      <p class="lead" data-i18n="home_lead">
+        扫描/录入宠物食品与洗护信息……
       </p>
 
       <div class="grid">
-        <!-- 卡片 1：喂食计算器 -->
         <section class="card">
-          <h3>① 喂食计算器</h3>
-          <p class="muted">RER/MER → kcal/天 → 杯/克；支持混喂与零食占比提示。</p>
-          <a class="btn" href="feeding.html" id="calcBtn">打开计算器</a>
+          <h3 data-i18n="home_card1_title">① 喂食计算器</h3>
+          <p class="muted" data-i18n="home_card1_desc">RER/MER → …</p>
+          <a class="btn" href="feeding.html" id="calcBtn" data-i18n="home_card1_btn">打开计算器</a>
         </section>
 
-        <!-- 卡片 2：7 天换粮卡 -->
         <section class="card">
-          <h3>② 7 天换粮卡</h3>
-          <p class="muted">90/10 → 0/100 的过渡表，自动按能量密度换算。</p>
-          <a class="btn sec" href="cards/transition-7.html?v=20250922e" rel="nofollow">查看换粮卡</a>
+          <h3 data-i18n="home_card2_title">② 7 天换粮卡</h3>
+          <p class="muted" data-i18n="home_card2_desc">90/10 → …</p>
+          <a class="btn sec" href="cards/transition-7.html?v=20250922h" rel="nofollow" data-i18n="home_card2_btn">查看换粮卡</a>
         </section>
 
-        <!-- 卡片 3：意见反馈 -->
         <section class="card">
-          <h3>③ 意见反馈</h3>
-          <p class="muted">帮助我们提高命中率与解释易读性；导购披露保持中立。</p>
-          <a class="btn" href="feedback.html" id="feedbackOpen">去反馈</a>
+          <h3 data-i18n="home_card3_title">③ 意见反馈</h3>
+          <p class="muted" data-i18n="home_card3_desc">帮助我们提高…</p>
+          <a class="btn" href="feedback.html" id="feedbackOpen" data-i18n="home_card3_btn">去反馈</a>
         </section>
       </div>
 
-      <p class="muted" style="margin-top:14px">
-        指标监测：visit_home / visit_feeding_page / visit_feedback_page / feedback_open / calc_click / wash_*。
+      <p class="muted" style="margin-top:14px" data-i18n="home_metrics_hint">
+        指标监测：visit_home …
       </p>
     </main>
 
     <footer>
-      <strong>信息性提示：</strong>本工具基于公开信息与通用标准（如 AAFCO/NRC）给出参考建议，不构成医疗或诊断意见。涉及疾病/处方需求请咨询持证兽医。
-      <br />数据可能因配方/包装更新而变化；页面已标注来源/时间戳/版本以供核验。
-      <br />如含推广链接，可能获得佣金（已披露）；这不影响信息的中立性。
+      <div class="i18n-footer">© <span class="mono">Pet Scan</span> · <span class="muted">信息性建议（非医疗）</span></div>
     </footer>
   </div>
 </body>
