@@ -1,88 +1,87 @@
-/* /assets/js/events.js — 统一版 v20250922c */
-/* 功能：
-   - 自动识别页面并上报：visit_home / visit_feeding_page / visit_feedback_page
-   - 统一绑定按钮点击：calc_click / feedback_open / feedback_click
-   - 洗护结果页事件：wash_category_detected / wash_label_warning_view
-   - 容错：Plausible 未加载、按钮/元素不存在时不报错
-   - 同时暴露到 window.PS 便于非模块脚本调用
-*/
-
+/* /assets/js/events.js — 统一版 v20250922d
+ * 功能：
+ * - 自动修正“绝对路径”链接：把 <a href="/xxx"> 改成 "/{repo}/xxx"
+ * - 自动上报页面级事件：visit_home / visit_feeding_page / visit_feedback_page
+ * - 点击事件：calc_click / feedback_open / feedback_click
+ * - 安全：Plausible 未加载时不报错；DEBUG 可在控制台查看
+ */
 'use strict';
 
-/** 调试开关：需要时改为 true，可在控制台看到事件打印 */
 const __DEBUG__ = false;
 
-/** 安全触发 Plausible 事件 */
-export function track(eventName, props = {}) {
-  try {
-    if (__DEBUG__) console.log('[PS.track]', eventName, props);
-    if (window.plausible) window.plausible(eventName, { props });
-  } catch (_) {
-    /* no-op */
-  }
-}
-
-/** 多选择器就近匹配（第一个匹配即用） */
-function pick(selList = []) {
-  for (const s of selList) {
-    const el = document.querySelector(s);
-    if (el) return el;
-  }
-  return null;
-}
-
-/** 页面类型判定（按路径名 + 数据属性双重兜底） */
-function detectPage() {
-  const p = (location.pathname || '').toLowerCase();
-  const isHome = p === '/' || p.endsWith('/index.html') || !!document.querySelector('[data-page="home"]');
-  const isFeed = p.endsWith('/feeding.html') || !!document.querySelector('[data-page="feeding"]');
-  const isFeedback = p.endsWith('/feedback.html') || !!document.querySelector('[data-page="feedback"]');
-  const isResult = p.includes('/result') || !!document.querySelector('[data-page="result"]');
-  return { isHome, isFeed, isFeedback, isResult };
-}
-
-/** 基础访问事件（visit_*） */
-function visitEvents() {
-  const { isHome, isFeed, isFeedback } = detectPage();
-  if (isHome) track('visit_home');
-  if (isFeed) track('visit_feeding_page');
-  if (isFeedback) track('visit_feedback_page');
-}
-
-/** 统一绑定点击事件（避免你改页面 DOM） */
-function bindClicks() {
-  // 计算按钮 → calc_click
-  const calcBtn = pick([
-    '#calcBtn', '.calc-btn', '[data-action="calculate"]', 'button[name="calculate"]'
-  ]);
-  calcBtn?.addEventListener('click', () => track('calc_click'), { passive: true });
-
-  // 反馈打开 → feedback_open
-  const feedbackOpen = pick([
-    '#feedbackOpen', '.feedback-open', '[data-action="feedback-open"]'
-  ]);
-  feedbackOpen?.addEventListener('click', () => track('feedback_open'), { passive: true });
-
-  // 反馈提交 → feedback_click
-  const feedbackClick = pick([
-    '#feedbackClick', '.feedback-click', '[data-action="feedback-click"]', 'form#fbForm button[type="submit"]'
-  ]);
-  feedbackClick?.addEventListener('click', () => track('feedback_click'), { passive: true });
-}
-
-/** 洗护：对外暴露的事件（结果页渲染逻辑中调用） */
-export const WashEvents = {
-  /** 监管类别：EPA / FDA / general / unknown */
-  category: (c) => track('wash_category_detected', { category: String(c || 'unknown') }),
-  /** 标签红线被查看 */
-  warningView: () => track('wash_label_warning_view')
+/* ---------- 公共：Plausible 安全封装 ---------- */
+window.plausible = window.plausible || function () {
+  (window.plausible.q = window.plausible.q || []).push(arguments);
 };
+function track(eventName, props = {}) {
+  try {
+    if (__DEBUG__) console.log('[track]', eventName, props);
+    window.plausible && window.plausible(eventName, Object.keys(props).length ? { props } : undefined);
+  } catch (_) {}
+}
 
-/** 同时挂到 window 以便非模块脚本调用（保险起见） */
-window.PS = Object.assign(window.PS || {}, { track, WashEvents });
+/* ---------- 计算项目根（支持 GitHub Pages 项目站） ---------- */
+function getBase() {
+  // 例如：/p-feeding/xxx.html  => base = "/p-feeding/"
+  //       /                   => base = "/"
+  const seg = (location.pathname || '/').split('/').filter(Boolean);
+  return seg.length ? `/${seg[0]}/` : '/';
+}
+const BASE = getBase();
 
-/** 启动：DOM 就绪后执行 */
-document.addEventListener('DOMContentLoaded', () => {
-  visitEvents();
+/* ---------- 链接修正：把以 "/" 开头且属于本站的链接改到项目根下 ---------- */
+function rewriteAbsoluteLinks() {
+  const as = document.querySelectorAll('a[href^="/"]');
+  as.forEach(a => {
+    try {
+      const href = a.getAttribute('href') || '';
+      // 绝对 URL（含协议）的直接跳过；非本站域名也跳过
+      if (/^https?:\/\//i.test(href)) return;
+      // 已经是正确的项目前缀，跳过
+      if (href.startsWith(BASE)) return;
+      // 404 页面返回按钮等也走这里
+      a.setAttribute('href', BASE + href.replace(/^\//, ''));
+      if (__DEBUG__) console.log('[rewrite]', href, '=>', a.getAttribute('href'));
+    } catch (_) {}
+  });
+}
+
+/* ---------- 页面级事件 ---------- */
+function autoPageEvent() {
+  const page = (document.querySelector('[data-page]') || {}).dataset?.page;
+  if (!page) return;
+
+  if (page === 'home') track('visit_home');
+  if (page === 'feeding') track('visit_feeding_page');
+  if (page === 'feedback') track('visit_feedback_page');
+}
+
+/* ---------- 点击事件绑定（按 ID 绑定；不存在则跳过） ---------- */
+function bindClicks() {
+  const byId = id => document.getElementById(id);
+
+  // 计算器按钮
+  const calcBtn = byId('calcBtn');
+  if (calcBtn) {
+    calcBtn.addEventListener('click', () => track('calc_click', { page: 'feeding' }), { passive: true });
+  }
+
+  // 反馈入口按钮
+  const fbOpen = byId('feedbackOpen');
+  if (fbOpen) {
+    fbOpen.addEventListener('click', () => track('feedback_open'), { passive: true });
+  }
+
+  // 反馈提交按钮（如果有的话）
+  const fbSubmit = byId('feedbackSubmit');
+  if (fbSubmit) {
+    fbSubmit.addEventListener('click', () => track('feedback_click'), { passive: true });
+  }
+}
+
+/* ---------- 启动 ---------- */
+window.addEventListener('DOMContentLoaded', () => {
+  rewriteAbsoluteLinks();  // 先把链接修正，避免点击后 404
   bindClicks();
+  autoPageEvent();
 });
