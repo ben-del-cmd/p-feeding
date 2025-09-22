@@ -1,121 +1,104 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
+<!-- Pet Scan · Home · 一键可用（v=20250922c | 自动识别域名注入 Plausible） -->
 <head>
-  <!-- 基础与 SEO -->
+  <!-- 基础 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title data-i18n="title.index">Pet Feeding Tools</title>
-  <meta name="description" content="Simple, handy tools: feeding calculator, feedback, and more." />
-  <link rel="canonical" href="https://ben-del-cmd.github.io/p-feeding/" />
+  <title>Pet Scan · 信息性建议（非医疗）</title>
+  <meta name="description" content="扫描/录入宠物食品与洗护信息，统一口径并生成可执行建议；结果页显式来源与时间戳（信息性建议，非医疗）。" />
   <meta name="robots" content="index,follow" />
-  <meta name="theme-color" content="#0b0c0f" />
 
-  <!-- 安全（Phase 1 基线） -->
-  <meta name="referrer" content="strict-origin-when-cross-origin">
-  <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self';
-                 img-src 'self' https: data:;
-                 script-src 'self' https://plausible.io 'unsafe-inline';
-                 style-src 'self' 'unsafe-inline';
-                 connect-src https://plausible.io;
-                 form-action 'self' https://github.com mailto:;
-                 base-uri 'none';
-                 frame-ancestors 'self';">
+  <!-- 性能预取 -->
+  <link rel="preconnect" href="https://plausible.io" crossorigin />
+  <link rel="dns-prefetch" href="https://plausible.io" />
 
-  <!-- Open Graph / Twitter -->
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://ben-del-cmd.github.io/p-feeding/" />
-  <meta property="og:title" content="Pet Feeding Tools" />
-  <meta property="og:description" content="Simple, handy tools: feeding calculator, feedback, and more." />
-  <meta property="og:image" content="https://ben-del-cmd.github.io/p-feeding/cover.png?v=20250919" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Pet Feeding Tools" />
-  <meta name="twitter:description" content="Simple, handy tools: feeding calculator, feedback, and more." />
-  <meta name="twitter:image" content="https://ben-del-cmd.github.io/p-feeding/cover.png?v=20250919" />
+  <!-- 自动注入 Plausible：运行时用当前真实域名设置 data-domain，无需手动改 -->
+  <script>
+  (function(){
+    var domain = (location && location.hostname) ? location.hostname : 'localhost';
+    var s = document.createElement('script');
+    s.defer = true;
+    s.setAttribute('data-domain', domain);
+    s.src = 'https://plausible.io/js/script.js';
+    document.head.appendChild(s);
+  })();
+  </script>
 
-  <!-- Plausible（匿名统计） -->
-  <script defer data-domain="ben-del-cmd.github.io" src="https://plausible.io/js/script.js"></script>
+  <!-- 统一事件模块（自动上报 visit_* / calc_click / feedback_* / wash_*） -->
+  <script type="module" src="/assets/js/events.js?v=20250922c"></script>
 
-  <!-- 多语言与事件（版本号用于防缓存） -->
-  <script src="/p-feeding/i18n.js?v=20250920b" defer></script>
-  <script src="/p-feeding/events.js?v=1" defer></script>
-
-  <!-- 轻量样式 -->
+  <!-- 站点样式（极简） -->
   <style>
-    :root { --fg:#111; --muted:#6b7280; --bd:#e5e7eb; --bg:#fff; --card:#fff; }
-    html,body { margin:0; padding:0; background:var(--bg); color:var(--fg);
-      font:16px/1.6 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, PingFang SC, Noto Sans, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji"; }
-    .wrap { max-width:960px; margin:0 auto; padding:24px 16px 56px; }
-    h1 { font-size:clamp(28px, 4vw, 40px); margin:8px 0 12px; }
-    p.muted { color:var(--muted); margin-top:0; }
-    .topbar { display:flex; gap:12px; align-items:center; justify-content:space-between; margin-bottom:12px; }
-    .pill { display:inline-flex; gap:10px; }
-    .btn, button, input { font:inherit; border:1px solid var(--bd); border-radius:12px; background:#fff; color:var(--fg); }
-    .btn { padding:8px 12px; cursor:pointer; }
-    .btn-ghost { background:#fff; }
-    .grid { display:grid; grid-template-columns:1fr; gap:16px; margin-top:16px; }
-    @media (min-width:720px){ .grid-2 { grid-template-columns: 1fr 1fr; } }
-    .card { border:1px solid var(--bd); border-radius:16px; padding:18px; background:var(--card); }
-    .card h2 { margin:0 0 8px; font-size:20px; }
-    .card p { margin:6px 0 12px; color:var(--muted); }
-    .actions { display:flex; gap:10px; flex-wrap:wrap; }
-    a.link { color:#111; text-decoration:none; }
-    a.link:hover { text-decoration:underline; }
-    .search { display:flex; gap:8px; margin-top:16px; }
-    .search input { padding:10px 12px; min-width:260px; border-radius:12px; }
-    .search button { padding:10px 16px; border-radius:12px; background:#111; color:#fff; border-color:#111; cursor:pointer; }
-    .search button:hover { opacity:.92; }
-    footer { color:var(--muted); margin-top:18px; font-size:14px; }
+    :root{--bg:#0b0d12;--fg:#e5e7eb;--muted:#9ca3af;--card:#111827;--btn:#10b981;--btnfg:#0b0d12;--br:16px}
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:linear-gradient(180deg,#0b0d12,#0f172a);color:var(--fg);font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"PingFang SC","Microsoft Yahei","Noto Sans",sans-serif}
+    .wrap{max-width:980px;margin:0 auto;padding:28px}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+    .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;color:#fff;text-decoration:none}
+    .logo-badge{width:28px;height:28px;border-radius:8px;background:#10b981;display:inline-grid;place-items:center;color:#0b0d12;font-weight:900}
+    .nav a{color:var(--muted);text-decoration:none;margin-left:16px}
+    .hero{background:rgba(17,24,39,.6);border:1px solid rgba(255,255,255,.06);border-radius:var(--br);padding:28px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+    h1{margin:0 0 8px;font-size:24px}
+    p.lead{margin:0 0 16px;color:#cbd5e1}
+    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:18px}
+    .card{background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:var(--br);padding:16px}
+    .card h3{margin:0 0 8px;font-size:16px}
+    .btn{display:inline-block;padding:10px 14px;border-radius:12px;background:var(--btn);color:var(--btnfg);font-weight:700;text-decoration:none;border:0}
+    .btn.sec{background:#374151;color:#e5e7eb}
+    .muted{color:var(--muted);font-size:12px}
+    footer{margin:28px 0 8px;color:#94a3b8;font-size:12px}
+    @media (max-width:800px){.grid{grid-template-columns:1fr}}
   </style>
 </head>
+
 <body>
   <div class="wrap">
-    <!-- 顶部语言切换 -->
-    <div class="topbar">
-      <div style="font-weight:600">/p-feeding</div>
-      <div class="pill">
-        <button class="btn btn-ghost" onclick="window.__setLang && __setLang('en-US')">English</button>
-        <button class="btn btn-ghost" onclick="window.__setLang && __setLang('es-419')">Español</button>
-        <button class="btn btn-ghost" onclick="window.__setLang && __setLang('zh-Hans')">中文(简)</button>
-        <button class="btn btn-ghost" onclick="window.__setLang && __setLang('fr-CA')">Français (Canada)</button>
-      </div>
-    </div>
+    <header>
+      <a class="logo" href="/">
+        <span class="logo-badge">PS</span> Pet Scan
+      </a>
+      <nav class="nav">
+        <a href="/feeding.html">喂食计算器</a>
+        <a href="/feedback.html">反馈</a>
+        <a href="/cards/transition-7.html?v=20250922c" rel="nofollow">7天换粮卡</a>
+      </nav>
+    </header>
 
-    <!-- 标题与简介 -->
-    <h1 data-i18n="h1.index">Pet Feeding Tools</h1>
-    <p class="muted" data-i18n="desc.index">Simple, handy tools: feeding calculator, feedback, and more.</p>
+    <main class="hero" data-page="home">
+      <h1>把难懂的标签 → 变成可执行建议</h1>
+      <p class="lead">扫描/录入宠物食品与洗护信息，统一口径（ME、GA、as-fed/DM），秒出喂量/换粮卡；页面显式来源与时间戳。<strong>信息性建议，非医疗。</strong></p>
 
-    <!-- 工具卡片 -->
-    <div class="grid grid-2">
-      <div class="card">
-        <h2 data-i18n="nav.feeding">Feeding Calculator</h2>
-        <p data-i18n="title.feeding">Feeding Calculator</p>
-        <div class="actions">
-          <a class="btn" href="/p-feeding/feeding.html" rel="noopener" data-i18n="nav.feeding">Feeding Calculator</a>
-        </div>
+      <div class="grid">
+        <section class="card">
+          <h3>① 喂食计算器</h3>
+          <p class="muted">RER/MER → kcal/天 → 杯/克；支持混喂与零食占比提示。</p>
+          <a class="btn" href="/feeding.html" id="calcBtn">打开计算器</a>
+        </section>
+
+        <section class="card">
+          <h3>② 7 天换粮卡</h3>
+          <p class="muted">90/10 → 0/100 的过渡表，自动按能量密度换算。</p>
+          <a class="btn sec" href="/cards/transition-7.html?v=20250922c" rel="nofollow">查看换粮卡</a>
+        </section>
+
+        <section class="card">
+          <h3>③ 意见反馈</h3>
+          <p class="muted">帮助我们提高命中率与解释易读性；导购披露保持中立。</p>
+          <a class="btn" href="/feedback.html" id="feedbackOpen">去反馈</a>
+        </section>
       </div>
 
-      <div class="card">
-        <h2 data-i18n="nav.feedback">Feedback</h2>
-        <p data-i18n="title.feedback">Feedback</p>
-        <div class="actions">
-          <!-- events.js 会自动识别指向 feedback.html 的链接并上报 feedback_click -->
-          <a class="btn" href="/p-feeding/feedback.html" rel="noopener" data-i18n="nav.feedback">Feedback</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- 站内搜索（占位） -->
-    <div class="card" style="margin-top:16px">
-      <label for="q" data-i18n="search.label" style="display:block; font-weight:600; margin-bottom:8px;">Site Search</label>
-      <div class="search">
-        <input id="q" type="search" data-i18n-placeholder="search.placeholder" placeholder="Type a keyword…" />
-        <button type="button" data-i18n="search.btn" onclick="(function(){ try{ window.plausible && window.plausible('search_click'); }catch(e){} alert('Search is coming soon.'); })()">Search</button>
-      </div>
-    </div>
+      <p class="muted" style="margin-top:14px">
+        指标监测：visit_home / visit_feeding_page / visit_feedback_page / feedback_open / calc_click / wash_*。
+      </p>
+    </main>
 
     <footer>
-      <span data-i18n="footer.note">Anonymous analytics (Plausible) is enabled to improve the product.</span>
+      <strong>信息性提示：</strong>本工具基于公开信息与通用标准（如 AAFCO/NRC）给出参考建议，不构成医疗或诊断意见。涉及疾病/处方需求请咨询持证兽医。
+      <br />数据可能因配方/包装更新而变化；页面已标注来源/时间戳/版本以供核验。
+      <br />如含推广链接，可能获得佣金（已披露）；这不影响信息的中立性。
     </footer>
   </div>
 </body>
