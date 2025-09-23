@@ -1,38 +1,54 @@
-/* /p-feeding/assets/site.css — minimal dark theme */
+/* /p-feeding/assets/site.css — dark theme, click-safe (no blur/backdrop) */
 
 :root{
   --bg:#0b1220; --panel:#121a2b; --card:#0f1726; --text:#e8eefc; --muted:#93a4c3;
   --brand:#1ec9a3; --brand-2:#1aa383; --border:#233049; --btn:#22d3a3; --btn-2:#16b389;
 }
+
 *{box-sizing:border-box}
 html,body{height:100%}
 body{
-  margin:0; font:16px/1.6 ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji;
+  margin:0;
+  font:16px/1.6 ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";
   color:var(--text);
   background:radial-gradient(1200px 600px at 70% -20%,#112042,transparent), var(--bg);
 }
-a{color:var(--btn); text-decoration:none} a:hover{text-decoration:underline}
 
+/* 链接与按钮 */
+a{color:var(--btn); text-decoration:none; cursor:pointer}
+a:hover{text-decoration:underline}
+button{cursor:pointer}
+
+/* 顶部导航：去掉 backdrop-filter，避免某些环境下形成“看不见的罩子” */
 .nav{
-  position:sticky; top:0; z-index:10; display:flex; align-items:center; gap:20px;
-  padding:10px 20px; background:rgba(10,14,25,.6); backdrop-filter:blur(8px);
-  border-bottom:1px solid var(--border)
+  position:sticky; top:0; z-index:1000;       /* 提高层级，确保只覆盖头部 */
+  display:flex; align-items:center; gap:20px;
+  padding:10px 20px;
+  background:rgba(10,14,25,.88);              /* 纯色半透明，不用 blur */
+  border-bottom:1px solid var(--border);
+  isolation:isolate;                           /* 独立绘制上下文，进一步防溢出 */
+  pointer-events:auto;                         /* 明确可点击 */
 }
 .nav > a{font-weight:700}
 .nav nav{display:flex; gap:16px; margin-left:auto}
+
 #lang-btn{
-  margin-left:8px; padding:6px 14px; border-radius:999px; background:#1e293b; color:var(--text);
-  border:1px solid var(--border); cursor:pointer
+  margin-left:8px; padding:6px 14px; border-radius:999px;
+  background:#1e293b; color:var(--text);
+  border:1px solid var(--border);
 }
 #lang-btn:hover{background:#26344c}
 
+/* 页面布局 */
 .container{max-width:1100px; margin:56px auto; padding:0 20px}
 .muted{color:var(--muted); font-size:14px}
 
+/* 卡片 */
 .cards{display:grid; gap:20px; grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
 .card{
   background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px;
-  box-shadow:0 10px 30px rgba(0,0,0,.2)
+  box-shadow:0 10px 30px rgba(0,0,0,.2);
+  pointer-events:auto;
 }
 .card h3{margin:0 0 8px}
 .card p{color:var(--muted); margin:0 0 14px}
@@ -42,6 +58,7 @@ a{color:var(--btn); text-decoration:none} a:hover{text-decoration:underline}
 }
 .btn:hover{background:var(--btn-2); text-decoration:none}
 
+/* 面板与表单 */
 .grid{display:grid; gap:20px; grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
 .panel{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:20px}
 .panel h3{margin:0 0 12px}
@@ -55,14 +72,19 @@ output{display:block; background:#0b1424}
 .actions{display:flex; gap:10px; margin-top:14px}
 .actions button{
   padding:10px 14px; border-radius:10px; border:1px solid var(--border);
-  background:#17223a; color:var(--text); cursor:pointer
+  background:#17223a; color:var(--text);
 }
 .actions button:first-child{background:var(--btn); color:#071a16; border-color:transparent}
 .actions button:first-child:hover{background:var(--btn-2)}
 
+/* 表格 */
 table{width:100%; border-collapse:collapse; margin-top:10px}
 th,td{border:1px solid var(--border); padding:8px 10px; text-align:left}
 thead th{background:#0e1a2f}
 
+/* 页脚 */
 .footer{max-width:1100px; margin:40px auto 80px; padding:0 20px; color:var(--muted)}
 .footer strong{color:var(--text)}
+
+/* 保险：任何主要容器都明确可点击，防止第三方样式注入出现 pointer-events: none 之类情况 */
+.container,.cards,.card,.panel,.actions,main,header,nav,a,button{pointer-events:auto}
