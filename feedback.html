@@ -1,54 +1,70 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title data-i18n="fb.title">Feedback · Pet Scan</title>
-  <link rel="icon" href="cover.png">
+  <title data-i18n="fb.title">意见反馈</title>
+  <link rel="stylesheet" href="/p-feeding/assets/site.css" />
+  <script defer src="/p-feeding/i18n.js"></script>
 </head>
 <body>
-  <header class="nav">
-    <a href="index.html" data-i18n="nav.home"></a>
+  <div class="nav">
+    <a href="/p-feeding/index.html" data-i18n="nav.home">首页</a>
     <nav>
-      <a href="feeding.html" data-i18n="nav.feeding"></a>
-      <a href="feedback.html" data-i18n="nav.feedback"></a>
-      <a href="cards/transition-7.html" data-i18n="nav.card"></a>
+      <a href="/p-feeding/feeding/feeding.html" data-i18n="nav.feeding">喂食计算器</a>
+      <a href="/p-feeding/feedback.html" data-i18n="nav.feedback">反馈</a>
+      <a href="/p-feeding/cards/" data-i18n="nav.card">7天换粮卡</a>
+
+      <button id="lang-btn" type="button">中文</button>
+      <select id="lang-select">
+        <option value="en" data-i18n-option="lang.en">English</option>
+        <option value="zh" data-i18n-option="lang.zh">中文</option>
+        <option value="ja" data-i18n-option="lang.ja">日本語</option>
+        <option value="ko" data-i18n-option="lang.ko">한국어</option>
+        <option value="es" data-i18n-option="lang.es">Español</option>
+        <option value="fr" data-i18n-option="lang.fr">Français</option>
+      </select>
     </nav>
-    <button id="lang-btn">English</button>
-  </header>
+  </div>
 
   <main class="container">
-    <h1 data-i18n="fb.title"></h1>
-    <p data-i18n="fb.lead"></p>
+    <h1 data-i18n="fb.title">意见反馈</h1>
+    <p class="muted" data-i18n="fb.lead">帮助我们提高命中率与解释易读性…</p>
 
-    <form class="panel">
-      <h3 data-i18n="fb.form.title"></h3>
+    <section class="panel">
+      <h3 data-i18n="fb.form.title">提交你的反馈</h3>
 
-      <label data-i18n="fb.form.category"></label>
-      <select>
-        <option data-i18n-option="fb.form.cat.issue"></option>
-        <option data-i18n-option="fb.form.cat.improve"></option>
-        <option data-i18n-option="fb.form.cat.other"></option>
-      </select>
+      <div class="grid" style="grid-template-columns:1fr 1fr">
+        <div>
+          <label data-i18n="fb.form.category">类别</label>
+          <select>
+            <option data-i18n-option="fb.form.cat.issue">问题/报错</option>
+            <option data-i18n-option="fb.form.cat.improve">改进建议</option>
+            <option data-i18n-option="fb.form.cat.other">其他</option>
+          </select>
+        </div>
+        <div>
+          <label data-i18n="fb.form.email">联系邮箱（可选）</label>
+          <input type="email" placeholder="name@example.com" />
+        </div>
+      </div>
 
-      <label data-i18n="fb.form.email"></label>
-      <input type="email" placeholder="name@example.com" />
+      <label data-i18n="fb.form.subject">标题</label>
+      <input placeholder="简要概述问题或建议" data-i18n-placeholder="fb.form.subject.ph" />
 
-      <label data-i18n="fb.form.subject"></label>
-      <input type="text" data-i18n-placeholder="fb.form.subject.ph" />
+      <label data-i18n="fb.form.detail">详细描述</label>
+      <textarea rows="6" data-i18n-placeholder="fb.form.detail.ph"
+        placeholder="复现步骤、期望结果、相关产品/配方/截图/链接等…"></textarea>
 
-      <label data-i18n="fb.form.detail"></label>
-      <textarea rows="6" data-i18n-placeholder="fb.form.detail.ph"></textarea>
+      <div class="actions">
+        <button data-i18n="fb.form.submit">提交</button>
+      </div>
+    </section>
 
-      <button type="submit" data-i18n="fb.form.submit"></button>
-    </form>
+    <div class="footer">
+      <strong data-i18n="footer.noticeTitle">信息性提示（非医疗）</strong>：
+      <span data-i18n="footer.noticeBody">数据可能因配方/包装更新而变化…</span>
+    </div>
   </main>
-
-  <footer class="footer">
-    <strong data-i18n="footer.noticeTitle"></strong>
-    <span data-i18n="footer.noticeBody"></span>
-  </footer>
-
-  <script src="i18n.js?v=1"></script>
 </body>
 </html>
