@@ -1,69 +1,113 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title data-i18n="feeding.metaTitle">Feeding Calculator · Pet Scan</title>
-  <link rel="icon" href="cover.png">
+  <title data-i18n="feeding.metaTitle">喂食计算器 · Pet Scan</title>
+  <link rel="stylesheet" href="/p-feeding/assets/site.css" />
+  <script defer src="/p-feeding/i18n.js"></script>
 </head>
 <body>
-  <header class="nav">
-    <a href="index.html" data-i18n="nav.home"></a>
+  <div class="nav">
+    <a href="/p-feeding/index.html" data-i18n="nav.home">首页</a>
     <nav>
-      <a href="feeding.html" data-i18n="nav.feeding"></a>
-      <a href="feedback.html" data-i18n="nav.feedback"></a>
-      <a href="cards/transition-7.html" data-i18n="nav.card"></a>
+      <a href="/p-feeding/feeding/feeding.html" data-i18n="nav.feeding">喂食计算器</a>
+      <a href="/p-feeding/feedback.html" data-i18n="nav.feedback">反馈</a>
+      <a href="/p-feeding/cards/" data-i18n="nav.card">7天换粮卡</a>
+
+      <button id="lang-btn" type="button">中文</button>
+      <select id="lang-select">
+        <option value="en" data-i18n-option="lang.en">English</option>
+        <option value="zh" data-i18n-option="lang.zh">中文</option>
+        <option value="ja" data-i18n-option="lang.ja">日本語</option>
+        <option value="ko" data-i18n-option="lang.ko">한국어</option>
+        <option value="es" data-i18n-option="lang.es">Español</option>
+        <option value="fr" data-i18n-option="lang.fr">Français</option>
+      </select>
     </nav>
-    <button id="lang-btn">English</button>
-  </header>
+  </div>
 
   <main class="container">
-    <h1 data-i18n="feeding.h1"></h1>
-    <p data-i18n="feeding.lead"></p>
+    <h1 data-i18n="feeding.h1">喂食计算器</h1>
+    <p class="muted" data-i18n="feeding.lead">
+      根据每日所需能量（kcal/天）与食物能量密度（kcal/100 g）…
+    </p>
 
-    <section class="grid">
-      <div class="panel">
-        <h3 data-i18n="feeding.inputs.title"></h3>
+    <div class="grid">
+      <section class="panel">
+        <h3 data-i18n="feeding.inputs.title">输入参数</h3>
 
-        <label data-i18n="feeding.inputs.kcalDay"></label>
-        <input type="number" id="kcal_day" data-i18n-placeholder="feeding.ph.kcal" />
+        <label for="kcal" data-i18n="feeding.inputs.kcalDay">每天用于正餐（kcal/天）</label>
+        <input id="kcal" type="number" step="1" placeholder="例如 600" data-i18n-placeholder="feeding.ph.kcal" />
 
-        <label data-i18n="feeding.inputs.gPerCup"></label>
-        <input type="number" id="g_per_cup" value="110" />
-
-        <label data-i18n="feeding.inputs.energy"></label>
-        <input type="number" id="energy" data-i18n-placeholder="feeding.ph.energy" />
-
-        <div class="actions">
-          <button data-i18n="feeding.actions.calc"></button>
-          <button data-i18n="feeding.actions.reset"></button>
-          <button data-i18n="feeding.actions.print"></button>
+        <div class="grid" style="grid-template-columns:1fr 1fr">
+          <div>
+            <label for="gpc" data-i18n="feeding.inputs.gPerCup">克/杯（g per cup）</label>
+            <input id="gpc" type="number" step="0.1" value="110" />
+          </div>
+          <div>
+            <label for="dens" data-i18n="feeding.inputs.energy">能量密度（kcal/100 g）</label>
+            <input id="dens" type="number" step="0.1" placeholder="例如 380" data-i18n-placeholder="feeding.ph.energy" />
+          </div>
         </div>
 
-        <p class="tip" data-i18n="feeding.tips"></p>
-      </div>
+        <div class="actions">
+          <button id="do" data-i18n="feeding.actions.calc">计算</button>
+          <button id="reset" data-i18n="feeding.actions.reset">重置</button>
+          <button id="print" data-i18n="feeding.actions.print">打印/保存 PDF</button>
+        </div>
 
-      <div class="panel">
-        <h3 data-i18n="feeding.results.title"></h3>
+        <p class="muted" style="margin-top:12px" data-i18n="feeding.tips">
+          建议先在首页“计算器”得到 MER 正餐能量，再回此页换算。
+        </p>
+      </section>
 
-        <label data-i18n="feeding.results.grams"></label>
-        <output id="out_gpd">—</output>
+      <section class="panel">
+        <h3 data-i18n="feeding.results.title">结果</h3>
+        <label data-i18n="feeding.results.grams">每日克数（g/天）</label>
+        <output id="gpd">—</output>
 
-        <label data-i18n="feeding.results.cups"></label>
-        <output id="out_cpd">—</output>
+        <label data-i18n="feeding.results.cups">每日杯数（cups/天）</label>
+        <output id="cpd">—</output>
 
-        <p class="note" data-i18n="feeding.results.note"></p>
-      </div>
-    </section>
+        <p class="muted" style="margin-top:12px" data-i18n="feeding.results.note">
+          结果保留一位小数；如混喂或零食，请按比例拆分。
+        </p>
 
-    <p class="muted" data-i18n="feeding.tracked"></p>
+        <p class="muted" data-i18n="feeding.tracked">事件：visit_feeding_page / calc_click。</p>
+      </section>
+    </div>
+
+    <div class="footer">
+      <strong data-i18n="footer.noticeTitle">信息性提示（非医疗）</strong>：
+      <span data-i18n="footer.noticeBody">数据可能因配方/包装更新而变化…</span>
+    </div>
   </main>
 
-  <footer class="footer">
-    <strong data-i18n="footer.noticeTitle"></strong>
-    <span data-i18n="footer.noticeBody"></span>
-  </footer>
+  <script>
+    const $ = (s) => document.querySelector(s);
+    const round1 = (n) => (isFinite(n) ? Math.round(n * 10) / 10 : NaN);
 
-  <script src="i18n.js?v=1"></script>
+    const calc = () => {
+      const kcal = parseFloat($('#kcal').value);
+      const dens = parseFloat($('#dens').value); // kcal / 100g
+      const gpc  = parseFloat($('#gpc').value);
+
+      if (!kcal || !dens || !gpc) { $('#gpd').textContent = '—'; $('#cpd').textContent = '—'; return; }
+
+      const grams = kcal * 100 / dens;
+      const cups  = grams / gpc;
+
+      $('#gpd').textContent = round1(grams);
+      $('#cpd').textContent = round1(cups);
+    };
+
+    $('#do').addEventListener('click', calc);
+    $('#reset').addEventListener('click', () => {
+      $('#kcal').value=''; $('#dens').value=''; $('#gpc').value='110';
+      $('#gpd').textContent='—'; $('#cpd').textContent='—';
+    });
+    $('#print').addEventListener('click', () => window.print());
+  </script>
 </body>
 </html>
