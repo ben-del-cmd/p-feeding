@@ -1,292 +1,221 @@
-/* /p-feeding/i18n.js — safe & lightweight (no heavy MutationObserver) */
-(() => {
-  'use strict';
-
-  // -------------------- Config --------------------
-  const SUPPORTED = ['en', 'zh', 'ja', 'ko', 'es', 'fr'];
-  const DEFAULT_LANG = 'en';
-  const LS_KEY = 'ps_lang';
-  const SELECTOR = '[data-i18n],[data-i18n-html],[data-i18n-placeholder],[data-i18n-option]';
-
-  // -------------------- Dictionary --------------------
-  // 英文 + 中文完整；其它语言先回退中文，需要时再补
-  const dict = {
+<script>
+// i18n.js — drop-in replacement (EN/ZH), supports data-i18n / data-i18n-placeholder
+(function () {
+  var DICT = {
     en: {
-      // brand / nav
-      'brand.name': 'Pet Scan',
-      'nav.home': 'Home', 'nav.feeding': 'Feeding Calculator', 'nav.feedback': 'Feedback', 'nav.card': '7-Day Transition',
-      // backward-compat old keys
-      'nav.calc': 'Feeding Calculator', 'nav.transition': '7-Day Transition',
+      "nav.home": "Home",
+      "nav.calculator": "Calculator",
+      "nav.transition7": "7-Day Switch",
+      "nav.feedback": "Feedback",
 
-      // language names
-      'lang.en': 'English', 'lang.zh': '中文', 'lang.ja': '日本語', 'lang.ko': '한국어', 'lang.es': 'Español', 'lang.fr': 'Français',
+      "home.hero.title": "Turn pet food labels into simple, actionable feeding.",
+      "home.hero.subtitle": "Scan → unify terms → personalized portions → smooth transition → reorder.",
+      "home.cta.open_calculator": "Open Calculator",
+      "home.cta.view_transition_card": "View 7-Day Card",
 
-      // home (new)
-      'home.h1': 'Turn confusing labels — into actionable advice',
-      'home.lead': 'Scan/enter pet food & wash-care info, unify terms (ME, GA, as-fed/DM), output feeding amount/transition card in seconds; source & timestamp shown. Informational, not medical.',
-      'home.calc.title': '① Feeding Calculator',
-      'home.calc.desc': 'RER/MER → kcal/day → cups/grams; supports mixed feeding & treat ratio hints.',
-      'home.calc.btn': 'Open Calculator',
-      'home.card.title': '② 7-Day Transition',
-      'home.card.desc': '90/10 → 0/100 schedule; auto converts by energy density.',
-      'home.card.btn': 'View Card',
-      'home.fb.title': '③ Feedback',
-      'home.fb.desc': 'Help us improve hit rate & explanation readability; affiliate clearly disclosed.',
-      'home.fb.btn': 'Give Feedback',
-      'home.tracked': 'Tracked: visit_home / visit_feeding_page / visit_feedback_page / feedback_open / calc_click / wash_*.',
+      "legal.info_boundary": "Informational only. Not medical advice.",
+      "legal.data_use": "We use anonymous analytics to improve features.",
+      "footer.disclaimer": "For diet/medical questions, consult your veterinarian.",
 
-      // footer
-      'footer.noticeTitle': 'Informational notice (not medical)',
-      'footer.noticeBody': 'Data may change with formula/pack updates; pages show source, timestamp and version to verify.',
+      "feeding.title": "Feeding Calculator",
+      "feeding.pet_type.label": "Pet",
+      "feeding.pet_type.dog": "Dog",
+      "feeding.pet_type.cat": "Cat",
+      "feeding.weight.label": "Weight",
+      "feeding.weight.placeholder": "Enter weight",
+      "feeding.unit.label": "Unit",
+      "feeding.unit.kg": "kg",
+      "feeding.unit.lb": "lb",
+      "feeding.activity.label": "Activity",
+      "feeding.activity.resting": "Resting",
+      "feeding.activity.normal": "Normal",
+      "feeding.activity.active": "Active",
+      "feeding.kcal_per_cup.label": "kcal per cup",
+      "feeding.kcal_per_cup.placeholder": "e.g., 350",
+      "feeding.grams_per_cup.label": "grams per cup",
+      "feeding.grams_per_cup.placeholder": "e.g., 110",
+      "feeding.formula.note": "RER = 70 × weight^0.75; MER = RER × activity.",
+      "feeding.calculate": "Calculate",
+      "feeding.result.title": "Result",
+      "feeding.result.kcal": "Daily energy:",
+      "feeding.result.cups": "Cups/day:",
+      "feeding.result.grams": "Grams/day:",
+      "feeding.result.tip": "Split into 2–3 meals. Adjust with weight trend.",
+      "feeding.result.view_transition_card": "View 7-Day Transition Card",
 
-      // feeding page (new)
-      'feeding.metaTitle': 'Feeding Calculator · Pet Scan',
-      'feeding.h1': 'Feeding Calculator',
-      'feeding.lead': 'Based on daily energy need (kcal/day) & food energy density (kcal/100 g), auto converts grams/cups; supports custom g per cup. Informational, not medical.',
-      'feeding.inputs.title': 'Inputs',
-      'feeding.inputs.kcalDay': 'Daily energy for main meals (kcal/day)',
-      'feeding.inputs.gPerCup': 'g per cup',
-      'feeding.inputs.energy': 'Energy density (kcal/100 g)',
-      'feeding.actions.calc': 'Calculate',
-      'feeding.actions.reset': 'Reset',
-      'feeding.actions.print': 'Print / Save PDF',
-      'feeding.results.title': 'Results',
-      'feeding.results.grams': 'Grams per day (g/day)',
-      'feeding.results.cups': 'Cups per day (cups/day)',
-      'feeding.results.note': 'Results keep 1 decimal place. For mixed feeding or treats, please split by ratio.',
-      'feeding.tips': 'Tip: Use the calculator first to get the MER intake, then convert here.',
-      'feeding.tracked': 'Events: visit_feeding_page / calc_click.',
-      'feeding.ph.kcal': 'e.g. 600', 'feeding.ph.energy': 'e.g. 380',
+      "transition.title": "7-Day Transition Card",
+      "transition.day1.title": "Day 1", "transition.day1.txt": "75% current food / 25% new food",
+      "transition.day2.title": "Day 2", "transition.day2.txt": "70% / 30%",
+      "transition.day3.title": "Day 3", "transition.day3.txt": "60% / 40%",
+      "transition.day4.title": "Day 4", "transition.day4.txt": "50% / 50%",
+      "transition.day5.title": "Day 5", "transition.day5.txt": "40% / 60%",
+      "transition.day6.title": "Day 6", "transition.day6.txt": "25% / 75%",
+      "transition.day7.title": "Day 7", "transition.day7.txt": "0% / 100%",
 
-      // 7-day card page
-      't7.title': '7-Day Transition',
-      't7.lead': 'Classic 90/10 → 0/100 schedule; type the two energy densities, auto converts grams/cups per day.',
-      't7.input.daily': 'Daily for main meals (kcal/day)',
-      't7.input.cupg': 'g per cup',
-      't7.input.a': 'Food A', 't7.input.b': 'Food B',
-      't7.placeholder.cupg': 'e.g. 110', 't7.placeholder.a': 'e.g. 380', 't7.placeholder.b': 'e.g. 320',
-      't7.btn.gen': 'Generate Card', 't7.btn.print': 'Print / Save PDF',
-      't7.table.title': '7-Day Schedule',
-      't7.th.day': 'Day', 't7.th.mix': 'Ratio (old/new)',
-      't7.th.old': 'Old (g/day)', 't7.th.new': 'New (g/day)', 't7.th.total': 'Total (g/day)',
-      't7.note': 'Auto converts by energy density, unit is kcal/100 g (ME/100). If mixing/treats exist, please split ratios separately.',
+      "feedback.title": "Send Feedback",
+      "feedback.type.label": "Type",
+      "feedback.type.bug": "Bug",
+      "feedback.type.idea": "Idea",
+      "feedback.type.other": "Other",
+      "feedback.text.label": "Your message",
+      "feedback.text.placeholder": "Tell us what happened...",
+      "feedback.send": "Send",
 
-      // feedback
-      'fb.title': 'Feedback',
-      'fb.lead': 'Help us improve hit rate & explanation readability. Affiliate disclosures stay neutral. We don’t collect personal sensitive info.',
-      'fb.form.title': 'Submit your feedback',
-      'fb.form.category': 'Category',
-      'fb.form.cat.issue': 'Issue / Bug', 'fb.form.cat.improve': 'Improvement', 'fb.form.cat.other': 'Other',
-      'fb.form.email': 'Contact email (optional)',
-      'fb.form.subject': 'Subject', 'fb.form.subject.ph': 'Briefly describe the issue/idea',
-      'fb.form.detail': 'Detail', 'fb.form.detail.ph': 'Steps to reproduce, expected result, related products/formulas/links/screenshots…',
-      'fb.form.submit': 'Submit',
-
-      // old calc/home keys for compatibility
-      'calc.title': 'Feeding Calculator',
-      'calc.lead': 'Based on daily energy need (kcal/day) & food energy density (kcal/100 g), auto converts grams/cups; supports custom g per cup.',
-      'calc.input.daily': 'Daily energy for main meals (kcal/day)',
-      'calc.input.cupg': 'g per cup',
-      'calc.input.density': 'Energy density (kcal/100 g)',
-      'calc.placeholder.daily': 'e.g. 600',
-      'calc.placeholder.density': 'e.g. 380',
-      'calc.btn.calc': 'Calculate', 'calc.btn.reset': 'Reset', 'calc.btn.print': 'Print / Save PDF',
-      'calc.result.title': 'Results', 'calc.result.gpd': 'Grams per day (g/day)', 'calc.result.cpd': 'Cups per day (cups/day)',
-      'calc.result.hint': 'Results keep 1 decimal place. For mixed feeding or treats, please split by ratio.',
-      'home.card1.title': '① Feeding Calculator',
-      'home.card1.desc': 'RER/MER → kcal/day → cups/grams; supports mixed feeding & treat ratio hints.',
-      'home.card1.btn': 'Open Calculator',
-      'home.card2.title': '② 7-Day Transition',
-      'home.card2.desc': '90/10 → 0/100 schedule; auto converts by energy density.',
-      'home.card2.btn': 'View Card',
-      'home.card3.title': '③ Feedback',
-      'home.card3.desc': 'Help us improve hit rate & explanation readability; affiliate clearly disclosed.',
-      'home.card3.btn': 'Give Feedback',
-
-      'common.lang': 'Language'
+      "404.title": "Page not found",
+      "404.subtitle": "This page doesn't exist. Let's get you back.",
+      "404.back_home": "Back to Home"
     },
-
     zh: {
-      'brand.name': 'Pet Scan',
-      'nav.home': '首页', 'nav.feeding': '喂食计算器', 'nav.feedback': '反馈', 'nav.card': '7天换粮卡',
-      'nav.calc': '喂食计算器', 'nav.transition': '7天换粮卡',
-      'lang.en': 'English', 'lang.zh': '中文', 'lang.ja': '日本語', 'lang.ko': '한국어', 'lang.es': 'Español', 'lang.fr': 'Français',
+      "nav.home": "首页",
+      "nav.calculator": "喂食计算器",
+      "nav.transition7": "7天换粮卡",
+      "nav.feedback": "反馈",
 
-      'home.h1': '把难懂的标签 → 变成可执行建议',
-      'home.lead': '扫描/录入宠物食品与洗护信息，统一口径（ME、GA、as-fed/DM），秒出喂量/换粮卡；页面显式来源与时间戳。信息性建议，非医疗。',
-      'home.calc.title': '① 喂食计算器', 'home.calc.desc': 'RER/MER → kcal/天 → 杯/克；支持混喂与零食占比提示。', 'home.calc.btn': '打开计算器',
-      'home.card.title': '② 7 天换粮卡', 'home.card.desc': '90/10 → 0/100 的过渡表，自动按能量密度换算。', 'home.card.btn': '查看换粮卡',
-      'home.fb.title': '③ 意见反馈', 'home.fb.desc': '帮助我们提高命中率与解释易读性；导购披露保持中立。', 'home.fb.btn': '去反馈',
-      'home.tracked': '指标/事件：visit_home / visit_feeding_page / visit_feedback_page / feedback_open / calc_click / wash_*。',
+      "home.hero.title": "把宠物食品标签变成可执行的喂食建议。",
+      "home.hero.subtitle": "扫描→统一口径→个性化喂量→平滑换粮→补货闭环。",
+      "home.cta.open_calculator": "打开计算器",
+      "home.cta.view_transition_card": "查看7天换粮卡",
 
-      'footer.noticeTitle': '信息性提示（非医疗）',
-      'footer.noticeBody': '数据可能因配方/包装更新而变化；页面已标注来源/时间戳/版本以供核验。',
+      "legal.info_boundary": "仅供信息参考；不构成医疗建议。",
+      "legal.data_use": "我们使用匿名分析以改进功能。",
+      "footer.disclaimer": "如涉及处方/疾病，请咨询兽医。",
 
-      'feeding.metaTitle': '喂食计算器 · Pet Scan',
-      'feeding.h1': '喂食计算器',
-      'feeding.lead': '根据每日所需能量（kcal/天）与食物能量密度（kcal/100 g），自动换算每日克数与杯数；支持自定义“克/杯”。信息性建议，非医疗。',
-      'feeding.inputs.title': '输入参数',
-      'feeding.inputs.kcalDay': '每天用于正餐（kcal/天）',
-      'feeding.inputs.gPerCup': '克/杯（g per cup）',
-      'feeding.inputs.energy': '能量密度（kcal/100 g）',
-      'feeding.actions.calc': '计算', 'feeding.actions.reset': '重置', 'feeding.actions.print': '打印/保存 PDF',
-      'feeding.results.title': '结果', 'feeding.results.grams': '每日克数（g/天）', 'feeding.results.cups': '每日杯数（cups/天）',
-      'feeding.results.note': '结果保留一位小数；如混喂或零食，请按比例拆分。',
-      'feeding.tips': '建议先在首页“计算器”得到 MER 正餐能量，再回此页换算。',
-      'feeding.tracked': '事件：visit_feeding_page / calc_click。',
-      'feeding.ph.kcal': '例如 600', 'feeding.ph.energy': '例如 380',
+      "feeding.title": "喂食计算器",
+      "feeding.pet_type.label": "宠物",
+      "feeding.pet_type.dog": "犬",
+      "feeding.pet_type.cat": "猫",
+      "feeding.weight.label": "体重",
+      "feeding.weight.placeholder": "输入体重",
+      "feeding.unit.label": "单位",
+      "feeding.unit.kg": "千克",
+      "feeding.unit.lb": "磅",
+      "feeding.activity.label": "活动水平",
+      "feeding.activity.resting": "静息",
+      "feeding.activity.normal": "日常",
+      "feeding.activity.active": "活跃",
+      "feeding.kcal_per_cup.label": "每杯千卡",
+      "feeding.kcal_per_cup.placeholder": "如：350",
+      "feeding.grams_per_cup.label": "每杯克重",
+      "feeding.grams_per_cup.placeholder": "如：110",
+      "feeding.formula.note": "RER = 70 × 体重^0.75；MER = RER × 活动因子。",
+      "feeding.calculate": "计算",
+      "feeding.result.title": "结果",
+      "feeding.result.kcal": "每日能量：",
+      "feeding.result.cups": "杯/天：",
+      "feeding.result.grams": "克/天：",
+      "feeding.result.tip": "建议分2–3餐；随体重趋势调整。",
+      "feeding.result.view_transition_card": "查看7天换粮卡",
 
-      't7.title': '7 天换粮卡',
-      't7.lead': '经典 90/10 → 0/100 过渡；按两种食品的能量密度 g/杯自动换算每天克数与杯数。',
-      't7.input.daily': '每天用于正餐（kcal/天）', 't7.input.cupg': '克/杯（g per cup）',
-      't7.input.a': '食物 A', 't7.input.b': '食物 B',
-      't7.placeholder.cupg': '例如 110', 't7.placeholder.a': '例如 380', 't7.placeholder.b': '例如 320',
-      't7.btn.gen': '生成换粮卡', 't7.btn.print': '打印/保存 PDF',
-      't7.table.title': '7 日过渡表',
-      't7.th.day': '天数', 't7.th.mix': '配比（旧/新）', 't7.th.old': '旧粮（g/天）', 't7.th.new': '新粮（g/天）', 't7.th.total': '总量（g/天）',
-      't7.note': '按能量密度换算，计量公式为 kcal ÷（ME/100）；如含混喂/零食，请分别按自定义配比换算。',
+      "transition.title": "7天换粮卡",
+      "transition.day1.title": "第1天", "transition.day1.txt": "75% 旧粮 / 25% 新粮",
+      "transition.day2.title": "第2天", "transition.day2.txt": "70% / 30%",
+      "transition.day3.title": "第3天", "transition.day3.txt": "60% / 40%",
+      "transition.day4.title": "第4天", "transition.day4.txt": "50% / 50%",
+      "transition.day5.title": "第5天", "transition.day5.txt": "40% / 60%",
+      "transition.day6.title": "第6天", "transition.day6.txt": "25% / 75%",
+      "transition.day7.title": "第7天", "transition.day7.txt": "0% / 100%",
 
-      'fb.title': '意见反馈',
-      'fb.lead': '帮助我们提高命中率与解释易读性；导购披露保持中立。提交前不会收集个人敏感信息。',
-      'fb.form.title': '提交你的反馈',
-      'fb.form.category': '类别',
-      'fb.form.cat.issue': '问题/报错', 'fb.form.cat.improve': '改进建议', 'fb.form.cat.other': '其他',
-      'fb.form.email': '联系邮箱（可选）',
-      'fb.form.subject': '标题', 'fb.form.subject.ph': '简要概述问题或建议',
-      'fb.form.detail': '详细描述', 'fb.form.detail.ph': '复现步骤、期望结果、相关产品/配方/截图/链接等…',
-      'fb.form.submit': '提交',
+      "feedback.title": "反馈",
+      "feedback.type.label": "类型",
+      "feedback.type.bug": "问题",
+      "feedback.type.idea": "想法",
+      "feedback.type.other": "其他",
+      "feedback.text.label": "你的留言",
+      "feedback.text.placeholder": "描述问题或建议…",
+      "feedback.send": "发送",
 
-      'calc.title': '喂食计算器',
-      'calc.lead': '根据每日所需能量（kcal/天）与食物能量密度（kcal/100 g），自动换算每日克数与杯数；支持自定义“克/杯”。',
-      'calc.input.daily': '每天用于正餐（kcal/天）',
-      'calc.input.cupg': '克/杯（g per cup）',
-      'calc.input.density': '能量密度（kcal/100 g）',
-      'calc.placeholder.daily': '例如 600', 'calc.placeholder.density': '例如 380',
-      'calc.btn.calc': '计算', 'calc.btn.reset': '重置', 'calc.btn.print': '打印/保存 PDF',
-      'calc.result.title': '结果', 'calc.result.gpd': '每日克数（g/天）', 'calc.result.cpd': '每日杯数（cups/天）',
-      'calc.result.hint': '结果保留一位小数；如混喂或零食，请按比例拆分。',
-
-      'home.card1.title': '① 喂食计算器', 'home.card1.desc': 'RER/MER → kcal/天 → 杯/克；支持混喂与零食占比提示。', 'home.card1.btn': '打开计算器',
-      'home.card2.title': '② 7 天换粮卡', 'home.card2.desc': '90/10 → 0/100 的过渡表，自动按能量密度换算。', 'home.card2.btn': '查看换粮卡',
-      'home.card3.title': '③ 意见反馈', 'home.card3.desc': '帮助我们提高命中率与解释易读性；导购披露保持中立。', 'home.card3.btn': '去反馈',
-
-      'common.lang': '语言'
-    },
-
-    ja: {}, ko: {}, es: {}, fr: {}
-  };
-  ['ja','ko','es','fr'].forEach(k => { dict[k] = Object.assign({}, dict.zh, dict[k] || {}); });
-
-  // -------------------- Lang helpers --------------------
-  const getUrlLang = () => {
-    const m = location.search.match(/[?&]lang=([a-z\-]+)/i);
-    return m ? m[1].toLowerCase() : null;
-  };
-  const getStoredLang = () => localStorage.getItem(LS_KEY);
-  const getNavigatorLang = () => (navigator.language || '').slice(0,2).toLowerCase();
-  const normalize = (lang) => {
-    if (!lang) return null;
-    const base = lang.toLowerCase().split('-')[0];
-    return SUPPORTED.includes(lang) ? lang : (SUPPORTED.includes(base) ? base : null);
-  };
-  const resolveInitialLang = () =>
-    normalize(getUrlLang()) || normalize(getStoredLang()) || normalize(getNavigatorLang()) || DEFAULT_LANG;
-
-  let currentLang = resolveInitialLang();
-
-  // -------------------- Core --------------------
-  const t = (key, lang) => {
-    const pack = dict[lang] || dict[DEFAULT_LANG];
-    if (key in pack) return pack[key];
-    if (key in dict.en) return dict.en[key];
-    if (key in dict.zh) return dict.zh[key];
-    return key;
+      "404.title": "页面未找到",
+      "404.subtitle": "该页面不存在。我们带你返回。",
+      "404.back_home": "返回首页"
+    }
   };
 
-  const applyOne = (el, lang) => {
-    if (el.dataset.i18n) el.textContent = t(el.dataset.i18n, lang);
-    if (el.dataset.i18nHtml) el.innerHTML = t(el.dataset.i18nHtml, lang);
-    if (el.dataset.i18nPlaceholder) el.setAttribute('placeholder', t(el.dataset.i18nPlaceholder, lang));
-    if (el.tagName === 'OPTION' && el.dataset.i18nOption) el.textContent = t(el.dataset.i18nOption, lang);
-  };
+  function getLang() {
+    try {
+      var u = new URL(location.href);
+      return u.searchParams.get('lang') || localStorage.getItem('lang') || document.documentElement.getAttribute('lang') || 'en';
+    } catch (e) { return 'en'; }
+  }
+  function setLang(lang, withReload) {
+    try {
+      localStorage.setItem('lang', lang);
+      document.documentElement.setAttribute('lang', lang);
+      var u = new URL(location.href);
+      u.searchParams.set('lang', lang);
+      if (withReload) location.href = u.toString();
+      else history.replaceState(null, '', u.toString());
+    } catch (e) {}
+  }
 
-  const applyAll = (lang) => {
-    document.querySelectorAll(SELECTOR).forEach(el => applyOne(el, lang));
-    updateLangUI(lang);
-    rewriteInternalLinks(lang);
-  };
+  function t(key, lang) {
+    var L = lang || getLang();
+    if (DICT[L] && DICT[L][key] != null) return DICT[L][key];
+    // fallback to EN if missing
+    if (DICT.en && DICT.en[key] != null) return DICT.en[key];
+    return key; // last resort
+  }
 
-  const updateLangUI = (lang) => {
-    const btn = document.getElementById('lang-btn');
-    if (btn) btn.textContent = t('lang.' + lang, lang);
-    const sel = document.getElementById('lang-select');
-    if (sel && sel.value !== lang) sel.value = lang;
-  };
-
-  const setLang = (lang) => {
-    const L = normalize(lang) || DEFAULT_LANG;
-    if (L === currentLang) return;
-    currentLang = L;
-    localStorage.setItem(LS_KEY, L);
-    const url = new URL(location.href);
-    url.searchParams.set('lang', L);
-    history.replaceState(null, '', url.pathname + url.search + url.hash);
-    applyAll(L);
-  };
-
-  // 仅改写一次，避免重复处理
-  const rewriteInternalLinks = (lang) => {
-    const host = location.host;
-    document.querySelectorAll('a[href]:not([data-no-lang])').forEach(a => {
-      if (a.dataset.langPatched === '1') return;
-      try {
-        const u = new URL(a.getAttribute('href'), location.href);
-        if (u.host === host) {
-          u.searchParams.set('lang', lang);
-          a.setAttribute('href', u.pathname + (u.search || '') + (u.hash || ''));
-          a.dataset.langPatched = '1';
-        }
-      } catch {}
+  function applyI18n(root) {
+    var lang = getLang();
+    (root || document).querySelectorAll('[data-i18n]').forEach(function (el) {
+      var k = el.getAttribute('data-i18n');
+      if (!k) return;
+      var val = t(k, lang);
+      // keep existing HTML? Most are plain text; use textContent to avoid injecting HTML accidentally
+      el.textContent = val;
     });
-  };
+    (root || document).querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+      var k = el.getAttribute('data-i18n-placeholder');
+      if (!k) return;
+      var val = t(k, lang);
+      try { el.setAttribute('placeholder', val); } catch (e) {}
+    });
+  }
 
-  // -------------------- Boot --------------------
-  document.addEventListener('DOMContentLoaded', () => {
-    const url = new URL(location.href);
-    if (!url.searchParams.get('lang')) {
-      url.searchParams.set('lang', currentLang);
-      history.replaceState(null, '', url.pathname + url.search + url.hash);
-    }
+  function mountLangUI() {
+    // Avoid duplicate controls
+    if (document.querySelector('.ps-lang-select')) return;
+    var host = document.getElementById('lang-slot') || document.querySelector('header nav') || document.body;
+    var wrap = document.createElement('div');
+    wrap.className = 'ps-lang-select';
+    wrap.style.cssText = 'float:right;margin:8px 0 0 12px;';
+    wrap.innerHTML = '<select aria-label="Language"><option value="en">English</option><option value="zh">中文</option></select>';
+    host.parentNode.insertBefore(wrap, host.nextSibling || host);
+    var sel = wrap.querySelector('select');
+    try { sel.value = getLang(); } catch(e){}
+    sel.addEventListener('change', function (e) {
+      setLang(e.target.value, true); // reload so URL携带?lang，并确保跨页一致
+    });
+  }
 
-    // 绑定语言控件
-    const btn = document.getElementById('lang-btn');
-    const sel = document.getElementById('lang-select');
-    const menu = document.getElementById('lang-menu');
+  function preserveLangOnLinks() {
+    var lang = getLang();
+    document.querySelectorAll('a[href^="/"],a[href^="./"],a[href^="../"],a[href^="index"],a[href^="feeding"],a[href^="cards"],a[href^="feedback"]').forEach(function(a){
+      var href = a.getAttribute('href');
+      if (!href || href.startsWith('#') || /^https?:\/\//i.test(href)) return;
+      var url = new URL(href, location.href);
+      var sp = url.searchParams;
+      if (!sp.get('lang')) sp.set('lang', lang);
+      url.search = sp.toString();
+      a.setAttribute('href', url.pathname + (url.search ? '?' + url.search : '') + url.hash);
+    });
+  }
 
-    if (btn) {
-      btn.addEventListener('click', () => {
-        if (sel || menu) return;
-        const idx = SUPPORTED.indexOf(currentLang);
-        setLang(SUPPORTED[(idx + 1) % SUPPORTED.length]);
-      });
-    }
-    if (sel) sel.addEventListener('change', e => setLang(e.target.value));
-    if (menu) {
-      menu.addEventListener('click', e => {
-        const node = e.target.closest('[data-lang]');
-        if (node) setLang(node.getAttribute('data-lang'));
-      });
-    }
+  // public API
+  window.ps = window.ps || {};
+  window.ps.i18n = { t: t, apply: applyI18n, setLang: setLang, getLang: getLang };
 
-    applyAll(currentLang);
+  document.addEventListener('DOMContentLoaded', function () {
+    applyI18n();
+    preserveLangOnLinks();
+    mountLangUI();
   });
 
-  // 前进/后退
-  window.addEventListener('popstate', () => {
-    const backLang = normalize(getUrlLang()) || currentLang;
-    applyAll(backLang);
+  // allow manual refresh
+  document.addEventListener('ps:i18n:refresh', function () {
+    applyI18n();
+    preserveLangOnLinks();
   });
 
-  // debug
-  window.__i18n = { get lang(){return currentLang;}, setLang };
 })();
+</script>
