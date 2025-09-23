@@ -1,52 +1,72 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title data-i18n="notfound_title">Pet Scan</title>
-<meta name="robots" content="noindex">
-<link rel="icon" href="cover.png">
-
-<link rel="preconnect" href="https://plausible.io" crossorigin />
-<link rel="dns-prefetch" href="https://plausible.io" />
-
-<script>
-  // Plausible 队列 shim（稳妥：先排队，等主脚本加载后再发送）
-  (function(w,d){
-    w.plausible = w.plausible || function(){ (w.plausible.q = w.plausible.q || []).push(arguments); };
-    var domain = (location && location.hostname) ? location.hostname : 'localhost';
-    var s = d.createElement('script');
-    s.defer = true; s.setAttribute('data-domain', domain); s.src = 'https://plausible.io/js/script.js';
-    d.head.appendChild(s);
-  })(window,document);
-</script>
-
-<script defer src="i18n.js?v=20250922h"></script>
-
-<style>
-  :root{color-scheme:light dark}
-  body{font:16px/1.7 system-ui,-apple-system,Segoe UI,Roboto,PingFang SC,Noto Sans,Helvetica,Arial,sans-serif;margin:48px 16px;max-width:720px}
-  a.btn{display:inline-block;padding:.6rem 1rem;border:1px solid color-mix(in oklab, CanvasText 20%, Canvas 80%);border-radius:12px;text-decoration:none}
-  .muted{opacity:.8}
-</style>
-</head>
-<body>
-  <h1 data-i18n="notfound_h1">404 — 页面不存在</h1>
-  <p class="muted" data-i18n="notfound_note">已启用匿名分析（Plausible），用于改进产品体验。</p>
-  <p><a class="btn" id="goHome" href="./" data-i18n="notfound_home">回首页</a></p>
-
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Not Found</title>
+  <link rel="stylesheet" href="assets/site.css?v=20250920b">
+  <script defer data-domain="" src="https://plausible.io/js/script.js"></script>
   <script>
-    // 上报 404 自定义事件
-    try {
-      window.plausible && window.plausible('404', {
-        props: { path: location.pathname + location.search, referrer: document.referrer || '-' }
-      });
-    } catch(e) {}
-
-    // 保障按钮始终回项目首页（防止路径错位）
     (function(){
-      var base = (location.pathname.split('/').slice(0,-1).join('/') || '') + '/';
-      document.getElementById('goHome').setAttribute('href', './');
+      var u=new URL(location.href);
+      var cur=u.searchParams.get('lang')||localStorage.getItem('lang')||'en';
+      if(!u.searchParams.get('lang')){ u.searchParams.set('lang',cur); history.replaceState(null,'',u.toString()); }
+      document.documentElement.setAttribute('lang', cur);
+      localStorage.setItem('lang', cur);
     })();
   </script>
+  <style>
+    :root{ --maxw: 720px; }
+    body{ margin:0; display:flex; min-height:100vh; align-items:center; justify-content:center; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto; }
+    main{ max-width:var(--maxw); padding:24px; text-align:center; }
+    .btn{ padding:10px 14px; border-radius:10px; border:1px solid #ddd; display:inline-block; }
+    .note{ font-size:12px; opacity:.8; }
+  </style>
+</head>
+<body>
+<main>
+  <h1 data-i18n="404.title">Page not found</h1>
+  <p data-i18n="404.subtitle">This page doesn't exist. Let's get you back.</p>
+  <p><a class="btn" id="back-home" href="index.html" data-i18n="404.back_home">Back to Home</a></p>
+  <p class="note" data-i18n="footer.disclaimer">For diet/medical questions, consult your veterinarian.</p>
+</main>
+<script>
+  // 事件队列 shim，确保脚本慢加载也能记录一次 404
+  (function(){
+    window.ps = window.ps || {};
+    var q=[]; ps._q=q;
+    ps.events = ps.events || {
+      page:  function(n,p){ q.push(['page',n,p||{}]); },
+      event: function(n,p){ q.push(['event',n,p||{}]); }
+    };
+    window.addEventListener('load', function(){
+      try{
+        var lang=(new URL(location.href)).searchParams.get('lang')||localStorage.getItem('lang')||'en';
+        q.forEach(function([t,n,p]){
+          if(t==='page' && typeof plausible==='function') plausible('pageview',{props:Object.assign({page_name:n,lang:lang},p||{})});
+          if(t==='event'&& typeof plausible==='function') plausible(n,{props:Object.assign({lang:lang},p||{})});
+        });
+        ps._q=[];
+      }catch(e){}
+    });
+  })();
+
+  (function(){
+    function lang(){ try{var u=new URL(location.href); return u.searchParams.get('lang')||localStorage.getItem('lang')||'en';}catch(e){return'en';} }
+    // 保留 ?lang
+    (function(){
+      var l=lang();
+      var a=document.getElementById('back-home');
+      if(a){
+        var url=new URL(a.getAttribute('href'), location.href);
+        var sp=url.searchParams; if(!sp.get('lang')) sp.set('lang', l); url.search=sp.toString();
+        a.setAttribute('href', url.pathname + (url.search?('?'+url.search):'') + url.hash);
+      }
+    })();
+    // 上报 404
+    if(window.ps && ps.events) ps.events.event('custom_404');
+    else if(typeof plausible==='function') plausible('custom_404', { props:{ lang: lang() } });
+  })();
+</script>
 </body>
 </html>
