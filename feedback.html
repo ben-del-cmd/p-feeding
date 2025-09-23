@@ -1,217 +1,225 @@
 <!doctype html>
 <html lang="zh-CN">
-<!-- Pet Scan · Feedback · v20250922h -->
+<!-- Pet Scan · Feedback · v=20250922k | 下拉语言选择 + ?lang= 保留 + Plausible + events.js -->
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pet Scan</title>
-  <meta name="description" content="Pet Scan feedback" />
+  <title data-i18n="feedback.metaTitle">意见反馈 · Pet Scan</title>
+  <meta name="description" data-i18n="feedback.metaDesc"
+        content="提交问题、建议或数据勘误，帮助我们提升命中率与解释可读性；信息性建议，非医疗。" />
   <meta name="robots" content="index,follow" />
+  <link rel="icon" href="cover.png" />
 
+  <!-- 性能预取 -->
   <link rel="preconnect" href="https://plausible.io" crossorigin />
   <link rel="dns-prefetch" href="https://plausible.io" />
 
+  <!-- 自动注入 Plausible：以真实 hostname 作为 data-domain -->
   <script>
-  (function(){
-    var domain = (location && location.hostname) ? location.hostname : 'localhost';
-    var s = document.createElement('script'); s.defer = true;
-    s.setAttribute('data-domain', domain); s.src = 'https://plausible.io/js/script.js';
-    document.head.appendChild(s);
-  })();
+    (function () {
+      var domain = (location && location.hostname) ? location.hostname : 'localhost';
+      var s = document.createElement('script');
+      s.defer = true;
+      s.setAttribute('data-domain', domain);
+      s.src = 'https://plausible.io/js/script.js';
+      document.head.appendChild(s);
+    })();
   </script>
 
-  <script defer src="i18n.js?v=20250922h"></script>
-  <script type="module" src="assets/js/events.js?v=20250922h"></script>
+  <!-- 多语言（含：下拉选择器、?lang= 保留、链接补参、文案切换） -->
+  <script defer src="i18n.js?v=20250922k"></script>
+
+  <!-- 统一事件：自动上报 visit_feedback_page；下面按钮会额外触发 feedback_open / feedback_click -->
+  <script type="module" src="assets/js/events.js?v=20250922k"></script>
 
   <style>
-    :root{--bg:#0b0d12;--fg:#e5e7eb;--muted:#9ca3af;--card:#111827;--btn:#10b981;--btnfg:#0b0d12;--outline:rgba(255,255,255,.08);--br:16px}
-    *{box-sizing:border-box} html,body{height:100%}
-    body{margin:0;background:linear-gradient(180deg,#0b0d12,#0f172a);color:var(--fg);font:15px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"PingFang SC","Microsoft Yahei","Noto Sans",sans-serif}
+    :root{--bg:#0b0d12;--fg:#e5e7eb;--muted:#9ca3af;--card:#111827;--btn:#10b981;--btnfg:#0b0d12;--br:16px}
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:linear-gradient(180deg,#0b0d12,#0f172a);color:var(--fg);
+         font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"PingFang SC","Microsoft Yahei","Noto Sans",sans-serif}
     .wrap{max-width:980px;margin:0 auto;padding:28px}
     header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
     .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;color:#fff;text-decoration:none}
     .logo-badge{width:28px;height:28px;border-radius:8px;background:#10b981;display:inline-grid;place-items:center;color:#0b0d12;font-weight:900}
-    .nav a{color:var(--muted);text-decoration:none;margin-left:16px}
-    .lang{margin-left:16px;padding:6px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:transparent;color:#cbd5e1;cursor:pointer}
-    .page{background:rgba(17,24,39,.6);border:1px solid var(--outline);border-radius:var(--br);padding:24px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
-    h1{margin:0 0 6px;font-size:22px} p.lead{margin:0 0 16px;color:#cbd5e1}
-    .card{background:var(--card);border:1px solid var(--outline);border-radius:14px;padding:16px}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    nav a{color:var(--muted);text-decoration:none;margin-left:16px}
+    #langSelect{
+      appearance:none;-webkit-appearance:none;-moz-appearance:none;
+      padding:6px 28px 6px 10px;border:1px solid rgba(255,255,255,.15);
+      background:#111827;color:#e5e7eb;border-radius:10px;font:14px/1.2 inherit;cursor:pointer;margin-left:10px
+    }
+
+    .hero{background:rgba(17,24,39,.6);border:1px solid rgba(255,255,255,.06);border-radius:var(--br);padding:28px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+    h1{margin:0 0 8px;font-size:24px}
+    p.lead{margin:0 0 16px;color:#cbd5e1}
+
+    .card{background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:var(--br);padding:16px}
     label{display:block;margin:10px 0 6px;color:#cbd5e1}
-    input,select,textarea{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--outline);background:#0f172a;color:#e5e7eb}
+    input[type="text"],input[type="email"],select,textarea{
+      width:100%;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);
+      background:#0f172a;color:#e5e7eb
+    }
     textarea{min-height:140px;resize:vertical}
     .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .btn{display:inline-block;padding:12px 16px;border-radius:12px;background:var(--btn);color:var(--btnfg);font-weight:800;border:0;cursor:pointer}
+    .btn{display:inline-block;padding:10px 14px;border-radius:12px;background:var(--btn);color:var(--btnfg);font-weight:700;text-decoration:none;border:0;cursor:pointer}
     .btn.sec{background:#374151;color:#e5e7eb}
-    .btn.ghost{background:transparent;border:1px solid var(--outline)}
+    .btn.warn{background:#ef4444;color:#fff}
     .muted{color:var(--muted);font-size:12px}
-    .note{margin-top:12px;color:#94a3b8;font-size:13px}
-    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
     footer{margin:28px 0 8px;color:#94a3b8;font-size:12px}
-    @media (max-width:900px){.grid{grid-template-columns:1fr}}
+    @media (max-width:880px){.row{grid-template-columns:1fr}}
   </style>
 </head>
 
 <body>
-<div class="wrap">
-  <header>
-    <a class="logo" href="./">
-      <span class="logo-badge">PS</span> <span>Pet Scan</span>
-    </a>
-    <nav class="nav">
-      <a href="./"><span data-i18n="nav_home">首页</span></a>
-      <a href="feeding.html"><span data-i18n="nav_feeding">喂食计算器</span></a>
-      <a href="cards/transition-7.html?v=20250922h" rel="nofollow"><span data-i18n="nav_card7">7天换粮卡</span></a>
-      <button id="langToggle" class="lang" type="button">中</button>
-    </nav>
-  </header>
+  <div class="wrap">
+    <header>
+      <a class="logo" href="./" data-keep-lang>
+        <span class="logo-badge">PS</span> <span data-i18n="brand.name">Pet Scan</span>
+      </a>
+      <nav class="nav" aria-label="Primary">
+        <a href="./" data-i18n="nav.home" data-keep-lang>首页</a>
+        <a href="feeding.html" data-i18n="nav.feeding" data-keep-lang>喂食计算器</a>
+        <a href="feedback.html" data-i18n="nav.feedback" data-keep-lang>反馈</a>
+        <a href="cards/transition-7.html?v=20250922h" data-i18n="nav.card" data-keep-lang>7天换粮卡</a>
+        <select id="langSelect" aria-label="Language">
+          <option value="en">English</option>
+          <option value="zh" selected>中文</option>
+          <option value="ja">日本語</option>
+          <option value="ko">한국어</option>
+          <option value="es">Español</option>
+          <option value="fr">Français</option>
+        </select>
+      </nav>
+    </header>
 
-  <main class="page" data-page="feedback">
-    <h1 data-i18n="fb_title">意见反馈</h1>
-    <p class="lead" data-i18n="fb_lead">帮助我们提升命中率与解释易读性…</p>
+    <main class="hero" data-page="feedback">
+      <h1 data-i18n="feedback.h1">意见反馈</h1>
+      <p class="lead" data-i18n="feedback.lead">
+        帮助我们提高命中率与解释可读性；导购披露保持中立。提交前不会收集个人敏感信息。
+      </p>
 
-    <div class="grid">
-      <!-- 左：提交区 -->
-      <section class="card">
-        <h3 data-i18n="fb_form_title">填写信息</h3>
+      <section class="card" aria-labelledby="formTitle">
+        <h2 id="formTitle" data-i18n="feedback.form.title">提交你的反馈</h2>
 
         <div class="row">
           <div>
-            <label for="cat" data-i18n="fb_cat">类别</label>
+            <label for="cat" data-i18n="feedback.form.category">类别</label>
             <select id="cat">
-              <option value="hit" data-i18n="fb_opt_hit">命中</option>
-              <option value="mismatch" data-i18n="fb_opt_mismatch">识别错误/不一致</option>
-              <option value="ux" data-i18n="fb_opt_ux">可用性问题</option>
-              <option value="suggest" data-i18n="fb_opt_suggest">功能建议</option>
-              <option value="other" data-i18n="fb_opt_other">其他</option>
+              <option value="bug" data-i18n="feedback.form.opt.bug">问题/报错</option>
+              <option value="data" data-i18n="feedback.form.opt.data">数据勘误</option>
+              <option value="suggest" data-i18n="feedback.form.opt.suggest">功能建议</option>
+              <option value="other" data-i18n="feedback.form.opt.other">其它</option>
             </select>
           </div>
           <div>
-            <label for="contact" data-i18n="fb_allow_contact">是否允许联系你（可选）</label>
-            <select id="contact">
-              <option value="no" selected data-i18n="fb_allow_no">否</option>
-              <option value="yes" data-i18n="fb_allow_yes">是</option>
-            </select>
+            <label for="email" data-i18n="feedback.form.contact">联系邮箱（可选）</label>
+            <input id="email" type="email" placeholder="name@example.com" autocomplete="email" />
           </div>
         </div>
 
-        <div class="row">
+        <label for="title" data-i18n="feedback.form.titleLabel">标题</label>
+        <input id="title" type="text" placeholder="简要概述问题或建议" />
+
+        <label for="detail" data-i18n="feedback.form.detail">详细描述</label>
+        <textarea id="detail" placeholder="复现步骤、期望结果、相关产品/配方/截图链接等…"></textarea>
+
+        <div class="row" style="margin-top:12px">
           <div>
-            <label for="brand" data-i18n="fb_brand">品牌（可选）</label>
-            <input id="brand" data-i18n="fb_brand_ph" data-i18n-attr="placeholder" placeholder="例如：Brand A" />
+            <button id="btnCopy" class="btn sec" data-i18n="feedback.form.copy">复制内容</button>
           </div>
-          <div>
-            <label for="product" data-i18n="fb_product">产品/口味（可选）</label>
-            <input id="product" data-i18n="fb_product_ph" data-i18n-attr="placeholder" placeholder="例如：Adult Chicken" />
+          <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end">
+            <button id="btnOpen"   class="btn"      data-i18n="feedback.form.openIssue">去 GitHub 提交</button>
+            <a id="btnMail" class="btn warn" data-i18n="feedback.form.mailto" href="#">邮件发送</a>
           </div>
         </div>
 
-        <label for="link" data-i18n="fb_link">相关链接/图片（可选）</label>
-        <input id="link" data-i18n="fb_link_ph" data-i18n-attr="placeholder" placeholder="SKU/页面/图片链接" />
-
-        <label for="desc" data-i18n="fb_desc">详细描述（必填）</label>
-        <textarea id="desc" data-i18n="fb_desc_ph" data-i18n-attr="placeholder" placeholder="请尽量描述…"></textarea>
-        <div class="muted"><span id="counter">0</span> <span data-i18n="fb_desc_count_unit">字</span></div>
-
-        <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn" id="sendBtn" data-i18n="fb_send">发邮件</button>
-          <button class="btn sec" id="copyBtn" data-i18n="fb_copy">复制反馈文本</button>
-          <a class="btn ghost" href="./" id="backHome" data-i18n="fb_back">返回首页</a>
-          <span id="tip" class="muted"></span>
-        </div>
-
-        <div class="note" data-i18n="fb_note">
-          我们默认会在匿名聚合层面使用反馈数据……
-        </div>
+        <p class="muted" style="margin-top:10px" data-i18n="feedback.form.hint">
+          点击“复制内容”会把 JSON 文本复制到剪贴板；“去 GitHub 提交”将打开 Issues 页面，粘贴即发。
+          如不方便，可点击“邮件发送”。
+        </p>
       </section>
 
-      <!-- 右：说明区 -->
-      <section class="card">
-        <h3 data-i18n="fb_right_title">说明</h3>
-        <ul style="margin:0 0 8px 18px">
-          <li data-i18n="fb_right_hit">命中…</li>
-          <li data-i18n="fb_right_mis">识别错误/不一致…</li>
-          <li data-i18n="fb_right_ux">可用性问题…</li>
-          <li data-i18n="fb_right_sug">功能建议…</li>
-        </ul>
-        <div class="note">
-          <div data-i18n="fb_right_safety">安全与边界…</div>
-          <div data-i18n="fb_right_neutral">中立性…</div>
-          <div id="metaLine" class="muted" style="margin-top:6px"></div>
-        </div>
-      </section>
-    </div>
-  </main>
+      <p class="muted" style="margin-top:14px" data-i18n="feedback.tracked">
+        已启用匿名统计（Plausible），仅用于改进产品体验；事件：visit_feedback_page / feedback_open / feedback_click。
+      </p>
+    </main>
 
-  <footer>
-    <div class="i18n-footer">© <span class="mono">Pet Scan</span> · <span class="muted">信息性建议（非医疗）</span></div>
-  </footer>
-</div>
+    <footer>
+      <strong data-i18n="footer.noticeTitle">信息性提示：</strong>
+      <span data-i18n="footer.noticeBody">
+        本工具基于公开信息与通用标准（如 AAFCO/NRC）给出参考建议，不构成医疗或诊断意见。涉及疾病/处方需求请咨询持证兽医。
+        数据可能因配方/包装更新而变化；页面已标注来源/时间戳/版本以供核验。如含推广链接，可能获得佣金（已披露）；这不影响信息的中立性。
+      </span>
+    </footer>
+  </div>
 
-<script>
-  const desc = document.getElementById('desc');
-  const counter = document.getElementById('counter');
-  desc.addEventListener('input', ()=>{ counter.textContent = Math.min(1000, desc.value.length); });
+  <script>
+    // === 可定制：你仓库的 Issues 页面（或任意收集地址） ===
+    const ISSUE_URL = "https://github.com/ben-del-cmd/p-feeding/issues/new";
+    // ================================================
 
-  function payload(){
-    const d = new Date().toISOString().replace('T',' ').replace('Z',' UTC');
-    const data = {
-      path: location.pathname + location.search,
-      category: document.getElementById('cat').value,
-      allow_contact: document.getElementById('contact').value,
-      brand: document.getElementById('brand').value.trim(),
-      product: document.getElementById('product').value.trim(),
-      link: document.getElementById('link').value.trim(),
-      desc: desc.value.trim(),
-      ts: d,
-      ver: 'v20250922h'
-    };
-    return (
-`[Pet Scan 反馈]
-分类: ${data.category}
-允许联系: ${data.allow_contact}
-品牌: ${data.brand || '-'}
-产品: ${data.product || '-'}
+    const $ = (s) => document.querySelector(s);
+    const cat = $('#cat');
+    const email = $('#email');
+    const title = $('#title');
+    const detail = $('#detail');
+    const btnCopy = $('#btnCopy');
+    const btnOpen = $('#btnOpen');
+    const btnMail = $('#btnMail');
 
-链接: ${data.link || '-'}
-
-详细描述:
-${data.desc || '(未填写)'}
-
-页面: ${data.path}
-时间: ${data.ts}
-版本: ${data.ver}`);
-  }
-
-  document.getElementById('copyBtn').addEventListener('click', async ()=>{
-    const text = payload();
-    try{
-      await navigator.clipboard.writeText(text);
-      document.getElementById('tip').textContent = (window.__PS_FB_COPY_OK__ || 'Copied to clipboard ✅');
-      document.getElementById('tip').className = 'muted';
-      try{ window.plausible && window.plausible('feedback_click', { props:{ action:'copy' } }); }catch(e){}
-    }catch(e){
-      document.getElementById('tip').textContent = (window.__PS_FB_COPY_FAIL__ || 'Copy failed');
-      document.getElementById('tip').className = 'muted';
+    function buildPayload() {
+      return {
+        page: location.href,
+        lang: (new URLSearchParams(location.search)).get('lang') || document.documentElement.lang || 'zh',
+        category: cat.value,
+        email: (email.value || '').trim(),
+        title: (title.value || '').trim(),
+        detail: (detail.value || '').trim(),
+        ua: navigator.userAgent,
+        ts: new Date().toISOString()
+      };
     }
-  });
 
-  document.getElementById('sendBtn').addEventListener('click', ()=>{
-    const text = payload();
-    const body = encodeURIComponent(text);
-    const subject = encodeURIComponent('Pet Scan 反馈');
-    const url = `mailto:?subject=${subject}&body=${body}`;
-    try{ window.plausible && window.plausible('feedback_click', { props:{ action:'mailto' } }); }catch(e){}
-    window.location.href = url;
-  });
+    function encodeRFC3986(str) {
+      return encodeURIComponent(str).replace(/[!'()*]/g, c => '%' + c.charCodeAt(0).toString(16));
+    }
 
-  (function(){
-    const ts = new Date().toISOString().replace('T',' ').replace('Z',' UTC');
-    document.getElementById('metaLine').textContent =
-      '数据与中立披露已启用；时间戳 ' + ts + '；版本 v20250922h。';
-  })();
+    btnCopy.addEventListener('click', async () => {
+      const payload = buildPayload();
+      const text = JSON.stringify(payload, null, 2);
+      try {
+        await navigator.clipboard.writeText(text);
+        btnCopy.textContent = (window.i18n && i18n.t) ? i18n.t('feedback.form.copied') : '已复制';
+        setTimeout(()=>btnCopy.textContent=(window.i18n && i18n.t)? i18n.t('feedback.form.copy'):'复制内容',1600);
+      } catch(e) {}
+    });
 
-  try{ window.plausible && window.plausible('feedback_open', { props:{ from: document.referrer ? 'referrer' : 'direct' } }); }catch(e){}
-</script>
+    btnOpen.addEventListener('click', () => {
+      const payload = buildPayload();
+      const subject = `[${payload.category}] ${payload.title || 'Feedback'}`;
+      const body = [
+        '### Feedback JSON',
+        '```json',
+        JSON.stringify(payload, null, 2),
+        '```',
+        '',
+        '### Extra context',
+        '(Optional) Paste screenshots/links below.'
+      ].join('\n');
+
+      try { window.plausible && window.plausible('feedback_open'); } catch(e){}
+      window.open(`${ISSUE_URL}?title=${encodeRFC3986(subject)}&body=${encodeRFC3986(body)}`, '_blank', 'noopener,noreferrer');
+    });
+
+    btnMail.addEventListener('click', (e) => {
+      e.preventDefault();
+      const payload = buildPayload();
+      const subject = `[${payload.category}] ${payload.title || 'Feedback'}`;
+      const body = JSON.stringify(payload, null, 2);
+      const mailto = `mailto:?subject=${encodeRFC3986(subject)}&body=${encodeRFC3986(body)}`;
+      try { window.plausible && window.plausible('feedback_click'); } catch(e){}
+      location.href = mailto;
+    });
+  </script>
 </body>
 </html>
