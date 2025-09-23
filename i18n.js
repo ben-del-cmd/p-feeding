@@ -1,172 +1,174 @@
 <script>
-// /p-feeding/i18n.js  v20250922k  (drop-in, robust apply + legacy chip removal)
-(function () {
-  const STORE_KEY = 'ps_lang';
-  const SUPPORTED = ['en','zh','ja','ko','es','fr'];   // 目前支持的语言
-  const DEFAULT = 'en';                               // 默认英语优先
-  const QS_KEY = 'lang';
+/* Pet Scan · i18n runtime v20250922p
+   - Keeps language across pages via ?lang=xx and localStorage('ps_lang')
+   - Rewrites internal links to carry ?lang
+   - Applies translations to [data-i18n] elements
+*/
 
-  // ===== 词典（节选）：务必与页面 data-i18n key 一致 =====
-  const DICT = {
-    en: {
-      nav.home: 'Home',
-      nav.calc: 'Feeding Calculator',
-      nav.feedback: 'Feedback',
-      nav.transition7: '7-Day Transition',
-      home.title: 'Turn confusing labels → into actionable advice',
-      home.card1.title: 'Feeding Calculator',
-      home.card1.btn: 'Open Calculator',
-      home.card2.title: '7-Day Transition',
-      home.card2.btn: 'View Card',
-      home.card3.title: 'Feedback',
-      home.card3.btn: 'Give Feedback',
-      footer.note: 'Pet Scan · Informational advice (not medical)',
-    },
-    zh: {
-      nav.home: '首页',
-      nav.calc: '喂食计算器',
-      nav.feedback: '反馈',
-      nav.transition7: '7天换粮卡',
-      home.title: '把难懂的标签 → 变成可执行建议',
-      home.card1.title: '喂食计算器',
-      home.card1.btn: '打开计算器',
-      home.card2.title: '7 天换粮卡',
-      home.card2.btn: '查看换粮卡',
-      home.card3.title: '意见反馈',
-      home.card3.btn: '去反馈',
-      footer.note: '© Pet Scan · 信息性建议（非医疗）',
-    },
-    ja: { /* 先留空，后续补词条也可正常落回英文 */ },
-    ko: { /* 同上 */ },
-    es: { /* 同上 */ },
-    fr: { /* 同上 */ },
-  };
+/* ===== 1) Languages & dictionary (keep your existing dictionary) ===== */
+const PS_LANGS = {
+  en: { label: 'English' },
+  zh: { label: '中文' },
+  ja: { label: '日本語' },
+  ko: { label: '한국어' },
+  es: { label: 'Español' },
+  fr: { label: 'Français' },
+};
+/* 词典：沿用你之前版本（为了便于覆盖，这里只放结构；请保留你已填好的所有键值） */
+const PS_I18N = window.PS_I18N || {
+  /* 示例：
+  title: { zh:'宠物喂食工具集', en:'Pet Feeding Tools', ja:'…', ko:'…', es:'…', fr:'…' },
+  nav_home: { zh:'首页', en:'Home', … },
+  … 其它键 …
+  */
+};
 
-  // ===== 工具函数 =====
-  const qs = (k) => new URLSearchParams(location.search).get(k);
-  const setQS = (url, k, v) => {
-    const u = new URL(url, location.origin);
-    if (v) u.searchParams.set(k, v);
-    return u.pathname + (u.search ? u.search : '') + u.hash;
-  };
-  const inList = (x, list) => list.includes(x);
+/* ===== 2) Helpers ===== */
+const PS_STORE_KEY = 'ps_lang';
 
-  // 解析语言：URL > localStorage > navigator > 默认
-  function resolveLang() {
-    const fromUrl = qs(QS_KEY);
-    if (inList(fromUrl, SUPPORTED)) return fromUrl;
+function ps_normLang(lang) {
+  lang = String(lang || '').trim().toLowerCase();
+  if (lang.includes('-')) lang = lang.split('-')[0];
+  return PS_LANGS[lang] ? lang : 'en';
+}
 
-    try {
-      const store = localStorage.getItem(STORE_KEY);
-      if (inList(store, SUPPORTED)) return store;
-    } catch (e) {}
+function ps_qsGet(name, url) {
+  const u = new URL(url || location.href);
+  return u.searchParams.get(name);
+}
 
-    const nav = (navigator.language || navigator.userLanguage || '').toLowerCase();
-    const short = nav.split('-')[0];
-    if (inList(short, SUPPORTED)) return short;
-    return DEFAULT;
-  }
+function ps_getInitialLang() {
+  // 1) URL ?lang
+  const fromUrl = ps_qsGet('lang');
+  if (fromUrl) return ps_normLang(fromUrl);
+  // 2) localStorage
+  try {
+    const fromStore = localStorage.getItem(PS_STORE_KEY);
+    if (fromStore) return ps_normLang(fromStore);
+  } catch {}
+  // 3) navigator
+  const nav = (navigator.language || (navigator.languages && navigator.languages[0]) || 'en');
+  return ps_normLang(nav);
+}
 
-  function setLang(lang, opts={propagate:true, persist:true}) {
-    const final = inList(lang, SUPPORTED) ? lang : DEFAULT;
+function ps_setUrlLang(lang) {
+  const u = new URL(location.href);
+  u.searchParams.set('lang', lang);
+  history.replaceState(null, '', u.toString());
+}
 
-    // 持久化
-    if (opts.persist) {
-      try { localStorage.setItem(STORE_KEY, final); } catch(e){}
+function ps_isInternal(href) {
+  if (!href) return false;
+  if (href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('#')) return false;
+  try {
+    const u = new URL(href, location.origin);
+    return u.origin === location.origin;
+  } catch { return false; }
+}
+
+/** 在页面上重写所有站内链接，附带 ?lang=xx */
+function ps_rewriteLinks(lang) {
+  document.querySelectorAll('a[href]').forEach(a => {
+    const href = a.getAttribute('href');
+    if (!ps_isInternal(href)) return;
+    const u = new URL(href, location.origin);
+    u.searchParams.set('lang', lang);
+    a.href = u.pathname + (u.search ? '?' + u.searchParams.toString() : '') + (u.hash || '');
+  });
+}
+
+/** 应用翻译到 [data-i18n] 元素 */
+function ps_applyTexts(lang) {
+  const fallbackOrder = [lang, 'en', 'zh']; // 缺词回退顺序
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const dict = PS_I18N[key] || {};
+    for (const tryLang of fallbackOrder) {
+      const txt = dict[tryLang];
+      if (typeof txt === 'string') { el.textContent = txt; return; }
     }
-    // 设置 <html lang="">
-    document.documentElement.setAttribute('lang', final);
+  });
+}
 
-    // 应用翻译
-    applyI18N(final);
+/** 同步右上角下拉/按钮的显示 */
+function ps_syncLangControl(lang) {
+  const sel = document.getElementById('langSelect') || document.getElementById('lang');
+  if (!sel) return;
 
-    // 链接补参
-    if (opts.propagate) {
-      patchLinks(final);
-      if (qs(QS_KEY) !== final) {
-        history.replaceState(null, '', setQS(location.href, QS_KEY, final));
-      }
-    }
-
-    // 同步下拉
-    const sel = document.getElementById('langSelect');
-    if (sel && sel.value !== final) sel.value = final;
-
-    return final;
-  }
-
-  // 把 data-i18n / data-i18n-attr 应用到 DOM
-  function applyI18N(lang) {
-    const dict = DICT[lang] || DICT[DEFAULT] || {};
-    const fallback = DICT[DEFAULT] || {};
-
-    // 文本
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-      const key = el.getAttribute('data-i18n');
-      const val = dict[key] ?? fallback[key] ?? '';
-      if (val) el.textContent = val;
-    });
-
-    // 属性
-    document.querySelectorAll('[data-i18n-attr]').forEach(el => {
-      const conf = el.getAttribute('data-i18n-attr'); // e.g. title:home.title|placeholder:form.hint
-      conf.split('|').forEach(pair => {
-        const [attr, key] = pair.split(':');
-        const val = dict[key] ?? fallback[key] ?? '';
-        if (attr && val) el.setAttribute(attr.trim(), val);
+  // 如果是 <select>，重建选项并选中当前
+  if (sel.tagName === 'SELECT') {
+    if (!sel.dataset.built) {
+      sel.innerHTML = '';
+      // 排序：English 优先，其次 zh/ja/ko/es/fr（可按需调整）
+      const order = ['en','zh','ja','ko','es','fr'];
+      order.forEach(code => {
+        if (!PS_LANGS[code]) return;
+        const opt = document.createElement('option');
+        opt.value = code;
+        opt.textContent = PS_LANGS[code].label;
+        sel.appendChild(opt);
       });
-    });
-
-    // 移除旧的语言圆点按钮（legacy chip），避免双控件冲突
-    document.querySelectorAll('[data-legacy-lang-chip]').forEach(el => el.remove());
-  }
-
-  // 给站内链接自动补上 ?lang=
-  function patchLinks(lang) {
-    const anchors = document.querySelectorAll('a[href]');
-    anchors.forEach(a => {
-      const href = a.getAttribute('href');
-      // 只处理站内相对路径或本站绝对路径
-      if (!href || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('#')) return;
-      // 外链直接跳过
-      try {
-        const u = new URL(href, location.origin);
-        if (u.origin !== location.origin) return;
-        // 给 /p-feeding/ 站内页补参
-        if (u.pathname.startsWith('/p-feeding/')) {
-          a.setAttribute('href', setQS(u.href, QS_KEY, lang));
-        }
-      } catch(e){}
-    });
-  }
-
-  // 下拉事件
-  function bindSelect() {
-    const sel = document.getElementById('langSelect');
-    if (!sel) return;
-    if (!SUPPORTED.includes(sel.value)) sel.value = resolveLang();
-    sel.addEventListener('change', () => setLang(sel.value));
-  }
-
-  // 主流程：确保 DOM 就绪后执行；若已就绪，立即执行
-  function boot() {
-    const lang = resolveLang();
-    setLang(lang, {propagate:true, persist:true});
-    bindSelect();
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', boot, { once: true });
+      sel.dataset.built = '1';
+    }
+    sel.value = lang;
   } else {
-    boot();
+    // 非 select：显示当前语言名（按钮/伪下拉）
+    sel.textContent = PS_LANGS[lang]?.label || lang.toUpperCase();
+  }
+}
+
+/* ===== 3) Public: initI18n({ page }) ===== */
+function initI18n({ page = '' } = {}) {
+  const lang = ps_getInitialLang();
+
+  // 保存 & 写回 URL
+  try { localStorage.setItem(PS_STORE_KEY, lang); } catch {}
+  ps_setUrlLang(lang);
+
+  // 应用文案
+  ps_applyTexts(lang);
+
+  // 同步右上角控件
+  ps_syncLangControl(lang);
+
+  // 重写站内链接，保证跨页保持语言
+  ps_rewriteLinks(lang);
+
+  // 绑定语言切换
+  const sel = document.getElementById('langSelect') || document.getElementById('lang');
+  if (sel) {
+    const handler = (ev) => {
+      const newLang = ps_normLang(sel.value || sel.getAttribute('data-value') || sel.textContent);
+      try { localStorage.setItem(PS_STORE_KEY, newLang); } catch {}
+      ps_setUrlLang(newLang);
+      ps_applyTexts(newLang);
+      ps_syncLangControl(newLang);
+      ps_rewriteLinks(newLang);
+    };
+    // select 用 change；按钮型可以也绑 click（即使是 select 也没关系）
+    sel.addEventListener('change', handler);
+    sel.addEventListener('click', handler);
   }
 
-  // 暴露调试 API
-  window.PS_I18N = {
-    get: () => (qs(QS_KEY) || localStorage.getItem(STORE_KEY) || document.documentElement.getAttribute('lang') || DEFAULT),
-    set: (l) => setLang(l),
-    dict: DICT,
-    supported: SUPPORTED.slice(),
-  };
-})();
+  // 保险：拦截点击，若发现站内链接未带 ?lang，则临时补上（极端情况下仍能保持）
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a[href]');
+    if (!a) return;
+    if (!ps_isInternal(a.getAttribute('href'))) return;
+    const u = new URL(a.href, location.origin);
+    if (!u.searchParams.get('lang')) {
+      u.searchParams.set('lang', lang);
+      a.href = u.toString();
+    }
+  });
+
+  // 你可用来上报当前页面的 visit_* 事件（可选）
+  try { if (window.track) {
+    const map = { home:'visit_home', feeding:'visit_feeding_page', feedback:'visit_feedback_page', trans7:'visit_transition7_page' };
+    if (map[page]) window.track(map[page]);
+  }} catch {}
+}
+
+// 暴露到全局
+window.initI18n = initI18n;
 </script>
