@@ -1,14 +1,13 @@
-/* /p-feeding/i18n.js  — drop-in, no <script> tags needed */
+/* /p-feeding/i18n.js — pure JS (no <script> wrapper) */
 (() => {
   'use strict';
 
   // -------------------- Config --------------------
   const SUPPORTED = ['en', 'zh', 'ja', 'ko', 'es', 'fr'];
-  const DEFAULT_LANG = 'en';                    // 英语优先
+  const DEFAULT_LANG = 'en';            // 英语优先
   const LS_KEY = 'ps_lang';
 
   // -------------------- Dictionary --------------------
-  // 统一字典键（务必与页面上的 data-i18n / data-i18n-placeholder 等一致）
   const dict = {
     en: {
       // nav
@@ -94,7 +93,7 @@
       'common.lang': 'Language'
     },
 
-    // 中文
+    // zh
     zh: {
       'nav.home': '首页', 'nav.calc': '喂食计算器', 'nav.feedback': '反馈', 'nav.transition': '7天换粮卡',
       'lang.en': 'English', 'lang.zh': '中文', 'lang.ja': '日本語', 'lang.ko': '한국어', 'lang.es': 'Español', 'lang.fr': 'Français',
@@ -163,19 +162,18 @@
       'common.lang': '语言'
     },
 
-    // 其它语言：先用中文内容兜底，后续再补翻译
+    // 其它语言先用中文兜底，后续再补翻译
     ja: {}, ko: {}, es: {}, fr: {}
   };
-  // 让 ja/ko/es/fr 在缺失时回退到中文，但整体仍以 en 为第一优先
-  ['ja', 'ko', 'es', 'fr'].forEach(k => { dict[k] = Object.assign({}, dict.zh, dict[k] || {}); });
+  ['ja','ko','es','fr'].forEach(k => { dict[k] = Object.assign({}, dict.zh, dict[k] || {}); });
 
   // -------------------- Lang helpers --------------------
   const getUrlLang = () => {
     const m = location.search.match(/[?&]lang=([a-z-]+)/i);
     return m ? m[1].toLowerCase() : null;
-  };
+    };
   const getStoredLang = () => localStorage.getItem(LS_KEY);
-  const getNavigatorLang = () => (navigator.language || '').slice(0, 2).toLowerCase();
+  const getNavigatorLang = () => (navigator.language || '').slice(0,2).toLowerCase();
 
   const normalize = (lang) => {
     if (!lang) return null;
@@ -238,20 +236,17 @@
   const bindLangControls = () => {
     const btn = document.getElementById('lang-btn');
     const sel = document.getElementById('lang-select');
-    const menu = document.getElementById('lang-menu'); // 可选：你的自定义下拉容器
+    const menu = document.getElementById('lang-menu');
 
     if (btn) {
       btn.addEventListener('click', () => {
-        // 若页面提供了 select 或 menu，就交给它们；否则为兜底的“轮换”
-        if (sel || menu) return;
+        if (sel || menu) return; // 有下拉菜单就不轮换
         const idx = SUPPORTED.indexOf(currentLang);
         const next = SUPPORTED[(idx + 1) % SUPPORTED.length];
         setLang(next);
       });
     }
-    if (sel) {
-      sel.addEventListener('change', (e) => setLang(e.target.value));
-    }
+    if (sel) sel.addEventListener('change', e => setLang(e.target.value));
     if (menu) {
       menu.addEventListener('click', (e) => {
         const node = e.target.closest('[data-lang]');
@@ -265,7 +260,6 @@
   };
 
   // -------------------- Link rewriting --------------------
-  // 自动给站内链接带上 ?lang=xx
   const rewriteInternalLinks = (lang) => {
     const baseHost = location.host;
     document.querySelectorAll('a[href]:not([data-no-lang])').forEach(a => {
@@ -281,17 +275,14 @@
 
   // -------------------- Boot --------------------
   document.addEventListener('DOMContentLoaded', () => {
-    // 将当前语言写回 URL（保证首次进入也显式带 lang）
     const url = new URL(location.href);
     if (!url.searchParams.get('lang')) {
       url.searchParams.set('lang', currentLang);
       history.replaceState(null, '', url.pathname + url.search + url.hash);
     }
-
     bindLangControls();
     applyAll(currentLang);
 
-    // 监听动态内容插入，保证后续节点也会被翻译
     const mo = new MutationObserver(() => applyAll(currentLang));
     mo.observe(document.body, { childList: true, subtree: true });
   });
