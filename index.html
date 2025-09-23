@@ -3,54 +3,61 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title data-i18n="home.h1">Turn confusing labels — into actionable advice</title>
-  <link rel="icon" href="cover.png">
-  <!-- 你的样式表（如有） -->
-  <!-- <link rel="stylesheet" href="assets/site.css"> -->
+  <title>Pet Scan</title>
+
+  <!-- 关键三行：路径已按 /p-feeding/ 固定，直接可用 -->
+  <base href="/p-feeding/">
+  <link rel="stylesheet" href="/p-feeding/assets/site.css?v=20250922">
+  <script defer src="/p-feeding/i18n.js?v=20250922"></script>
 </head>
 <body>
-  <header class="nav">
-    <a href="index.html" data-i18n="brand.name">Pet Scan</a>
+
+  <!-- 顶部导航（已挂 data-i18n） -->
+  <header class="nav container">
+    <a href="./" data-i18n="brand.name">Pet Scan</a>
     <nav>
-      <a href="feeding.html" data-i18n="nav.feeding"></a>
-      <a href="feedback.html" data-i18n="nav.feedback"></a>
-      <a href="cards/transition-7.html" data-i18n="nav.card"></a>
+      <a href="feeding.html" data-i18n="nav.feeding">喂食计算器</a>
+      <a href="feedback.html" data-i18n="nav.feedback">反馈</a>
+      <a href="cards/" data-i18n="nav.card">7天换粮卡</a>
     </nav>
+    <!-- 语言按钮：i18n.js 会自动更新文案与切换 -->
     <button id="lang-btn">English</button>
   </header>
 
+  <!-- 主体内容（全部挂了 data-i18n / data-i18n-placeholder） -->
   <main class="container">
-    <h1 data-i18n="home.h1"></h1>
-    <p data-i18n="home.lead"></p>
+    <h1 data-i18n="home.h1">把难懂的标签 → 变成可执行建议</h1>
+    <p class="muted" data-i18n="home.lead">
+      扫描/录入宠物食品与洗护信息，统一口径（ME、GA、as-fed/DM），秒出喂量/换粮卡；页面显式来源与时间戳。信息性建议，非医疗。
+    </p>
 
     <section class="cards">
       <article class="card">
-        <h3 data-i18n="home.calc.title"></h3>
-        <p data-i18n="home.calc.desc"></p>
-        <a class="btn" href="feeding.html" data-i18n="home.calc.btn"></a>
+        <h3 data-i18n="home.calc.title">① 喂食计算器</h3>
+        <p data-i18n="home.calc.desc">RER/MER → kcal/天 → 杯/克；支持混喂与零食占比提示。</p>
+        <a class="btn" href="feeding.html" data-i18n="home.calc.btn">打开计算器</a>
       </article>
 
       <article class="card">
-        <h3 data-i18n="home.card.title"></h3>
-        <p data-i18n="home.card.desc"></p>
-        <a class="btn" href="cards/transition-7.html" data-i18n="home.card.btn"></a>
+        <h3 data-i18n="home.card.title">② 7 天换粮卡</h3>
+        <p data-i18n="home.card.desc">90/10 → 0/100 的过渡表，自动按能量密度换算。</p>
+        <a class="btn" href="cards/" data-i18n="home.card.btn">查看换粮卡</a>
       </article>
 
       <article class="card">
-        <h3 data-i18n="home.fb.title"></h3>
-        <p data-i18n="home.fb.desc"></p>
-        <a class="btn" href="feedback.html" data-i18n="home.fb.btn"></a>
+        <h3 data-i18n="home.fb.title">③ 意见反馈</h3>
+        <p data-i18n="home.fb.desc">帮助我们提高命中率与解释易读性；导购披露保持中立。</p>
+        <a class="btn" href="feedback.html" data-i18n="home.fb.btn">去反馈</a>
       </article>
     </section>
 
-    <p class="muted" data-i18n="home.tracked"></p>
+    <p class="muted" style="margin-top:24px">
+      <strong data-i18n="footer.noticeTitle">信息性提示（非医疗）</strong>
+      <span data-i18n="footer.noticeBody">
+        数据可能因配方/包装更新而变化；页面已标注来源/时间戳/版本以供核验。
+      </span>
+    </p>
   </main>
 
-  <footer class="footer">
-    <strong data-i18n="footer.noticeTitle"></strong>
-    <span data-i18n="footer.noticeBody"></span>
-  </footer>
-
-  <script src="i18n.js?v=1"></script>
 </body>
 </html>
