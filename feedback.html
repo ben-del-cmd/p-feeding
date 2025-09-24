@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Pet Scan — Feedback</title>
   <meta name="description" content="Send feedback to improve the product. Informational only. Not medical advice.">
-
   <script>
     (function () {
       var u = new URL(location.href);
@@ -14,9 +13,7 @@
       document.documentElement.setAttribute('lang', cur); localStorage.setItem('lang', cur);
     })();
   </script>
-
   <link rel="stylesheet" href="assets/site.css?v=20250920b" />
-
   <script>
     (function () {
       var DOMAIN = 'ben-del-cmd.github.io';
@@ -27,10 +24,8 @@
       }
     })();
   </script>
-
   <script src="i18n.js?v=20250923" defer></script>
   <script src="assets/js/events.js?v=20250923" defer></script>
-
   <style>
     :root { --maxw: 960px; }
     body { margin:0; line-height:1.45; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto; }
@@ -77,34 +72,37 @@
   <p class="note" data-i18n="footer.disclaimer">For diet/medical questions, consult your veterinarian.</p>
 </footer>
 
-<!-- 兜底：保留 ?lang（修正版） + 事件 -->
+<!-- 安全兜底：清理 ??%3F，去重 lang，仅保留一个 -->
 <script>
-  (function(){
-    function lang(){ try{ var u=new URL(location.href); return u.searchParams.get('lang')||localStorage.getItem('lang')||'en'; }catch(e){ return 'en'; } }
-
-    document.addEventListener('DOMContentLoaded', function () {
-      var l = lang();
-      document.querySelectorAll('a[href]').forEach(function (a) {
-        var href = a.getAttribute('href');
-        if (!href || href.startsWith('#') || /^https?:\/\//i.test(href)) return;
-        var url = new URL(href, location.href);
-        if (!url.searchParams.get('lang')) url.searchParams.set('lang', l);
-        a.setAttribute('href', url.pathname + url.search + url.hash); // ★ 修正版
-      });
+(function(){
+  function curLang(){ try{var u=new URL(location.href); return u.searchParams.get('lang')||localStorage.getItem('lang')||'en';}catch(e){return 'en';} }
+  function dedupeLangLinks(){
+    var l = curLang();
+    document.querySelectorAll('a[href]').forEach(function(a){
+      var href=a.getAttribute('href');
+      if(!href || href.startsWith('#') || /^https?:\/\//i.test(href)) return;
+      var url=new URL(href, location.href);
+      if (/^\?%3F/i.test(url.search)) url.search='?'+url.search.replace(/^\?%3F/i,'');
+      if (/^\?%253F/i.test(url.search)) url.search='?'+url.search.replace(/^\?%253F/i,'');
+      url.searchParams.delete('lang');
+      url.searchParams.set('lang', l);
+      a.setAttribute('href', url.pathname + url.search + url.hash);
     });
+  }
+  document.addEventListener('DOMContentLoaded', dedupeLangLinks);
 
-    function page(name, props){ if (window.ps && ps.events && ps.events.page) ps.events.page(name, props); else plausible('pageview', { props: Object.assign({ page_name: name, lang: lang() }, props||{}) }); }
-    function evt(name, props){ if (window.ps && ps.events && ps.events.event) ps.events.event(name, props); else plausible(name, { props: Object.assign({ lang: lang() }, props||{}) }); }
+  function page(name, props){ if (window.ps && ps.events && ps.events.page) ps.events.page(name, props); else plausible('pageview', { props: Object.assign({ page_name: name, lang: curLang() }, props||{}) }); }
+  function evt(name, props){ if (window.ps && ps.events && ps.events.event) ps.events.event(name, props); else plausible(name, { props: Object.assign({ lang: curLang() }, props||{}) }); }
 
-    window.addEventListener('DOMContentLoaded', function(){
-      page('visit_feedback_page');
-      var btn = document.getElementById('fb-send');
-      btn.addEventListener('click', function(){
-        evt('feedback_open', { type: (document.getElementById('fb-type')||{}).value || 'other' });
-        alert('Thanks!');
-      });
+  document.addEventListener('DOMContentLoaded', function(){
+    page('visit_feedback_page');
+    var btn = document.getElementById('fb-send');
+    btn.addEventListener('click', function(){
+      evt('feedback_open', { type: (document.getElementById('fb-type')||{}).value || 'other' });
+      alert('Thanks!');
     });
-  })();
+  });
+})();
 </script>
 </body>
 </html>
