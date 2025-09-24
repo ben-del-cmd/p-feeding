@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Pet Scan — Feeding Calculator</title>
   <meta name="description" content="RER/MER → kcal/day → cups/grams with activity factor. Informational only. Not medical advice.">
-
   <script>
     (function () {
       var u = new URL(location.href);
@@ -14,9 +13,7 @@
       document.documentElement.setAttribute('lang', cur); localStorage.setItem('lang', cur);
     })();
   </script>
-
   <link rel="stylesheet" href="../assets/site.css?v=20250920b" />
-
   <script>
     (function () {
       var DOMAIN = 'ben-del-cmd.github.io';
@@ -27,10 +24,8 @@
       }
     })();
   </script>
-
   <script src="../i18n.js?v=20250923" defer></script>
   <script src="../assets/js/events.js?v=20250923" defer></script>
-
   <style>
     :root { --maxw: 960px; }
     body { margin:0; line-height:1.45; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto; }
@@ -87,7 +82,7 @@
     <label for="grams-per-cup" data-i18n="feeding.grams_per_cup.label">grams per cup</label>
     <input id="grams-per-cup" type="number" min="1" step="1" value="110" placeholder="e.g., 110" data-i18n-placeholder="feeding.grams_per_cup.placeholder" />
 
-    <p class="note" data-i18n="feeding.formula.note">RER = 70 × weight^0.75; MER = RER × activity.</p>
+    <p class="note" id="formula-note" data-i18n="feeding.formula.note">RER = 70 × weight^0.75; MER = RER × activity.</p>
 
     <button id="btn-calc" class="btn" data-i18n="feeding.calculate">Calculate</button>
 
@@ -106,51 +101,57 @@
   <p class="note" data-i18n="footer.disclaimer">For diet/medical questions, consult your veterinarian.</p>
 </footer>
 
-<!-- 兜底：保留 ?lang（修正版） + 计算逻辑 + 事件 -->
+<!-- 安全兜底：清理 ??%3F，去重 lang，仅保留一个 -->
 <script>
-  (function () {
-    function lang(){ try{ var u=new URL(location.href); return u.searchParams.get('lang')||localStorage.getItem('lang')||'en'; }catch(e){ return 'en'; } }
-    document.addEventListener('DOMContentLoaded', function () {
-      var l = lang();
-      document.querySelectorAll('a[href]').forEach(function (a) {
-        var href = a.getAttribute('href');
-        if (!href || href.startsWith('#') || /^https?:\/\//i.test(href)) return;
-        var url = new URL(href, location.href);
-        if (!url.searchParams.get('lang')) url.searchParams.set('lang', l);
-        a.setAttribute('href', url.pathname + url.search + url.hash); // ★ 修正版
-      });
+(function(){
+  function curLang(){ try{var u=new URL(location.href); return u.searchParams.get('lang')||localStorage.getItem('lang')||'en';}catch(e){return 'en';} }
+  function dedupeLangLinks(){
+    var l = curLang();
+    document.querySelectorAll('a[href]').forEach(function(a){
+      var href=a.getAttribute('href');
+      if(!href || href.startsWith('#') || /^https?:\/\//i.test(href)) return;
+      var url=new URL(href, location.href);
+      if (/^\?%3F/i.test(url.search)) url.search='?'+url.search.replace(/^\?%3F/i,'');
+      if (/^\?%253F/i.test(url.search)) url.search='?'+url.search.replace(/^\?%253F/i,'');
+      url.searchParams.delete('lang');
+      url.searchParams.set('lang', l);
+      a.setAttribute('href', url.pathname + url.search + url.hash);
     });
-    function page(name, props){ if (window.ps && ps.events && ps.events.page) ps.events.page(name, props); else plausible('pageview', { props: Object.assign({ page_name: name, lang: lang() }, props||{}) }); }
-    function evt(name, props){ if (window.ps && ps.events && ps.events.event) ps.events.event(name, props); else plausible(name, { props: Object.assign({ lang: lang() }, props||{}) }); }
+  }
+  document.addEventListener('DOMContentLoaded', dedupeLangLinks);
 
-    function pow075(x){ return Math.pow(x, 0.75); }
-    function toKg(w,u){ return u==='lb' ? w*0.45359237 : w; }
+  // 计算逻辑 + 事件
+  function pow075(x){ return Math.pow(x, 0.75); }
+  function toKg(w,u){ return u==='lb' ? w*0.45359237 : w; }
+  function lang(){ return curLang(); }
+  function page(name, props){ if (window.ps && ps.events && ps.events.page) ps.events.page(name, props); else plausible('pageview', { props: Object.assign({ page_name: name, lang: lang() }, props||{}) }); }
+  function evt(name, props){ if (window.ps && ps.events && ps.events.event) ps.events.event(name, props); else plausible(name, { props: Object.assign({ lang: lang() }, props||{}) }); }
 
-    window.addEventListener('DOMContentLoaded', function () {
-      page('visit_feeding_page');
-      document.getElementById('btn-calc').addEventListener('click', function () {
-        var w   = parseFloat(document.getElementById('weight').value||'0');
-        var unit= document.getElementById('unit').value;
-        var kpc = parseFloat(document.getElementById('kcal-per-cup').value||'0');
-        var gpc = parseFloat(document.getElementById('grams-per-cup').value||'0');
-        var act = parseFloat(document.getElementById('activity').value||'1.0');
-        if(!w || !kpc || !gpc){ return; }
+  document.addEventListener('DOMContentLoaded', function () {
+    page('visit_feeding_page');
+    document.getElementById('btn-calc').addEventListener('click', function () {
+      var w   = parseFloat(document.getElementById('weight').value||'0');
+      var unit= document.getElementById('unit').value;
+      var kpc = parseFloat(document.getElementById('kcal-per-cup').value||'0');
+      var gpc = parseFloat(document.getElementById('grams-per-cup').value||'0');
+      var act = parseFloat(document.getElementById('activity').value||'1.0');
+      if(!w || !kpc || !gpc){ return; }
 
-        var kg   = toKg(w, unit);
-        var rer  = 70 * pow075(kg);
-        var mer  = rer * act;
-        var cups = mer / kpc;
-        var grams= cups * gpc;
+      var kg   = toKg(w, unit);
+      var rer  = 70 * pow075(kg);
+      var mer  = rer * act;
+      var cups = mer / kpc;
+      var grams= cups * gpc;
 
-        document.getElementById('out-kcal').textContent  = Math.round(mer);
-        document.getElementById('out-cups').textContent  = (Math.round(cups*100)/100).toFixed(2);
-        document.getElementById('out-grams').textContent = Math.round(grams);
-        document.getElementById('result').hidden = false;
+      document.getElementById('out-kcal').textContent  = Math.round(mer);
+      document.getElementById('out-cups').textContent  = (Math.round(cups*100)/100).toFixed(2);
+      document.getElementById('out-grams').textContent = Math.round(grams);
+      document.getElementById('result').hidden = false;
 
-        evt('calc_click');
-      });
+      evt('calc_click');
     });
-  })();
+  });
+})();
 </script>
 </body>
 </html>
