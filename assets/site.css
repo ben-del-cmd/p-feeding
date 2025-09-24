@@ -1,6 +1,10 @@
-/* Pet Scan base styles (keep original dark theme) */
+/* ============================
+   Pet Scan — site.css (full)
+   Theme: dark, mint accent
+   Last update: 2025-09-23
+   ============================ */
 
-/* 颜色与背景：保持深色渐变风格 */
+/* ---------- 基础变量 ---------- */
 :root{
   --bg1:#0b1220;
   --bg2:#0e172a;
@@ -9,10 +13,14 @@
   --muted:#a8b2c1;
   --surface:rgba(255,255,255,.04);
   --border:rgba(255,255,255,.10);
-  --accent:#22d3a3; /* 主按钮色：与原站一致的青绿 */
+  --accent:#22d3a3;
   --container:1080px;
 }
 
+/* 告诉浏览器控件使用深色（影响原生下拉弹层底色） */
+:root, body { color-scheme: dark; }
+
+/* ---------- Reset ---------- */
 *{box-sizing:border-box}
 html,body{height:100%}
 body{
@@ -24,16 +32,17 @@ body{
     linear-gradient(180deg, var(--bg1), var(--bg2) 50%, var(--bg3));
 }
 
-/* 容器与常用区块 */
+/* ---------- 布局容器 ---------- */
 header,main,footer{
   width:100%;
   max-width:var(--container);
   margin:0 auto;
   padding:24px 20px;
 }
+
 .note{color:var(--muted)}
 
-/* 顶部导航（不改配色） */
+/* ---------- 顶部导航 ---------- */
 nav a{
   color:var(--muted);
   text-decoration:none;
@@ -42,17 +51,18 @@ nav a{
 }
 nav a:hover{color:var(--text)}
 
-/* 卡片与网格：保持原来风格 */
+/* ---------- 卡片与网格 ---------- */
 .card{
   background:var(--surface);
   border:1px solid var(--border);
   border-radius:14px;
   padding:16px;
 }
+
 .grid{display:grid;gap:16px;grid-template-columns:repeat(3,minmax(0,1fr))}
 @media (max-width:980px){.grid{grid-template-columns:1fr}}
 
-/* 按钮：保持原来的青绿主色 */
+/* ---------- 按钮 ---------- */
 .btn{
   display:inline-flex; align-items:center; justify-content:center;
   min-height:44px; padding:0 16px;
@@ -65,7 +75,7 @@ nav a:hover{color:var(--text)}
 .btn:hover{filter:brightness(1.05)}
 .btn:active{filter:brightness(.98)}
 
-/* 表单的通用样式（全站） */
+/* ---------- 表单通用 ---------- */
 label{display:block;margin:12px 0 6px;font-weight:700}
 input,select,textarea,button{font:inherit}
 input,select,textarea{
@@ -84,23 +94,20 @@ input:focus,select:focus,textarea:focus{
 }
 
 /* =========================
-   仅“计算器页”的排版优化（双列）
+   仅“计算器页”样式（双列）
+   给 feeding.html 的 <body> 添加 class="page-feeding"
    ========================= */
-
-/* 作用域：给 feeding.html 的 <body> 添加 class="page-feeding" */
 .page-feeding main{max-width:980px}
 
-/* 核心：把主表单卡片收窄并居中 */
 .page-feeding .calculator{
-  max-width:860px;          /* 更宽屏也不会“太长” */
+  max-width:860px;
   margin:12px auto 24px;
 }
 
-/* 双列网格：一行两个类目；移动端自动回落为1列 */
 .page-feeding .form-grid{
   display:grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap:16px 20px;            /* 行间16、列间20 */
+  gap:16px 20px; /* 行/列间距 */
 }
 .page-feeding .field{display:block}
 .page-feeding .field label{margin:6px 0 6px}
@@ -110,19 +117,52 @@ input:focus,select:focus,textarea:focus{
   padding:10px 12px;
 }
 
-/* 让“宠物/体重/单位/活动/kcal/grams”排布更紧凑 */
 .page-feeding #formula-note{margin:8px 0 10px}
 
-/* 结果卡片更聚焦但不抢色 */
 .page-feeding #result.card{
   margin-top:14px;
   border-color:rgba(255,255,255,.12);
   box-shadow:0 8px 20px rgba(0,0,0,.18);
 }
 
-/* 移动端：小于 720px 改为单列，避免挤压 */
+/* 小屏自动回落单列 */
 @media (max-width:720px){
   .page-feeding .form-grid{grid-template-columns:1fr}
   .page-feeding .calculator{max-width:680px;margin:8px auto 18px}
   .page-feeding .field input,.page-feeding .field select{height:42px}
+}
+
+/* =========================
+   下拉菜单弹层：深色&可读（含语言下拉）
+   ========================= */
+
+/* 语言下拉与所有 select 的常态 */
+#ps-lang-select,
+select{
+  appearance: auto;
+  background-color: rgba(255,255,255,.04);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+/* 弹层中的每一项（深色项背景与文字） */
+#ps-lang-select option,
+select option{
+  background-color: #0e172a;   /* 贴近 --bg2 */
+  color: var(--text);
+}
+
+/* 悬停/选中高亮（轻度主色强调） */
+#ps-lang-select option:hover,
+#ps-lang-select option:checked,
+select option:hover,
+select option:checked{
+  background-color: rgba(34,211,163,.22);
+  color: #fff;
+}
+
+/* Windows 高对比模式 */
+@media (forced-colors: active){
+  #ps-lang-select, select{ forced-color-adjust: none; }
 }
