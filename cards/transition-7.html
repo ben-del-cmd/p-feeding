@@ -1,12 +1,12 @@
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>7-Day Transition</title>
-<link rel="stylesheet" href="../assets/site.css?v=20250923d">
+<link rel="stylesheet" href="../assets/site.css?v=20250923e">
 <style>
 :root,body{color-scheme:dark}
-#ps-lang-select,select{appearance:auto;background:rgba(255,255,255,.04);color:#e7eefc;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:.4rem .7rem}
-#ps-lang-select option,select option{background:#0e172a;color:#e7eefc}
-#ps-lang-select option:hover,#ps-lang-select option:checked{background:rgba(34,211,163,.22);color:#fff}
+#ps-lang-select{min-width:140px;max-width:180px}
+select{appearance:auto;background:rgba(255,255,255,.04);color:#e7eefc;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:.4rem .6rem}
+select option{background:#0e172a;color:#e7eefc}
 </style>
 <script defer data-domain="" src="https://plausible.io/js/script.js"></script>
 </head><body>
@@ -38,10 +38,6 @@
 </main>
 
 <script src="../i18n.js"></script>
-<script src="../assets/js/events.js?v=20250923d"></script>
-<script>
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister()));
-}
-</script>
+<script src="../assets/js/events.js?v=20250923e"></script>
+<script>if('serviceWorker'in navigator){navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister()))}</script>
 </body></html>
