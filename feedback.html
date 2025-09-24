@@ -1,49 +1,33 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Pet Scan — Feedback</title>
-
-<link rel="manifest" href="/p-feeding/manifest.webmanifest">
-<meta name="theme-color" content="#22d3a3">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="/p-feeding/assets/icons/icon-192.png">
-
-<link rel="stylesheet" href="assets/site.css?v=20250923c">
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Feedback</title>
+<link rel="stylesheet" href="assets/site.css?v=20250923d">
 <style>
-  :root,body{color-scheme:dark}
-  #ps-lang-select,select{appearance:auto;background-color:rgba(255,255,255,.04);color:#e7eefc;border:1px solid rgba(255,255,255,.10);border-radius:12px}
-  #ps-lang-select option,select option{background:#0e172a;color:#e7eefc}
-  #ps-lang-select option:hover,#ps-lang-select option:checked,select option:hover,select option:checked{background:rgba(34,211,163,.22);color:#fff}
+:root,body{color-scheme:dark}
+#ps-lang-select,select{appearance:auto;background:rgba(255,255,255,.04);color:#e7eefc;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:.4rem .7rem}
+#ps-lang-select option,select option{background:#0e172a;color:#e7eefc}
+#ps-lang-select option:hover,#ps-lang-select option:checked{background:rgba(34,211,163,.22);color:#fff}
 </style>
-
 <script defer data-domain="" src="https://plausible.io/js/script.js"></script>
-</head>
-<body>
-<header style="display:flex;align-items:center;gap:16px;">
-  <nav style="display:flex;gap:16px;">
+</head><body>
+<header style="display:flex;gap:16px;align-items:center">
+  <nav style="display:flex;gap:16px">
     <a href="index.html">Home</a>
     <a href="feeding/feeding.html">Calculator</a>
     <a href="cards/transition-7.html">7-Day Switch</a>
     <a href="feedback.html">Feedback</a>
   </nav>
-  <div style="margin-left:auto">
-    <select id="ps-lang-select" aria-label="Language">
-      <option value="en">English</option>
-      <option value="es">Español</option>
-      <option value="zh">中文</option>
-      <option value="fr">Français</option>
-    </select>
-  </div>
+  <select id="ps-lang-select" style="margin-left:auto">
+    <option value="en">English</option><option value="es">Español</option>
+    <option value="zh">中文</option><option value="fr">Français</option>
+  </select>
 </header>
 
 <main>
   <h1>Feedback</h1>
   <section class="card">
     <p class="note">We use anonymous analytics to improve features. Informational only. Not medical advice.</p>
-    <p>If you found an issue or have suggestions, please tell us what’s unclear or missing (screenshots help).</p>
+    <p>If you spot an issue or have suggestions, please share details (screenshots help).</p>
     <div style="display:flex;gap:12px;flex-wrap:wrap">
       <a class="btn" href="mailto:hello@example.com?subject=Pet%20Scan%20Feedback">Send Email</a>
       <a class="btn" href="index.html">Back to Home</a>
@@ -51,24 +35,11 @@
   </section>
 </main>
 
-<script src="assets/js/events.js?v=20250923c"></script>
+<script src="i18n.js"></script>
+<script src="assets/js/events.js?v=20250923d"></script>
 <script>
-(function(){
-  const allowed=['en','es','zh','fr'];
-  const url=new URL(location.href);
-  let lang=url.searchParams.get('lang')||'en';
-  if(!allowed.includes(lang)) lang='en';
-  const sel=document.getElementById('ps-lang-select');
-  if(sel){ sel.value=lang; sel.addEventListener('change',()=>{const u=new URL(location.href);u.searchParams.set('lang',sel.value);location.href=u.toString();}); }
-  document.querySelectorAll('a[href]').forEach(a=>{
-    const href=a.getAttribute('href'); if(!href||/^(https?:|mailto:|tel:|#)/i.test(href)) return;
-    const u=new URL(href,location.href); u.searchParams.set('lang',lang); a.href=u.pathname+'?'+u.searchParams.toString();
-  });
-  if('serviceWorker' in navigator){
-    const base=location.pathname.split('/').slice(0,2).join('/')+'/';
-    navigator.serviceWorker.register(base+'service-worker.js').catch(console.error);
-  }
-})();
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister()));
+}
 </script>
-</body>
-</html>
+</body></html>
