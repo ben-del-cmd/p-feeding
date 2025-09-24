@@ -1,17 +1,19 @@
-/* i18n.js — 多语言下拉 + data-i18n 应用 + ?lang 跨页保留（已修复链接“??%3F”问题） */
+/* i18n.js — 语言梯队 + 英文永远第一（默认/优先/兜底）+ 跨页保留 + 点击拦截修复坏链接 */
 (function () {
-  // ★ 只显示这些语言；要开放其它语言（如日语）就在数组里加 'ja'
-  var ENABLED_LANGS = ['en', 'zh'];
+  /* --- 语言梯队与顺序（英文第一）--- */
+  // 按你之前的排序：Tier1 英文 → Tier2 中文 → Tier3 其它
+  var TIER_ORDER = ['en', 'zh', 'ja', 'fr', 'es', 'de', 'ko', 'it', 'pt', 'ru'];
 
-  // 下拉显示名称（未在 ENABLED_LANGS 内的不会出现）
+  // 实际展示的语言（此处默认全开；若要暂时只开中英，改成 ['en','zh'] 即可）
+  var ENABLED_LANGS = TIER_ORDER.slice();
+
+  // 下拉显示名称
   var LANG_LABELS = {
-    en: 'English', zh: '中文',
-    ja: '日本語', fr: 'Français', es: 'Español',
-    de: 'Deutsch', ko: '한국어', it: 'Italiano',
-    pt: 'Português', ru: 'Русский'
+    en:'English', zh:'中文', ja:'日本語', fr:'Français', es:'Español',
+    de:'Deutsch', ko:'한국어', it:'Italiano', pt:'Português', ru:'Русский'
   };
 
-  // 词典：提供 EN/ZH；其它语言未提供时会自动回退英文
+  /* --- 文案词典（其余语言会自动回退英文）--- */
   var DICT = {
     en: {
       "nav.home":"Home","nav.calculator":"Calculator","nav.transition7":"7-Day Switch","nav.feedback":"Feedback",
@@ -61,59 +63,82 @@
     }
   };
 
-  // —— 工具函数 —— //
+  /* ---------- 核心工具 ---------- */
+  function normalizeLang(code){
+    // 无论什么情况，英文是第一优先；非法/未启用直接归为 'en'
+    if (!code || ENABLED_LANGS.indexOf(code) === -1) return 'en';
+    return code;
+  }
   function getLang(){
     try{
-      var u=new URL(location.href);
-      return u.searchParams.get('lang')||localStorage.getItem('lang')||document.documentElement.getAttribute('lang')||'en';
+      var u = new URL(location.href);
+      return normalizeLang(u.searchParams.get('lang') || localStorage.getItem('lang') || document.documentElement.getAttribute('lang'));
     }catch(e){ return 'en'; }
   }
-  function setLang(l,reload){
+  function setLang(l, reload){
+    l = normalizeLang(l);
     try{
-      localStorage.setItem('lang',l);
-      document.documentElement.setAttribute('lang',l);
-      var u=new URL(location.href);
-      u.searchParams.set('lang',l);
-      reload ? location.href=u.toString() : history.replaceState(null,'',u.toString());
+      localStorage.setItem('lang', l);
+      document.documentElement.setAttribute('lang', l);
+      var u = new URL(location.href);
+      u.searchParams.set('lang', l);
+      reload ? location.href = u.toString() : history.replaceState(null, '', u.toString());
     }catch(e){}
   }
   function t(k,l){
-    l=l||getLang();
-    if(DICT[l]&&DICT[l][k]!=null) return DICT[l][k];
-    if(DICT.en&&DICT.en[k]!=null) return DICT.en[k];
+    l = normalizeLang(l || getLang());
+    if (DICT[l] && DICT[l][k] != null) return DICT[l][k];
+    if (DICT.en && DICT.en[k] != null) return DICT.en[k]; // 永远回退英文
     return k;
   }
-
   function apply(root){
-    var l=getLang();
+    var l = getLang();
     (root||document).querySelectorAll('[data-i18n]').forEach(function(el){
-      var k=el.getAttribute('data-i18n'); if(k) el.textContent=t(k,l);
+      var k = el.getAttribute('data-i18n'); if(k) el.textContent = t(k,l);
     });
     (root||document).querySelectorAll('[data-i18n-placeholder]').forEach(function(el){
-      var k=el.getAttribute('data-i18n-placeholder'); if(k) try{ el.setAttribute('placeholder', t(k,l)); }catch(e){}
+      var k = el.getAttribute('data-i18n-placeholder'); if(k) try{ el.setAttribute('placeholder', t(k,l)); }catch(e){}
     });
   }
 
-  // ★ 跨页保留语言：修复历史 “??%3F” 链接，并只保留一个 lang
-  function preserveLang(){
-    var l=getLang();
+  function normalizeURL(u, l){
+    // 清理被错误拼接的编码问号
+    if (/^\?%3F/i.test(u.search))   u.search='?'+u.search.replace(/^\?%3F/i,'');
+    if (/^\?%253F/i.test(u.search)) u.search='?'+u.search.replace(/^\?%253F/i,'');
+    // 去重并设置 lang（英文永远作为默认/兜底）
+    u.searchParams.delete('lang');
+    u.searchParams.set('lang', normalizeLang(l));
+    return u.pathname + u.search + u.hash;
+  }
+
+  function rewriteAllLinks(){
+    var l = getLang();
     document.querySelectorAll('a[href]').forEach(function(a){
       var h=a.getAttribute('href');
       if(!h || h.startsWith('#') || /^https?:\/\//i.test(h)) return;
-
-      var url=new URL(h, location.href);
-
-      // 1) 清理被错误拼接的“编码问号”
-      if (/^\?%3F/i.test(url.search)) url.search='?'+url.search.replace(/^\?%3F/i,'');
-      if (/^\?%253F/i.test(url.search)) url.search='?'+url.search.replace(/^\?%253F/i,'');
-
-      // 2) lang 去重，只保留一个
-      url.searchParams.delete('lang');
-      url.searchParams.set('lang', l);
-
-      // 3) 正确拼接（url.search 自带 ? 或为空）
-      a.setAttribute('href', url.pathname + url.search + url.hash);
+      var u=new URL(h, location.href);
+      a.setAttribute('href', normalizeURL(u, l));
     });
+  }
+
+  // ★ 关键：点击时兜底拦截，强制修复坏链接，彻底杜绝 404
+  function captureNav(){
+    document.addEventListener('click', function(ev){
+      var a = ev.target && ev.target.closest && ev.target.closest('a[href]');
+      if(!a) return;
+      var h=a.getAttribute('href');
+      if(!h || h.startsWith('#') || /^https?:\/\//i.test(h)) return;
+
+      var u = new URL(h, location.href);
+      var qs = u.searchParams.toString();
+      var duplicatedLang = /(^|&)lang=/.test(qs) && (qs.match(/(^|&)lang=/g)||[]).length > 1;
+      var badEncoded = /^\?%3F/i.test(u.search) || /^\?%253F/i.test(u.search);
+
+      if (duplicatedLang || badEncoded) {
+        ev.preventDefault();
+        location.href = normalizeURL(u, getLang());
+      }
+    }, true);
   }
 
   function mountLangUI(){
@@ -123,10 +148,9 @@
     wrap.style.cssText='position:fixed;right:16px;top:16px;z-index:9999;';
     var sel=document.createElement('select'); sel.setAttribute('aria-label','Language');
 
+    // 按梯队顺序生成（英文必在第一位）
     ENABLED_LANGS.forEach(function(code){
-      var opt=document.createElement('option');
-      opt.value=code; opt.textContent=LANG_LABELS[code]||code;
-      sel.appendChild(opt);
+      var opt=document.createElement('option'); opt.value=code; opt.textContent=LANG_LABELS[code]||code; sel.appendChild(opt);
     });
 
     try{ sel.value=getLang(); }catch(e){}
@@ -136,15 +160,26 @@
     host.parentNode.insertBefore(wrap, host.nextSibling||host);
   }
 
-  // —— 对外 API —— //
-  window.ps=window.ps||{};
-  ps.i18n={ t:t, apply:apply, setLang:setLang, getLang:getLang };
+  // 对外
+  window.ps = window.ps || {};
+  ps.i18n = { t:t, apply:apply, setLang:setLang, getLang:getLang };
 
-  // —— 启动 —— //
+  // 启动：若 URL 没有 lang 或非法 → 立即写回英文优先
+  (function ensureLang(){
+    var u=new URL(location.href);
+    var cur=normalizeLang(u.searchParams.get('lang')||localStorage.getItem('lang'));
+    if (!u.searchParams.get('lang') || cur!==u.searchParams.get('lang')) {
+      u.searchParams.set('lang', cur||'en');
+      history.replaceState(null,'',u.toString());
+    }
+    document.documentElement.setAttribute('lang', cur||'en');
+    localStorage.setItem('lang', cur||'en');
+  })();
+
   document.addEventListener('DOMContentLoaded', function(){
-    apply(); preserveLang(); mountLangUI();
+    apply(); rewriteAllLinks(); captureNav(); mountLangUI();
   });
   document.addEventListener('ps:i18n:refresh', function(){
-    apply(); preserveLang();
+    apply(); rewriteAllLinks();
   });
 })();
