@@ -1,6 +1,9 @@
-/* i18n.js — 多语言下拉 + data-i18n 应用 + ?lang 跨页保留（修复 href 拼接） */
+/* i18n.js — 多语言下拉 + data-i18n 应用 + ?lang 跨页保留（已修复链接“??%3F”问题） */
 (function () {
-  // 1) 下拉支持的语言（想隐藏就删掉相应键）
+  // ★ 只显示这些语言；要开放其它语言（如日语）就在数组里加 'ja'
+  var ENABLED_LANGS = ['en', 'zh'];
+
+  // 下拉显示名称（未在 ENABLED_LANGS 内的不会出现）
   var LANG_LABELS = {
     en: 'English', zh: '中文',
     ja: '日本語', fr: 'Français', es: 'Español',
@@ -8,7 +11,7 @@
     pt: 'Português', ru: 'Русский'
   };
 
-  // 2) 词典（先提供 EN/ZH；其他语言未提供时会自动回退 EN）
+  // 词典：提供 EN/ZH；其它语言未提供时会自动回退英文
   var DICT = {
     en: {
       "nav.home":"Home","nav.calculator":"Calculator","nav.transition7":"7-Day Switch","nav.feedback":"Feedback",
@@ -59,27 +62,57 @@
   };
 
   // —— 工具函数 —— //
-  function getLang(){ try{var u=new URL(location.href); return u.searchParams.get('lang')||localStorage.getItem('lang')||document.documentElement.getAttribute('lang')||'en';}catch(e){return'en';} }
-  function setLang(l,reload){ try{ localStorage.setItem('lang',l); document.documentElement.setAttribute('lang',l); var u=new URL(location.href); u.searchParams.set('lang',l); reload?location.href=u.toString():history.replaceState(null,'',u.toString()); }catch(e){} }
-  function t(k,l){ l=l||getLang(); if(DICT[l]&&DICT[l][k]!=null) return DICT[l][k]; if(DICT.en&&DICT.en[k]!=null) return DICT.en[k]; return k; }
+  function getLang(){
+    try{
+      var u=new URL(location.href);
+      return u.searchParams.get('lang')||localStorage.getItem('lang')||document.documentElement.getAttribute('lang')||'en';
+    }catch(e){ return 'en'; }
+  }
+  function setLang(l,reload){
+    try{
+      localStorage.setItem('lang',l);
+      document.documentElement.setAttribute('lang',l);
+      var u=new URL(location.href);
+      u.searchParams.set('lang',l);
+      reload ? location.href=u.toString() : history.replaceState(null,'',u.toString());
+    }catch(e){}
+  }
+  function t(k,l){
+    l=l||getLang();
+    if(DICT[l]&&DICT[l][k]!=null) return DICT[l][k];
+    if(DICT.en&&DICT.en[k]!=null) return DICT.en[k];
+    return k;
+  }
 
   function apply(root){
     var l=getLang();
-    (root||document).querySelectorAll('[data-i18n]').forEach(function(el){ var k=el.getAttribute('data-i18n'); if(k) el.textContent=t(k,l); });
-    (root||document).querySelectorAll('[data-i18n-placeholder]').forEach(function(el){ var k=el.getAttribute('data-i18n-placeholder'); if(k) try{ el.setAttribute('placeholder', t(k,l)); }catch(e){} });
+    (root||document).querySelectorAll('[data-i18n]').forEach(function(el){
+      var k=el.getAttribute('data-i18n'); if(k) el.textContent=t(k,l);
+    });
+    (root||document).querySelectorAll('[data-i18n-placeholder]').forEach(function(el){
+      var k=el.getAttribute('data-i18n-placeholder'); if(k) try{ el.setAttribute('placeholder', t(k,l)); }catch(e){}
+    });
   }
 
-  // ★ 修复：跨页保留 ?lang，且使用 url.pathname + url.search + url.hash（不再手动加 '?'，避免 ??%3Flang）
+  // ★ 跨页保留语言：修复历史 “??%3F” 链接，并只保留一个 lang
   function preserveLang(){
     var l=getLang();
     document.querySelectorAll('a[href]').forEach(function(a){
       var h=a.getAttribute('href');
-      if(!h||h.startsWith('#')||/^https?:\/\//i.test(h)) return;
-      var u=new URL(h, location.href);
-      var sp=u.searchParams;
-      if(!sp.get('lang')) sp.set('lang', l);
-      u.search = sp.toString();
-      a.setAttribute('href', u.pathname + u.search + u.hash);
+      if(!h || h.startsWith('#') || /^https?:\/\//i.test(h)) return;
+
+      var url=new URL(h, location.href);
+
+      // 1) 清理被错误拼接的“编码问号”
+      if (/^\?%3F/i.test(url.search)) url.search='?'+url.search.replace(/^\?%3F/i,'');
+      if (/^\?%253F/i.test(url.search)) url.search='?'+url.search.replace(/^\?%253F/i,'');
+
+      // 2) lang 去重，只保留一个
+      url.searchParams.delete('lang');
+      url.searchParams.set('lang', l);
+
+      // 3) 正确拼接（url.search 自带 ? 或为空）
+      a.setAttribute('href', url.pathname + url.search + url.hash);
     });
   }
 
@@ -89,19 +122,29 @@
     var wrap=document.createElement('div'); wrap.className='ps-lang-select';
     wrap.style.cssText='position:fixed;right:16px;top:16px;z-index:9999;';
     var sel=document.createElement('select'); sel.setAttribute('aria-label','Language');
-    Object.keys(LANG_LABELS).forEach(function(code){
-      var opt=document.createElement('option'); opt.value=code; opt.textContent=LANG_LABELS[code]; sel.appendChild(opt);
+
+    ENABLED_LANGS.forEach(function(code){
+      var opt=document.createElement('option');
+      opt.value=code; opt.textContent=LANG_LABELS[code]||code;
+      sel.appendChild(opt);
     });
+
     try{ sel.value=getLang(); }catch(e){}
     sel.addEventListener('change', function(e){ setLang(e.target.value, true); });
+
     wrap.appendChild(sel);
     host.parentNode.insertBefore(wrap, host.nextSibling||host);
   }
 
   // —— 对外 API —— //
-  window.ps=window.ps||{}; ps.i18n={ t:t, apply:apply, setLang:setLang, getLang:getLang };
+  window.ps=window.ps||{};
+  ps.i18n={ t:t, apply:apply, setLang:setLang, getLang:getLang };
 
   // —— 启动 —— //
-  document.addEventListener('DOMContentLoaded', function(){ apply(); preserveLang(); mountLangUI(); });
-  document.addEventListener('ps:i18n:refresh', function(){ apply(); preserveLang(); });
+  document.addEventListener('DOMContentLoaded', function(){
+    apply(); preserveLang(); mountLangUI();
+  });
+  document.addEventListener('ps:i18n:refresh', function(){
+    apply(); preserveLang();
+  });
 })();
