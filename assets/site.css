@@ -33,7 +33,7 @@ header,main,footer{
 }
 .note{color:var(--muted)}
 
-/* 顶部导航（不改配色，仅轻微动效） */
+/* 顶部导航（不改配色） */
 nav a{
   color:var(--muted);
   text-decoration:none;
@@ -67,9 +67,7 @@ nav a:hover{color:var(--text)}
 
 /* 表单的通用样式（全站） */
 label{display:block;margin:12px 0 6px;font-weight:700}
-input,select,textarea,button{
-  font:inherit;
-}
+input,select,textarea,button{font:inherit}
 input,select,textarea{
   width:100%;
   color:var(--text);
@@ -86,25 +84,34 @@ input:focus,select:focus,textarea:focus{
 }
 
 /* =========================
-   仅“计算器页”的排版优化
+   仅“计算器页”的排版优化（双列）
    ========================= */
 
 /* 作用域：给 feeding.html 的 <body> 添加 class="page-feeding" */
 .page-feeding main{max-width:980px}
 
-/* 核心：把主表单卡片收窄并居中，避免“太长” */
+/* 核心：把主表单卡片收窄并居中 */
 .page-feeding .calculator{
-  max-width:720px;
+  max-width:860px;          /* 更宽屏也不会“太长” */
   margin:12px auto 24px;
 }
 
-/* 输入控件高度与间距更舒服 */
-.page-feeding .calculator label{margin:10px 0 6px}
-.page-feeding .calculator input,
-.page-feeding .calculator select{height:44px;padding:10px 12px}
+/* 双列网格：一行两个类目；移动端自动回落为1列 */
+.page-feeding .form-grid{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap:16px 20px;            /* 行间16、列间20 */
+}
+.page-feeding .field{display:block}
+.page-feeding .field label{margin:6px 0 6px}
+.page-feeding .field input,
+.page-feeding .field select{
+  height:44px;
+  padding:10px 12px;
+}
 
-/* 公式说明与按钮距离微调 */
-.page-feeding #formula-note{margin:10px 0 12px}
+/* 让“宠物/体重/单位/活动/kcal/grams”排布更紧凑 */
+.page-feeding #formula-note{margin:8px 0 10px}
 
 /* 结果卡片更聚焦但不抢色 */
 .page-feeding #result.card{
@@ -113,9 +120,9 @@ input:focus,select:focus,textarea:focus{
   box-shadow:0 8px 20px rgba(0,0,0,.18);
 }
 
-/* 移动端进一步收紧 */
-@media (max-width:480px){
-  .page-feeding .calculator{margin:8px auto 18px}
-  .page-feeding .calculator input,
-  .page-feeding .calculator select{height:42px}
+/* 移动端：小于 720px 改为单列，避免挤压 */
+@media (max-width:720px){
+  .page-feeding .form-grid{grid-template-columns:1fr}
+  .page-feeding .calculator{max-width:680px;margin:8px auto 18px}
+  .page-feeding .field input,.page-feeding .field select{height:42px}
 }
