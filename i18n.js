@@ -1,13 +1,14 @@
-/* i18n.js — EN/ZH 基座；自动生成语言下拉；缺省回退 EN */
+/* i18n.js — 多语言下拉 + data-i18n 应用 + ?lang 跨页保留（修复 href 拼接） */
 (function () {
-  // 1) 语言名清单（下拉从这里生成；需要隐藏哪种就删掉键）
+  // 1) 下拉支持的语言（想隐藏就删掉相应键）
   var LANG_LABELS = {
     en: 'English', zh: '中文',
-    ja: '日本語', fr: 'Français', es: 'Español', de: 'Deutsch',
-    ko: '한국어', it: 'Italiano', pt: 'Português', ru: 'Русский'
+    ja: '日本語', fr: 'Français', es: 'Español',
+    de: 'Deutsch', ko: '한국어', it: 'Italiano',
+    pt: 'Português', ru: 'Русский'
   };
 
-  // 2) 词典：先提供 en/zh；其它语言没写条目也能选，文案将自动回退英文
+  // 2) 词典（先提供 EN/ZH；其他语言未提供时会自动回退 EN）
   var DICT = {
     en: {
       "nav.home":"Home","nav.calculator":"Calculator","nav.transition7":"7-Day Switch","nav.feedback":"Feedback",
@@ -57,6 +58,7 @@
     }
   };
 
+  // —— 工具函数 —— //
   function getLang(){ try{var u=new URL(location.href); return u.searchParams.get('lang')||localStorage.getItem('lang')||document.documentElement.getAttribute('lang')||'en';}catch(e){return'en';} }
   function setLang(l,reload){ try{ localStorage.setItem('lang',l); document.documentElement.setAttribute('lang',l); var u=new URL(location.href); u.searchParams.set('lang',l); reload?location.href=u.toString():history.replaceState(null,'',u.toString()); }catch(e){} }
   function t(k,l){ l=l||getLang(); if(DICT[l]&&DICT[l][k]!=null) return DICT[l][k]; if(DICT.en&&DICT.en[k]!=null) return DICT.en[k]; return k; }
@@ -67,33 +69,39 @@
     (root||document).querySelectorAll('[data-i18n-placeholder]').forEach(function(el){ var k=el.getAttribute('data-i18n-placeholder'); if(k) try{ el.setAttribute('placeholder', t(k,l)); }catch(e){} });
   }
 
+  // ★ 修复：跨页保留 ?lang，且使用 url.pathname + url.search + url.hash（不再手动加 '?'，避免 ??%3Flang）
   function preserveLang(){
     var l=getLang();
     document.querySelectorAll('a[href]').forEach(function(a){
-      var h=a.getAttribute('href'); if(!h||h.startsWith('#')||/^https?:\/\//i.test(h)) return;
-      var u=new URL(h, location.href); var sp=u.searchParams;
+      var h=a.getAttribute('href');
+      if(!h||h.startsWith('#')||/^https?:\/\//i.test(h)) return;
+      var u=new URL(h, location.href);
+      var sp=u.searchParams;
       if(!sp.get('lang')) sp.set('lang', l);
       u.search = sp.toString();
-      a.setAttribute('href', u.pathname + u.search + u.hash); // ★ 修正：不再手动加 '?'
+      a.setAttribute('href', u.pathname + u.search + u.hash);
     });
   }
 
   function mountLangUI(){
     if(document.querySelector('.ps-lang-select')) return;
     var host=document.getElementById('lang-slot')||document.querySelector('header nav')||document.body;
-    var w=document.createElement('div'); w.className='ps-lang-select'; w.style.cssText='position:fixed;right:16px;top:16px;z-index:9999;';
+    var wrap=document.createElement('div'); wrap.className='ps-lang-select';
+    wrap.style.cssText='position:fixed;right:16px;top:16px;z-index:9999;';
     var sel=document.createElement('select'); sel.setAttribute('aria-label','Language');
     Object.keys(LANG_LABELS).forEach(function(code){
       var opt=document.createElement('option'); opt.value=code; opt.textContent=LANG_LABELS[code]; sel.appendChild(opt);
     });
     try{ sel.value=getLang(); }catch(e){}
     sel.addEventListener('change', function(e){ setLang(e.target.value, true); });
-    w.appendChild(sel);
-    host.parentNode.insertBefore(w, host.nextSibling||host);
+    wrap.appendChild(sel);
+    host.parentNode.insertBefore(wrap, host.nextSibling||host);
   }
 
+  // —— 对外 API —— //
   window.ps=window.ps||{}; ps.i18n={ t:t, apply:apply, setLang:setLang, getLang:getLang };
 
+  // —— 启动 —— //
   document.addEventListener('DOMContentLoaded', function(){ apply(); preserveLang(); mountLangUI(); });
   document.addEventListener('ps:i18n:refresh', function(){ apply(); preserveLang(); });
 })();
