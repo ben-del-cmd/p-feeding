@@ -11,12 +11,12 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="/p-feeding/assets/icons/icon-192.png">
 
-<link rel="stylesheet" href="../assets/site.css?v=20250923b">
+<link rel="stylesheet" href="../assets/site.css?v=20250923c">
 <style>
   :root,body{color-scheme:dark}
   #ps-lang-select,select{appearance:auto;background-color:rgba(255,255,255,.04);color:#e7eefc;border:1px solid rgba(255,255,255,.10);border-radius:12px}
-  #ps-lang-select option,select option{background-color:#0e172a;color:#e7eefc}
-  #ps-lang-select option:hover,#ps-lang-select option:checked,select option:hover,select option:checked{background-color:rgba(34,211,163,.22);color:#fff}
+  #ps-lang-select option,select option{background:#0e172a;color:#e7eefc}
+  #ps-lang-select option:hover,#ps-lang-select option:checked,select option:hover,select option:checked{background:rgba(34,211,163,.22);color:#fff}
 </style>
 
 <script defer data-domain="" src="https://plausible.io/js/script.js"></script>
@@ -24,12 +24,12 @@
 <body class="page-feeding">
 <header style="display:flex;align-items:center;gap:16px;">
   <nav style="display:flex;gap:16px;">
-    <a href="../index.html" data-i18n="nav.home">Home</a>
-    <a href="feeding.html" data-i18n="nav.calculator">Calculator</a>
-    <a href="../cards/transition-7.html" data-i18n="nav.transition7">7-Day Switch</a>
-    <a href="../feedback.html" data-i18n="nav.feedback">Feedback</a>
+    <a href="../index.html">Home</a>
+    <a href="feeding.html">Calculator</a>
+    <a href="../cards/transition-7.html">7-Day Switch</a>
+    <a href="../feedback.html">Feedback</a>
   </nav>
-  <div id="lang-slot" style="margin-left:auto">
+  <div style="margin-left:auto">
     <select id="ps-lang-select" aria-label="Language">
       <option value="en">English</option>
       <option value="es">Español</option>
@@ -40,95 +40,109 @@
 </header>
 
 <main class="calculator">
-  <h1 data-i18n="feeding.title">Feeding Calculator</h1>
-  <p class="note" data-i18n="legal.info_boundary">Informational only. Not medical advice.</p>
+  <h1>Feeding Calculator</h1>
+  <p class="note">Informational only. Not medical advice.</p>
 
   <section class="card">
     <div class="form-grid">
+
       <div class="field">
-        <label data-i18n="feeding.pet_type.label">Pet</label>
+        <label>Pet</label>
         <select id="pet">
-          <option value="dog" data-i18n="feeding.pet_type.dog">Dog</option>
-          <option value="cat" data-i18n="feeding.pet_type.cat">Cat</option>
+          <option value="dog">Dog</option>
+          <option value="cat">Cat</option>
         </select>
       </div>
 
       <div class="field">
-        <label data-i18n="feeding.weight.label">Weight</label>
-        <input id="weight" type="number" min="0" step="0.1" data-i18n-placeholder="feeding.weight.placeholder" placeholder="Enter weight">
+        <label>Weight</label>
+        <input id="weight" type="number" min="0" step="0.1" placeholder="Enter weight">
       </div>
 
       <div class="field">
-        <label data-i18n="feeding.unit.label">Unit</label>
+        <label>Unit</label>
         <select id="unit">
-          <option value="kg" data-i18n="feeding.unit.kg">kg</option>
-          <option value="lb" data-i18n="feeding.unit.lb">lb</option>
+          <option value="kg">kg</option>
+          <option value="lb">lb</option>
         </select>
       </div>
 
       <div class="field">
-        <label data-i18n="feeding.activity.label">Activity</label>
+        <label>Activity</label>
         <select id="activity">
-          <option value="resting" data-i18n="feeding.activity.resting">Resting</option>
-          <option value="normal" data-i18n="feeding.activity.normal">Normal</option>
-          <option value="active" data-i18n="feeding.activity.active">Active</option>
+          <option value="resting">Resting</option>
+          <option value="normal">Normal</option>
+          <option value="active">Active</option>
         </select>
       </div>
 
       <div class="field">
-        <label data-i18n="feeding.kcal_per_cup.label">kcal per cup</label>
+        <label>kcal per cup</label>
         <input id="kcal" type="number" min="0" step="1" value="350">
       </div>
 
       <div class="field">
-        <label data-i18n="feeding.grams_per_cup.label">grams per cup</label>
+        <label>grams per cup</label>
         <input id="grams" type="number" min="0" step="1" value="110">
       </div>
     </div>
 
-    <p id="formula-note" class="note" data-i18n="feeding.formula.note">
-      RER = 70 × weight^0.75; MER = RER × activity.
-    </p>
-
-    <button class="btn" id="calcBtn" data-i18n="feeding.action.calculate">Calculate</button>
+    <p id="formula-note" class="note">RER = 70 × weight^0.75; MER = RER × activity.</p>
+    <button class="btn" id="calcBtn">Calculate</button>
   </section>
 
   <section id="result" class="card" style="display:none">
-    <h3 data-i18n="feeding.result.title">Result</h3>
+    <h3>Result</h3>
     <div id="resultText">—</div>
   </section>
 </main>
 
-<script src="../i18n.js?v=20250923b"></script>
-<script src="../assets/js/events.js?v=20250923b"></script>
+<script src="../assets/js/events.js?v=20250923c"></script>
 <script>
-  // 极简计算示意：仅示例
-  document.getElementById('calcBtn').addEventListener('click', function(){
-    const w = parseFloat(document.getElementById('weight').value || '0');
-    const unit = document.getElementById('unit').value;
-    const act = document.getElementById('activity').value;
-    if (!w || w <= 0) { alert('Enter weight'); return; }
-    const kg = unit === 'lb' ? w * 0.45359237 : w;
-    const RER = 70 * Math.pow(kg, 0.75);
-    const factor = (act === 'active') ? 1.8 : (act === 'normal' ? 1.4 : 1.0);
-    const MER = RER * factor;
-    const kcal = parseFloat(document.getElementById('kcal').value || '350');
-    const grams = parseFloat(document.getElementById('grams').value || '110');
-    const cups = MER / kcal;
-    const gPerDay = cups * grams;
-    const txt = `MER ≈ ${MER.toFixed(0)} kcal/day · ≈ ${cups.toFixed(2)} cups/day · ≈ ${gPerDay.toFixed(0)} g/day`;
-    document.getElementById('resultText').textContent = txt;
-    document.getElementById('result').style.display = 'block';
-    try { if (window.plausible) plausible('calc_click'); } catch(e){}
+(function(){
+  /* 语言与链接改写（与首页一致） */
+  const allowed=['en','es','zh','fr'];
+  const url=new URL(location.href);
+  let lang=url.searchParams.get('lang')||'en';
+  if(!allowed.includes(lang)) lang='en';
+
+  const sel=document.getElementById('ps-lang-select');
+  if(sel){ sel.value=lang; sel.addEventListener('change',()=>{const u=new URL(location.href);u.searchParams.set('lang',sel.value);location.href=u.toString();}); }
+
+  document.querySelectorAll('a[href]').forEach(a=>{
+    const href=a.getAttribute('href');
+    if(!href||/^(https?:|mailto:|tel:|#)/i.test(href)) return;
+    const u=new URL(href,location.href);
+    u.searchParams.set('lang',lang);
+    a.href=u.pathname+'?'+u.searchParams.toString();
   });
 
-  // SW 注册
-  (function(){
-    if('serviceWorker' in navigator){
-      var base = location.pathname.split('/').slice(0,2).join('/') + '/';
-      navigator.serviceWorker.register(base + 'service-worker.js').catch(console.error);
-    }
-  })();
+  /* 简易计算 */
+  const btn=document.getElementById('calcBtn');
+  btn.addEventListener('click',()=>{
+    const w=parseFloat(document.getElementById('weight').value||'0');
+    const unit=document.getElementById('unit').value;
+    const act=document.getElementById('activity').value;
+    if(!w||w<=0){alert('Enter weight');return;}
+    const kg=unit==='lb'?w*0.45359237:w;
+    const RER=70*Math.pow(kg,0.75);
+    const factor= act==='active'?1.8 : (act==='normal'?1.4:1.0);
+    const MER=RER*factor;
+    const kcal=parseFloat(document.getElementById('kcal').value||'350');
+    const grams=parseFloat(document.getElementById('grams').value||'110');
+    const cups=MER/kcal, gPerDay=cups*grams;
+    document.getElementById('resultText').textContent =
+      `MER ≈ ${MER.toFixed(0)} kcal/day · ${cups.toFixed(2)} cups/day · ${gPerDay.toFixed(0)} g/day`;
+    document.getElementById('result').style.display='block';
+    try{ if(window.plausible) plausible('calc_click'); }catch(e){}
+  });
+
+  /* SW */
+  if('serviceWorker' in navigator){
+    const base=location.pathname.split('/').slice(0,2).join('/')+'/';
+    navigator.serviceWorker.register(base+'service-worker.js').catch(console.error);
+  }
+})();
 </script>
 </body>
 </html>
