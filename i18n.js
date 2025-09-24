@@ -1,8 +1,16 @@
-/* i18n.js — EN/ZH, data-i18n / data-i18n-placeholder */
+/* i18n.js — EN/ZH 基座；自动生成语言下拉；缺省回退 EN */
 (function () {
+  // 1) 语言名清单（下拉从这里生成；需要隐藏哪种就删掉键）
+  var LANG_LABELS = {
+    en: 'English', zh: '中文',
+    ja: '日本語', fr: 'Français', es: 'Español', de: 'Deutsch',
+    ko: '한국어', it: 'Italiano', pt: 'Português', ru: 'Русский'
+  };
+
+  // 2) 词典：先提供 en/zh；其它语言没写条目也能选，文案将自动回退英文
   var DICT = {
     en: {
-      "nav.home": "Home","nav.calculator": "Calculator","nav.transition7": "7-Day Switch","nav.feedback":"Feedback",
+      "nav.home":"Home","nav.calculator":"Calculator","nav.transition7":"7-Day Switch","nav.feedback":"Feedback",
       "home.hero.title":"Turn pet food labels into simple, actionable feeding.",
       "home.hero.subtitle":"Scan → unify terms (ME, GA, as-fed/DM) → personalized portions → smooth transition → reorder.",
       "home.cta.open_calculator":"Open Calculator","home.cta.view_transition_card":"View 7-Day Card",
@@ -52,16 +60,40 @@
   function getLang(){ try{var u=new URL(location.href); return u.searchParams.get('lang')||localStorage.getItem('lang')||document.documentElement.getAttribute('lang')||'en';}catch(e){return'en';} }
   function setLang(l,reload){ try{ localStorage.setItem('lang',l); document.documentElement.setAttribute('lang',l); var u=new URL(location.href); u.searchParams.set('lang',l); reload?location.href=u.toString():history.replaceState(null,'',u.toString()); }catch(e){} }
   function t(k,l){ l=l||getLang(); if(DICT[l]&&DICT[l][k]!=null) return DICT[l][k]; if(DICT.en&&DICT.en[k]!=null) return DICT.en[k]; return k; }
-  function apply(root){ var l=getLang(); (root||document).querySelectorAll('[data-i18n]').forEach(function(el){ var k=el.getAttribute('data-i18n'); if(k) el.textContent=t(k,l);});
-    (root||document).querySelectorAll('[data-i18n-placeholder]').forEach(function(el){ var k=el.getAttribute('data-i18n-placeholder'); if(k) try{ el.setAttribute('placeholder',t(k,l)); }catch(e){} }); }
-  function mountUI(){ if(document.querySelector('.ps-lang-select')) return; var host=document.getElementById('lang-slot')||document.querySelector('header nav')||document.body;
-    var wrap=document.createElement('div'); wrap.className='ps-lang-select'; wrap.style.cssText='float:right;margin:8px 0 0 12px;';
-    wrap.innerHTML='<select aria-label="Language"><option value="en">English</option><option value="zh">中文</option></select>';
-    host.parentNode.insertBefore(wrap, host.nextSibling||host); var sel=wrap.querySelector('select'); try{ sel.value=getLang(); }catch(e){}
-    sel.addEventListener('change',function(e){ setLang(e.target.value,true); }); }
-  function keepLang(){ var l=getLang(); document.querySelectorAll('a[href]').forEach(function(a){ var h=a.getAttribute('href'); if(!h||h.startsWith('#')||/^https?:\/\//i.test(h))return; var u=new URL(h,location.href), sp=u.searchParams; if(!sp.get('lang')) sp.set('lang',l); u.search=sp.toString(); a.setAttribute('href',u.pathname+(u.search?('?'+u.search):'')+u.hash); }); }
 
-  window.ps=window.ps||{}; ps.i18n={t:t,apply:apply,setLang:setLang,getLang:getLang};
-  document.addEventListener('DOMContentLoaded',function(){ apply(); keepLang(); mountUI(); });
-  document.addEventListener('ps:i18n:refresh',function(){ apply(); keepLang(); });
+  function apply(root){
+    var l=getLang();
+    (root||document).querySelectorAll('[data-i18n]').forEach(function(el){ var k=el.getAttribute('data-i18n'); if(k) el.textContent=t(k,l); });
+    (root||document).querySelectorAll('[data-i18n-placeholder]').forEach(function(el){ var k=el.getAttribute('data-i18n-placeholder'); if(k) try{ el.setAttribute('placeholder', t(k,l)); }catch(e){} });
+  }
+
+  function preserveLang(){
+    var l=getLang();
+    document.querySelectorAll('a[href]').forEach(function(a){
+      var h=a.getAttribute('href'); if(!h||h.startsWith('#')||/^https?:\/\//i.test(h)) return;
+      var u=new URL(h, location.href); var sp=u.searchParams;
+      if(!sp.get('lang')) sp.set('lang', l);
+      u.search = sp.toString();
+      a.setAttribute('href', u.pathname + u.search + u.hash); // ★ 修正：不再手动加 '?'
+    });
+  }
+
+  function mountLangUI(){
+    if(document.querySelector('.ps-lang-select')) return;
+    var host=document.getElementById('lang-slot')||document.querySelector('header nav')||document.body;
+    var w=document.createElement('div'); w.className='ps-lang-select'; w.style.cssText='position:fixed;right:16px;top:16px;z-index:9999;';
+    var sel=document.createElement('select'); sel.setAttribute('aria-label','Language');
+    Object.keys(LANG_LABELS).forEach(function(code){
+      var opt=document.createElement('option'); opt.value=code; opt.textContent=LANG_LABELS[code]; sel.appendChild(opt);
+    });
+    try{ sel.value=getLang(); }catch(e){}
+    sel.addEventListener('change', function(e){ setLang(e.target.value, true); });
+    w.appendChild(sel);
+    host.parentNode.insertBefore(w, host.nextSibling||host);
+  }
+
+  window.ps=window.ps||{}; ps.i18n={ t:t, apply:apply, setLang:setLang, getLang:getLang };
+
+  document.addEventListener('DOMContentLoaded', function(){ apply(); preserveLang(); mountLangUI(); });
+  document.addEventListener('ps:i18n:refresh', function(){ apply(); preserveLang(); });
 })();
