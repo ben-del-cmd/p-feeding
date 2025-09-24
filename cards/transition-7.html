@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Pet Scan — 7-Day Transition Card</title>
   <meta name="description" content="A simple 7-day plan to switch pet foods smoothly. Informational only. Not medical advice.">
-
   <script>
     (function () {
       var u = new URL(location.href);
@@ -14,9 +13,7 @@
       document.documentElement.setAttribute('lang', cur); localStorage.setItem('lang', cur);
     })();
   </script>
-
   <link rel="stylesheet" href="../assets/site.css?v=20250920b" />
-
   <script>
     (function () {
       var DOMAIN = 'ben-del-cmd.github.io';
@@ -27,10 +24,8 @@
       }
     })();
   </script>
-
   <script src="../i18n.js?v=20250923" defer></script>
   <script src="../assets/js/events.js?v=20250923" defer></script>
-
   <style>
     :root { --maxw: 960px; }
     body { margin:0; line-height:1.45; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto; }
@@ -69,23 +64,28 @@
   <p class="note" data-i18n="footer.disclaimer">For diet/medical questions, consult your veterinarian.</p>
 </footer>
 
-<!-- 兜底：保留 ?lang（修正版） + 事件 -->
+<!-- 安全兜底：清理 ??%3F，去重 lang，仅保留一个 -->
 <script>
-  (function(){
-    function lang(){ try{ var u=new URL(location.href); return u.searchParams.get('lang')||localStorage.getItem('lang')||'en'; }catch(e){ return 'en'; } }
-    document.addEventListener('DOMContentLoaded', function(){
-      var l=lang();
-      document.querySelectorAll('a[href]').forEach(function(a){
-        var href=a.getAttribute('href');
-        if(!href || href.startsWith('#') || /^https?:\/\//i.test(href)) return;
-        var url=new URL(href, location.href);
-        if(!url.searchParams.get('lang')) url.searchParams.set('lang', l);
-        a.setAttribute('href', url.pathname + url.search + url.hash); // ★ 修正版
-      });
+(function(){
+  function curLang(){ try{var u=new URL(location.href); return u.searchParams.get('lang')||localStorage.getItem('lang')||'en';}catch(e){return 'en';} }
+  function dedupeLangLinks(){
+    var l = curLang();
+    document.querySelectorAll('a[href]').forEach(function(a){
+      var href=a.getAttribute('href');
+      if(!href || href.startsWith('#') || /^https?:\/\//i.test(href)) return;
+      var url=new URL(href, location.href);
+      if (/^\?%3F/i.test(url.search)) url.search='?'+url.search.replace(/^\?%3F/i,'');
+      if (/^\?%253F/i.test(url.search)) url.search='?'+url.search.replace(/^\?%253F/i,'');
+      url.searchParams.delete('lang');
+      url.searchParams.set('lang', l);
+      a.setAttribute('href', url.pathname + url.search + url.hash);
     });
-    function page(name, props){ if (window.ps && ps.events && ps.events.page) ps.events.page(name, props); else plausible('pageview', { props: Object.assign({ page_name: name, lang: lang() }, props||{}) }); }
-    window.addEventListener('DOMContentLoaded', function(){ page('visit_transition_page'); });
-  })();
+  }
+  document.addEventListener('DOMContentLoaded', dedupeLangLinks);
+
+  function page(name, props){ if (window.ps && ps.events && ps.events.page) ps.events.page(name, props); else plausible('pageview', { props: Object.assign({ page_name: name, lang: curLang() }, props||{}) }); }
+  document.addEventListener('DOMContentLoaded', function(){ page('visit_transition_page'); });
+})();
 </script>
 </body>
 </html>
