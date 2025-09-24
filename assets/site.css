@@ -1,90 +1,192 @@
-/* /p-feeding/assets/site.css — dark theme, click-safe (no blur/backdrop) */
+/* Pet Scan UI Refresh — v20250923 */
+/* 可选：如不想走谷歌字体，删掉下一行即可，系统字体也能很好看 */
+/* @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap'); */
 
 :root{
-  --bg:#0b1220; --panel:#121a2b; --card:#0f1726; --text:#e8eefc; --muted:#93a4c3;
-  --brand:#1ec9a3; --brand-2:#1aa383; --border:#233049; --btn:#22d3a3; --btn-2:#16b389;
+  /* 主题色 */
+  --bg: #0b1220;
+  --bg-grad-1:#0b1220; --bg-grad-2:#0e172a; --bg-grad-3:#111827;
+  --surface: rgba(255,255,255,0.04);
+  --surface-2: rgba(255,255,255,0.06);
+  --border: rgba(255,255,255,0.10);
+  --text: #e7eefc;
+  --muted: #a8b2c1;
+
+  --accent: #22d3a3;       /* 主色(青绿) */
+  --accent-600:#14b89a;
+  --ring: rgba(34,211,163,.35);
+
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --shadow-lg: 0 12px 30px rgba(0,0,0,.35);
+  --shadow-sm: 0 6px 18px rgba(0,0,0,.25);
+
+  --container: 1080px;
 }
 
+/* ===== 基础排版 ===== */
 *{box-sizing:border-box}
 html,body{height:100%}
 body{
   margin:0;
-  font:16px/1.6 ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";
-  color:var(--text);
-  background:radial-gradient(1200px 600px at 70% -20%,#112042,transparent), var(--bg);
+  color:var(--text) !important;
+  font: 16px/1.55 Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(34,211,163,.08), transparent 60%),
+    linear-gradient(180deg, var(--bg-grad-1), var(--bg-grad-2) 50%, var(--bg-grad-3));
 }
 
-/* 链接与按钮 */
-a{color:var(--btn); text-decoration:none; cursor:pointer}
-a:hover{text-decoration:underline}
-button{cursor:pointer}
-
-/* 顶部导航：去掉 backdrop-filter，避免某些环境下形成“看不见的罩子” */
-.nav{
-  position:sticky; top:0; z-index:1000;       /* 提高层级，确保只覆盖头部 */
-  display:flex; align-items:center; gap:20px;
-  padding:10px 20px;
-  background:rgba(10,14,25,.88);              /* 纯色半透明，不用 blur */
-  border-bottom:1px solid var(--border);
-  isolation:isolate;                           /* 独立绘制上下文，进一步防溢出 */
-  pointer-events:auto;                         /* 明确可点击 */
+header, main, footer{
+  width:100%;
+  max-width:var(--container) !important;
+  margin:0 auto !important;
+  padding:24px 20px !important;
 }
-.nav > a{font-weight:700}
-.nav nav{display:flex; gap:16px; margin-left:auto}
 
-#lang-btn{
-  margin-left:8px; padding:6px 14px; border-radius:999px;
-  background:#1e293b; color:var(--text);
+/* ===== 顶部导航 ===== */
+nav a{
+  color:var(--muted) !important;
+  text-decoration:none;
+  margin-right:16px;
+  padding:6px 0;
+  position:relative;
+  transition:color .2s ease;
+}
+nav a:hover{ color:var(--text) !important; }
+nav a::after{
+  content:"";
+  position:absolute; left:0; right:0; bottom:-6px; height:2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity:0; transform: translateY(4px);
+  transition: .25s ease;
+}
+nav a:hover::after{opacity:1; transform:translateY(0)}
+
+/* 右上角语言下拉（i18n.js 会注入到 header 内） */
+header select{
+  appearance:none;
+  background: var(--surface);
+  color: var(--text);
   border:1px solid var(--border);
+  border-radius: 12px;
+  padding:10px 36px 10px 12px;
+  margin-left:auto;
+  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-sm);
 }
-#lang-btn:hover{background:#26344c}
+header select:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 6px var(--ring); }
 
-/* 页面布局 */
-.container{max-width:1100px; margin:56px auto; padding:0 20px}
-.muted{color:var(--muted); font-size:14px}
+/* ===== 英雄区标题 ===== */
+.hero h1{
+  font-size: clamp(28px, 4vw, 44px) !important;
+  line-height: 1.15 !important;
+  font-weight: 800 !important;
+  letter-spacing: .2px;
+  margin: 8px 0 4px !important;
+  text-shadow: 0 2px 20px rgba(34,211,163,.15);
+}
+.note{ color:var(--muted) !important; }
 
-/* 卡片 */
-.cards{display:grid; gap:20px; grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+/* ===== 通用卡片 ===== */
 .card{
-  background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px;
-  box-shadow:0 10px 30px rgba(0,0,0,.2);
-  pointer-events:auto;
+  background: var(--surface) !important;
+  border:1px solid var(--border) !important;
+  border-radius: var(--radius-xl) !important;
+  padding: 18px !important;
+  box-shadow: var(--shadow-sm) !important;
+  backdrop-filter: blur(8px);
 }
-.card h3{margin:0 0 8px}
-.card p{color:var(--muted); margin:0 0 14px}
+.card h2{ margin: 0 0 8px; font-weight:800; letter-spacing:.2px }
+
+/* 首页3列卡片 */
+.grid{
+  display:grid !important;
+  gap:18px !important;
+  grid-template-columns: repeat(3, minmax(0,1fr)) !important;
+}
+@media (max-width: 980px){
+  .grid{ grid-template-columns: 1fr !important; }
+}
+
+/* ===== 按钮 ===== */
 .btn{
-  display:inline-block; font-weight:600; color:#06181a; background:var(--btn);
-  padding:10px 16px; border-radius:10px; box-shadow:0 6px 16px rgba(34,211,163,.25)
+  display:inline-flex; align-items:center; justify-content:center;
+  height:44px; padding:0 16px;
+  border:0;
+  border-radius: 14px;
+  color:#041014 !important;
+  background: linear-gradient(180deg, var(--accent), var(--accent-600));
+  box-shadow: 0 10px 24px rgba(34,211,163,.28);
+  text-decoration:none;
+  font-weight: 700;
+  letter-spacing:.2px;
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
 }
-.btn:hover{background:var(--btn-2); text-decoration:none}
+.btn:hover{ transform: translateY(-1px); filter: brightness(1.05); }
+.btn:active{ transform: translateY(0); box-shadow: 0 6px 16px rgba(34,211,163,.22); }
 
-/* 面板与表单 */
-.grid{display:grid; gap:20px; grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
-.panel{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:20px}
-.panel h3{margin:0 0 12px}
-label{display:block; margin:12px 0 6px}
-input,select,textarea,output{
-  width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border);
-  background:#0b1424; color:var(--text); outline:none
+/* 用作次要按钮的外观（目前未使用，备用） */
+.btn.btn-ghost{
+  background: var(--surface-2);
+  color: var(--text) !important;
+  border:1px solid var(--border);
+  box-shadow:none;
 }
-textarea{resize:vertical}
-output{display:block; background:#0b1424}
-.actions{display:flex; gap:10px; margin-top:14px}
-.actions button{
-  padding:10px 14px; border-radius:10px; border:1px solid var(--border);
-  background:#17223a; color:var(--text);
+
+/* ===== 表单（计算器页） ===== */
+label{
+  display:block;
+  margin: 14px 0 8px;
+  color: var(--text);
+  font-weight: 700;
+  letter-spacing:.2px;
 }
-.actions button:first-child{background:var(--btn); color:#071a16; border-color:transparent}
-.actions button:first-child:hover{background:var(--btn-2)}
+input, select, textarea, button{
+  font: inherit;
+}
+input, select, textarea{
+  width:100%;
+  color:var(--text);
+  background: var(--surface);
+  border:1px solid var(--border) !important;
+  border-radius: 14px !important;
+  padding: 12px 14px !important;
+  outline:none;
+  transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+  backdrop-filter: blur(8px);
+}
+input::placeholder, textarea::placeholder{ color:var(--muted); }
+input:focus, select:focus, textarea:focus{
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 6px var(--ring) !important;
+  background: rgba(255,255,255,.06);
+}
 
-/* 表格 */
-table{width:100%; border-collapse:collapse; margin-top:10px}
-th,td{border:1px solid var(--border); padding:8px 10px; text-align:left}
-thead th{background:#0e1a2f}
+/* 结果区显得更聚焦 */
+#result.card{ border-color: rgba(34,211,163,.3) !important; box-shadow: 0 10px 28px rgba(34,211,163,.12) !important; }
 
-/* 页脚 */
-.footer{max-width:1100px; margin:40px auto 80px; padding:0 20px; color:var(--muted)}
-.footer strong{color:var(--text)}
+/* ===== 页脚 ===== */
+footer .note{
+  margin-top: 24px;
+  text-align:left;
+  opacity:.9;
+}
 
-/* 保险：任何主要容器都明确可点击，防止第三方样式注入出现 pointer-events: none 之类情况 */
-.container,.cards,.card,.panel,.actions,main,header,nav,a,button{pointer-events:auto}
+/* ===== 404 页面、回首页按钮（如果有） ===== */
+a.btn-back-home{
+  display:inline-block; margin-top:12px;
+}
+
+/* ===== 细节：链接颜色 ===== */
+a{ color: var(--accent); }
+a:hover{ color: var(--accent-600); }
+
+/* ===== 可访问性（高对比聚焦） ===== */
+:focus-visible{
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ===== 容器尺寸适配旧内联样式（用 !important 压过去） ===== */
+header, main, footer { border-radius: 0 !important; }
