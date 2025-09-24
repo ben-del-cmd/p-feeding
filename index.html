@@ -1,15 +1,12 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Pet Scan — Home</title>
   <meta name="description" content="Turn pet food & wash labels into simple, actionable feeding & transition tips. Informational only. Not medical advice.">
-  <!-- 站点样式（相对路径，避免 GitHub Pages 子路径 404） -->
-  <link rel="stylesheet" href="assets/site.css?v=20250920b">
-  <!-- Plausible（自动使用当前 hostname） -->
-  <script defer data-domain="" src="https://plausible.io/js/script.js"></script>
-  <!-- 默认语言：无 lang 时设为 en；写入 URL 与 localStorage；设置 <html lang> -->
+
+  <!-- 默认语言：无 ?lang 时设为 en，并写入 URL / <html lang> / localStorage -->
   <script>
     (function () {
       var u = new URL(location.href);
@@ -22,11 +19,32 @@
       localStorage.setItem('lang', cur);
     })();
   </script>
-  <!-- 站内 i18n 与事件封装（相对路径） -->
-  <script src="i18n.js" defer></script>
-  <script src="assets/js/events.js" defer></script>
+
+  <!-- 站点样式（相对路径避免 GitHub Pages 子路径 404） -->
+  <link rel="stylesheet" href="assets/site.css?v=20250920b" />
+
+  <!-- Plausible（统一注入 + 软 stub；如域名变更只改 DOMAIN） -->
+  <script>
+    (function () {
+      var DOMAIN = 'ben-del-cmd.github.io';        /* ★ 按需改 */
+      window.plausible = window.plausible || function(){ (window.plausible.q = window.plausible.q || []).push(arguments); };
+      if (!document.querySelector('script[data-plausible][data-domain="' + DOMAIN + '"]')) {
+        var s = document.createElement('script');
+        s.defer = true;
+        s.src = 'https://plausible.io/js/script.js';
+        s.setAttribute('data-domain', DOMAIN);
+        s.setAttribute('data-plausible', '');
+        document.head.appendChild(s);
+      }
+    })();
+  </script>
+
+  <!-- i18n & 事件封装（相对路径 + 缓存版本号） -->
+  <script src="i18n.js?v=20250923" defer></script>
+  <script src="assets/js/events.js?v=20250923" defer></script>
+
+  <!-- 轻量兜底样式（不覆盖你自己的 site.css） -->
   <style>
-    /* 轻量兜底样式（不覆盖你现有的 site.css） */
     :root { --maxw: 960px; }
     body { margin:0; line-height:1.45; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto; }
     header, main, footer { max-width: var(--maxw); margin: 0 auto; padding: 16px; }
@@ -46,7 +64,7 @@
     <a id="nav-cards" href="cards/transition-7.html" data-i18n="nav.transition7">7-Day Switch</a>
     <a id="nav-feedback" href="feedback.html" data-i18n="nav.feedback">Feedback</a>
   </nav>
-  <!-- 注意：为避免“重复语言控件”，本页不再内置语言下拉；若需控件，请由 i18n.js 挂载到指定容器 -->
+  <!-- i18n.js 会自动在此后插入语言下拉 -->
   <div id="lang-slot" style="display:none"></div>
 </header>
 
@@ -86,54 +104,37 @@
   </p>
 </footer>
 
-<!-- 运行时保障：跨页保留 ?lang + 事件上报（即使外部脚本加载较慢也能工作） -->
+<!-- 运行时兜底：保留 ?lang + 事件上报（即使 events.js 尚未加载） -->
 <script>
   (function () {
-    function currentLang() {
-      try {
-        var u = new URL(location.href);
-        return u.searchParams.get('lang') || localStorage.getItem('lang') || 'en';
-      } catch (e) { return 'en'; }
+    function lang() {
+      try { var u = new URL(location.href); return u.searchParams.get('lang') || localStorage.getItem('lang') || 'en'; }
+      catch(e){ return 'en'; }
     }
-    // 1) 跨页保留 ?lang
+    // 保留 ?lang 到站内链接
     document.addEventListener('DOMContentLoaded', function () {
-      var lang = currentLang();
+      var l = lang();
       document.querySelectorAll('a[href]').forEach(function (a) {
         var href = a.getAttribute('href');
-        if (!href || href.startsWith('#') || /^https?:\/\//i.test(href)) return; // 外链/锚点跳过
+        if (!href || href.startsWith('#') || /^https?:\/\//i.test(href)) return;
         var url = new URL(href, location.href);
         var sp = url.searchParams;
-        if (!sp.get('lang')) sp.set('lang', lang);
+        if (!sp.get('lang')) sp.set('lang', l);
         url.search = sp.toString();
         a.setAttribute('href', url.pathname + (url.search ? '?' + url.search : '') + url.hash);
       });
     });
-
-    // 2) 事件上报（若 events.js 已加载则走其封装；否则直接调用 plausible）
-    function sendPage(name, props) {
-      if (window.ps && ps.events && typeof ps.events.page === 'function') {
-        ps.events.page(name, props);
-      } else if (typeof plausible === 'function') {
-        plausible('pageview', { props: Object.assign({ page_name: name, lang: currentLang() }, props || {}) });
-      }
-    }
-    function sendEvent(name, props) {
-      if (window.ps && ps.events && typeof ps.events.event === 'function') {
-        ps.events.event(name, props);
-      } else if (typeof plausible === 'function') {
-        plausible(name, { props: Object.assign({ lang: currentLang() }, props || {}) });
-      }
-    }
-
-    // 页面加载与 CTA 点击
+    // 上报封装：优先 ps.events；否则直接 plausible（已存在 stub 安全）
+    function page(name, props){ if (window.ps && ps.events && ps.events.page) ps.events.page(name, props); else plausible('pageview', { props: Object.assign({ page_name: name, lang: lang() }, props||{}) }); }
+    function evt(name, props){ if (window.ps && ps.events && ps.events.event) ps.events.event(name, props); else plausible(name, { props: Object.assign({ lang: lang() }, props||{}) }); }
     window.addEventListener('DOMContentLoaded', function () {
-      sendPage('visit_home');
+      page('visit_home');
       var calc = document.getElementById('cta-open-calculator');
       var card = document.getElementById('cta-view-card');
       var fb   = document.getElementById('cta-feedback');
-      if (calc) calc.addEventListener('click', function(){ sendEvent('calc_cta_click'); });
-      if (card) card.addEventListener('click', function(){ sendEvent('transition_card_cta'); });
-      if (fb)   fb.addEventListener('click',   function(){ sendEvent('feedback_open'); });
+      if (calc) calc.addEventListener('click', function(){ evt('calc_cta_click'); });
+      if (card) card.addEventListener('click', function(){ evt('transition_card_cta'); });
+      if (fb)   fb.addEventListener('click',   function(){ evt('feedback_open'); });
     });
   })();
 </script>
