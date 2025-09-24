@@ -1,45 +1,66 @@
-<!doctype html><html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Pet Scan — Home</title>
-<link rel="stylesheet" href="assets/site.css?v=20250923e">
-<style>
-:root,body{color-scheme:dark}
-#ps-lang-select{min-width:140px;max-width:180px}
-select{appearance:auto;background:rgba(255,255,255,.04);color:#e7eefc;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:.4rem .6rem}
-select option{background:#0e172a;color:#e7eefc}
-</style>
-<script defer data-domain="" src="https://plausible.io/js/script.js"></script>
-</head><body>
-<header style="display:flex;gap:16px;align-items:center">
-  <nav style="display:flex;gap:16px">
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Pet Scan — Home</title>
+  <link rel="stylesheet" href="assets/site.css"/>
+  <style>
+    .topbar { display:flex; gap:24px; align-items:center; justify-content:space-between; }
+    .nav { display:flex; gap:24px; align-items:center; }
+    .lang-select { width:160px; min-width:140px; padding:8px 12px; border-radius:12px; background:#0b1220; color:#e7eefc; }
+    .lang-select option{ background:#0f172a; color:#e7eefc; }
+    .hero h1 { font-size: clamp(28px, 4.5vw, 44px); margin: 24px 0 8px; }
+    .cta-row { display:flex; gap:16px; flex-wrap:wrap; margin: 18px 0 28px; }
+    .cards { display:grid; gap:18px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .card { border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:22px; background:rgba(255,255,255,.02); }
+    .btn { display:inline-block; padding:12px 18px; background:#20c997; color:#052; border-radius:14px; font-weight:600; }
+  </style>
+</head>
+<body>
+<header class="topbar">
+  <nav class="nav">
     <a href="index.html">Home</a>
-    <a href="feeding/feeding.html">Calculator</a>
+    <a href="feeding/feeding.html" id="open-calc-nav">Calculator</a>
     <a href="cards/transition-7.html">7-Day Switch</a>
     <a href="feedback.html">Feedback</a>
   </nav>
-  <select id="ps-lang-select" style="margin-left:auto">
-    <option value="en">English</option><option value="es">Español</option>
-    <option value="zh">中文</option><option value="fr">Français</option>
-  </select>
+  <select class="lang-select" data-role="lang-select" aria-label="Language"></select>
 </header>
 
-<main>
+<main class="hero">
   <h1>Turn pet food labels into simple, actionable feeding.</h1>
-  <p class="note">Informational only. Not medical advice.</p>
-  <div style="display:flex;gap:12px;flex-wrap:wrap;margin:18px 0">
-    <a class="btn" href="feeding/feeding.html">Open Calculator</a>
+  <p>Informational only. Not medical advice.</p>
+
+  <div class="cta-row">
+    <a class="btn" href="feeding/feeding.html" id="open-calc-btn">Open Calculator</a>
     <a class="btn" href="cards/transition-7.html">View 7-Day Card</a>
     <a class="btn" href="feedback.html">Feedback</a>
   </div>
-  <section class="grid">
-    <div class="card"><h3>Calculator</h3><p class="note">RER = 70 × weight^0.75; MER = RER × activity.</p></div>
-    <div class="card"><h3>7-Day Transition Card</h3><p class="note">90/10 → 0/100</p></div>
-    <div class="card"><h3>Feedback</h3><p class="note">Anonymous analytics to improve features.</p></div>
+
+  <section class="cards">
+    <article class="card">
+      <h3>Calculator</h3>
+      <p>RER = 70 × weight^0.75; MER = RER × activity.</p>
+    </article>
+    <article class="card">
+      <h3>7-Day Transition Card</h3>
+      <p>90/10 → 0/100</p>
+    </article>
+    <article class="card">
+      <h3>Feedback</h3>
+      <p>Anonymous analytics to improve features.</p>
+    </article>
   </section>
 </main>
 
+<!-- 统一的 i18n（必须是唯一） -->
 <script src="i18n.js"></script>
-<script src="assets/js/events.js?v=20250923e"></script>
-<!-- 防缓存：本轮先禁用历史 SW -->
-<script>if('serviceWorker'in navigator){navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister()))}</script>
-</body></html>
+<script>
+  // 彻底关闭旧 SW，避免缓存脚本干扰
+  if (navigator.serviceWorker) {
+    navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()));
+  }
+</script>
+</body>
+</html>
