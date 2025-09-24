@@ -11,29 +11,28 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="/p-feeding/assets/icons/icon-192.png">
 
-<link rel="stylesheet" href="assets/site.css?v=20250923b">
+<link rel="stylesheet" href="assets/site.css?v=20250923c">
 
-<!-- 下拉弹层深色化：双保险（即使外部 CSS 未更新也生效） -->
+<!-- 下拉弹层深色化（双保险） -->
 <style>
   :root,body{color-scheme:dark}
   #ps-lang-select,select{appearance:auto;background-color:rgba(255,255,255,.04);color:#e7eefc;border:1px solid rgba(255,255,255,.10);border-radius:12px}
-  #ps-lang-select option,select option{background-color:#0e172a;color:#e7eefc}
-  #ps-lang-select option:hover,#ps-lang-select option:checked,select option:hover,select option:checked{background-color:rgba(34,211,163,.22);color:#fff}
+  #ps-lang-select option,select option{background:#0e172a;color:#e7eefc}
+  #ps-lang-select option:hover,#ps-lang-select option:checked,select option:hover,select option:checked{background:rgba(34,211,163,.22);color:#fff}
 </style>
 
-<!-- 可选：Plausible（域名自动，data-domain 可留空） -->
 <script defer data-domain="" src="https://plausible.io/js/script.js"></script>
 </head>
 <body>
 <header style="display:flex;align-items:center;gap:16px;">
   <nav style="display:flex;gap:16px;">
-    <a href="index.html" data-i18n="nav.home">Home</a>
-    <a href="feeding/feeding.html" data-i18n="nav.calculator">Calculator</a>
-    <a href="cards/transition-7.html" data-i18n="nav.transition7">7-Day Switch</a>
-    <a href="feedback.html" data-i18n="nav.feedback">Feedback</a>
+    <a href="index.html">Home</a>
+    <a href="feeding/feeding.html">Calculator</a>
+    <a href="cards/transition-7.html">7-Day Switch</a>
+    <a href="feedback.html">Feedback</a>
   </nav>
-  <div id="lang-slot" style="margin-left:auto">
-    <!-- 静态后备语言下拉（i18n.js 在时会同步与接管） -->
+  <div style="margin-left:auto">
+    <!-- 静态语言下拉（英文优先） -->
     <select id="ps-lang-select" aria-label="Language">
       <option value="en">English</option>
       <option value="es">Español</option>
@@ -44,43 +43,54 @@
 </header>
 
 <main>
-  <h1 data-i18n="home.hero.title">Turn pet food labels into simple, actionable feeding.</h1>
-  <p class="note" data-i18n="home.hero.subtitle">Scan → unify terms (ME, GA, as-fed/DM) → personalized portions → smooth transition → reorder.</p>
+  <h1>Turn pet food labels into simple, actionable feeding.</h1>
+  <p class="note">Scan → unify terms (ME, GA, as-fed/DM) → personalized portions → smooth transition → reorder.</p>
 
   <div style="display:flex;gap:12px;flex-wrap:wrap;margin:24px 0">
-    <a class="btn" href="feeding/feeding.html" data-i18n="home.cta.open_calculator">Open Calculator</a>
-    <a class="btn" href="cards/transition-7.html" data-i18n="home.cta.view_transition_card">View 7-Day Card</a>
-    <a class="btn" href="feedback.html" data-i18n="nav.feedback">Feedback</a>
+    <a class="btn" href="feeding/feeding.html">Open Calculator</a>
+    <a class="btn" href="cards/transition-7.html">View 7-Day Card</a>
+    <a class="btn" href="feedback.html">Feedback</a>
   </div>
 
   <section class="grid">
-    <div class="card">
-      <h3 data-i18n="nav.calculator">Calculator</h3>
-      <p class="note" data-i18n="feeding.formula.note">RER = 70 × weight^0.75; MER = RER × activity.</p>
-    </div>
-    <div class="card">
-      <h3 data-i18n="transition.title">7-Day Transition Card</h3>
-      <p class="note">90/10 → 0/100</p>
-    </div>
-    <div class="card">
-      <h3 data-i18n="nav.feedback">Feedback</h3>
-      <p class="note" data-i18n="legal.data_use">We use anonymous analytics to improve features.</p>
-    </div>
+    <div class="card"><h3>Calculator</h3><p class="note">RER = 70 × weight^0.75; MER = RER × activity.</p></div>
+    <div class="card"><h3>7-Day Transition Card</h3><p class="note">90/10 → 0/100</p></div>
+    <div class="card"><h3>Feedback</h3><p class="note">We use anonymous analytics to improve features.</p></div>
   </section>
 
-  <p class="note" style="margin-top:24px" data-i18n="footer.disclaimer">
-    Informational only. Not medical advice.
-  </p>
+  <p class="note" style="margin-top:24px">Informational only. Not medical advice.</p>
 </main>
 
-<script src="i18n.js?v=20250923b"></script>
-<script src="assets/js/events.js?v=20250923b"></script>
-
-<!-- 注册 SW（自动识别 /p-feeding/ 根） -->
+<script src="assets/js/events.js?v=20250923c"></script>
 <script>
+/* 语言 & 站内链接统一保留 ?lang=，彻底消除 ??%3Flang 问题 */
 (function(){
-  if('serviceWorker' in navigator){
-    var base = location.pathname.split('/').slice(0,2).join('/') + '/';
+  const allowed = ['en','es','zh','fr'];
+  const url = new URL(location.href);
+  let lang = url.searchParams.get('lang') || 'en';
+  if (!allowed.includes(lang)) lang = 'en';
+
+  const sel = document.getElementById('ps-lang-select');
+  if (sel) {
+    sel.value = lang;
+    sel.addEventListener('change', () => {
+      const u = new URL(location.href);
+      u.searchParams.set('lang', sel.value);
+      location.href = u.toString();
+    });
+  }
+
+  document.querySelectorAll('a[href]').forEach(a => {
+    const href = a.getAttribute('href');
+    if (!href || /^(https?:|mailto:|tel:|#)/i.test(href)) return;
+    const u = new URL(href, location.href);   // 始终相对当前页解析
+    u.searchParams.set('lang', lang);         // 不手拼 '?'
+    a.setAttribute('href', u.pathname + '?' + u.searchParams.toString());
+  });
+
+  // 注册 SW
+  if ('serviceWorker' in navigator) {
+    const base = location.pathname.split('/').slice(0,2).join('/') + '/';
     navigator.serviceWorker.register(base + 'service-worker.js').catch(console.error);
   }
 })();
