@@ -32,7 +32,7 @@
   </script>
 </head>
 
-<!-- 仅用于样式作用域：让“收窄规则”只影响本页 -->
+<!-- 仅用于样式作用域：让“收窄&双列规则”只影响本页 -->
 <body class="page-feeding">
 <header>
   <nav aria-label="Main">
@@ -47,35 +47,51 @@
   <h1 data-i18n="feeding.title">Feeding Calculator</h1>
   <p class="note" data-i18n="legal.info_boundary">Informational only. Not medical advice.</p>
 
-  <!-- 加了 calculator 类，配合 CSS 把这张卡片变窄且居中 -->
+  <!-- 主卡片 + 双列网格 -->
   <div class="card calculator">
-    <label for="pet-type" data-i18n="feeding.pet_type.label">Pet</label>
-    <select id="pet-type">
-      <option value="dog" data-i18n="feeding.pet_type.dog">Dog</option>
-      <option value="cat" data-i18n="feeding.pet_type.cat">Cat</option>
-    </select>
+    <div class="form-grid">
 
-    <label for="weight" data-i18n="feeding.weight.label">Weight</label>
-    <input id="weight" type="number" min="0" step="0.1" placeholder="Enter weight" data-i18n-placeholder="feeding.weight.placeholder" />
+      <div class="field">
+        <label for="pet-type" data-i18n="feeding.pet_type.label">Pet</label>
+        <select id="pet-type">
+          <option value="dog" data-i18n="feeding.pet_type.dog">Dog</option>
+          <option value="cat" data-i18n="feeding.pet_type.cat">Cat</option>
+        </select>
+      </div>
 
-    <label for="unit" data-i18n="feeding.unit.label">Unit</label>
-    <select id="unit">
-      <option value="kg" data-i18n="feeding.unit.kg">kg</option>
-      <option value="lb" data-i18n="feeding.unit.lb">lb</option>
-    </select>
+      <div class="field">
+        <label for="weight" data-i18n="feeding.weight.label">Weight</label>
+        <input id="weight" type="number" min="0" step="0.1" placeholder="Enter weight" data-i18n-placeholder="feeding.weight.placeholder" />
+      </div>
 
-    <label for="activity" data-i18n="feeding.activity.label">Activity</label>
-    <select id="activity">
-      <option value="1.0" data-i18n="feeding.activity.resting">Resting</option>
-      <option value="1.4" data-i18n="feeding.activity.normal">Normal</option>
-      <option value="2.0" data-i18n="feeding.activity.active">Active</option>
-    </select>
+      <div class="field">
+        <label for="unit" data-i18n="feeding.unit.label">Unit</label>
+        <select id="unit">
+          <option value="kg" data-i18n="feeding.unit.kg">kg</option>
+          <option value="lb" data-i18n="feeding.unit.lb">lb</option>
+        </select>
+      </div>
 
-    <label for="kcal-per-cup" data-i18n="feeding.kcal_per_cup.label">kcal per cup</label>
-    <input id="kcal-per-cup" type="number" min="1" step="1" value="350" placeholder="e.g., 350" data-i18n-placeholder="feeding.kcal_per_cup.placeholder" />
+      <div class="field">
+        <label for="activity" data-i18n="feeding.activity.label">Activity</label>
+        <select id="activity">
+          <option value="1.0" data-i18n="feeding.activity.resting">Resting</option>
+          <option value="1.4" data-i18n="feeding.activity.normal">Normal</option>
+          <option value="2.0" data-i18n="feeding.activity.active">Active</option>
+        </select>
+      </div>
 
-    <label for="grams-per-cup" data-i18n="feeding.grams_per_cup.label">grams per cup</label>
-    <input id="grams-per-cup" type="number" min="1" step="1" value="110" placeholder="e.g., 110" data-i18n-placeholder="feeding.grams_per_cup.placeholder" />
+      <div class="field">
+        <label for="kcal-per-cup" data-i18n="feeding.kcal_per_cup.label">kcal per cup</label>
+        <input id="kcal-per-cup" type="number" min="1" step="1" value="350" placeholder="e.g., 350" data-i18n-placeholder="feeding.kcal_per_cup.placeholder" />
+      </div>
+
+      <div class="field">
+        <label for="grams-per-cup" data-i18n="feeding.grams_per_cup.label">grams per cup</label>
+        <input id="grams-per-cup" type="number" min="1" step="1" value="110" placeholder="e.g., 110" data-i18n-placeholder="feeding.grams_per_cup.placeholder" />
+      </div>
+
+    </div><!-- /form-grid -->
 
     <p class="note" id="formula-note" data-i18n="feeding.formula.note">RER = 70 × weight^0.75; MER = RER × activity.</p>
 
