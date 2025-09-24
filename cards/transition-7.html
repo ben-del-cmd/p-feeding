@@ -7,87 +7,45 @@
   <meta name="description" content="A simple 7-day plan to switch pet foods smoothly. Informational only. Not medical advice.">
 
   <!-- HOTFIX-01 -->
-  <script>
-  (function () {
-    var q = location.search;
-    if (/^\?%253F/i.test(q))      location.replace(location.pathname + '?' + q.replace(/^\?%253F/i, ''));
-    else if (/^\?%3F/i.test(q))   location.replace(location.pathname + '?' + q.replace(/^\?%3F/i, ''));
-  })();
-  </script>
+  <script>(function(){var q=location.search;if(/^\?%253F/i.test(q))location.replace(location.pathname+'?'+q.replace(/^\?%253F/i,''));else if(/^\?%3F/i.test(q))location.replace(location.pathname+'?'+q.replace(/^\?%3F/i,''));})();</script>
 
   <!-- 默认语言：英文优先 -->
-  <script>
-  (function () {
-    var u = new URL(location.href);
-    var cur = u.searchParams.get('lang') || localStorage.getItem('lang') || 'en';
-    if (!u.searchParams.get('lang')) { u.searchParams.set('lang', cur); history.replaceState(null, '', u.toString()); }
-    document.documentElement.setAttribute('lang', cur);
-    localStorage.setItem('lang', cur);
-  })();
-  </script>
+  <script>(function(){var u=new URL(location.href);var cur=u.searchParams.get('lang')||localStorage.getItem('lang')||'en';if(!u.searchParams.get('lang')){u.searchParams.set('lang',cur);history.replaceState(null,'',u.toString());}document.documentElement.lang=cur;localStorage.setItem('lang',cur);})();</script>
 
   <link rel="stylesheet" href="../assets/site.css?v=20250920b" />
 
   <!-- Plausible -->
-  <script>
-  (function () {
-    var DOMAIN = 'ben-del-cmd.github.io';
-    window.plausible = window.plausible || function(){ (window.plausible.q = window.plausible.q || []).push(arguments); };
-    if (!document.querySelector('script[data-plausible][data-domain="' + DOMAIN + '"]')) {
-      var s = document.createElement('script'); s.defer = true; s.src = 'https://plausible.io/js/script.js';
-      s.setAttribute('data-domain', DOMAIN); s.setAttribute('data-plausible', ''); document.head.appendChild(s);
-    }
-  })();
-  </script>
+  <script>(function(){var DOMAIN='ben-del-cmd.github.io';window.plausible=window.plausible||function(){(window.plausible.q=window.plausible.q||[]).push(arguments)};if(!document.querySelector('script[data-plausible][data-domain="'+DOMAIN+'"]')){var s=document.createElement('script');s.defer=true;s.src='https://plausible.io/js/script.js';s.setAttribute('data-domain',DOMAIN);s.setAttribute('data-plausible','');document.head.appendChild(s);}})();</script>
 
   <script src="../i18n.js?v=20250923" defer></script>
   <script src="../assets/js/events.js?v=20250923" defer></script>
 
-  <!-- 全站链接热补丁 -->
+  <!-- 链接热补丁 -->
   <script>
   (function(){
-    function curLang(){ try{const u=new URL(location.href); return u.searchParams.get('lang')||localStorage.getItem('lang')||'en';}catch(e){return 'en';} }
-    function normalize(u,l){
-      if (/^\?%3F/i.test(u.search))   u.search='?'+u.search.replace(/^\?%3F/i,'');
-      if (/^\?%253F/i.test(u.search)) u.search='?'+u.search.replace(/^\?%253F/i,'');
-      u.searchParams.delete('lang'); u.searchParams.set('lang', l||'en');
-      return u.pathname + u.search + u.hash;
-    }
-    function rewriteAll(){
-      var l=curLang();
-      document.querySelectorAll('a[href]').forEach(function(a){
-        var h=a.getAttribute('href'); if(!h||h.startsWith('#')||/^https?:\/\//i.test(h)) return;
-        var u=new URL(h, location.href); a.setAttribute('href', normalize(u,l));
-      });
-    }
-    document.addEventListener('DOMContentLoaded', rewriteAll);
-    document.addEventListener('click', function(ev){
-      var a = ev.target && ev.target.closest && ev.target.closest('a[href]');
-      if(!a) return;
-      var h=a.getAttribute('href'); if(!h||h.startsWith('#')||/^https?:\/\//i.test(h)) return;
-      var u=new URL(h, location.href), qs=u.searchParams.toString();
-      var dup = /(^|&)lang=/.test(qs) && (qs.match(/(^|&)lang=/g)||[]).length>1;
-      var bad = /^\?%3F/i.test(u.search) || /^\?%253F/i.test(u.search);
-      if (dup || bad){ ev.preventDefault(); location.href = normalize(u, curLang()); }
-    }, true);
+    function curLang(){try{const u=new URL(location.href);return u.searchParams.get('lang')||localStorage.getItem('lang')||'en'}catch(e){return'en'}}
+    function normalize(u,l){if(/^\?%3F/i.test(u.search))u.search='?'+u.search.replace(/^\?%3F/i,'');if(/^\?%253F/i.test(u.search))u.search='?'+u.search.replace(/^\?%253F/i,'');u.searchParams.delete('lang');u.searchParams.set('lang',l||'en');return u.pathname+u.search+u.hash}
+    function rewriteAll(){var l=curLang();document.querySelectorAll('a[href]').forEach(function(a){var h=a.getAttribute('href');if(!h||h.startsWith('#')||/^https?:\/\//i.test(h))return;var u=new URL(h,location.href);a.setAttribute('href',normalize(u,l));});}
+    document.addEventListener('DOMContentLoaded',rewriteAll);
+    document.addEventListener('click',function(ev){var a=ev.target&&ev.target.closest&&ev.target.closest('a[href]');if(!a)return;var h=a.getAttribute('href');if(!h||h.startsWith('#')||/^https?:\/\//i.test(h))return;var u=new URL(h,location.href),qs=u.searchParams.toString();var dup=/(^|&)lang=/.test(qs)&&(qs.match(/(^|&)lang=/g)||[]).length>1;var bad=/^\?%3F/i.test(u.search)||/^\?%253F/i.test(u.search);if(dup||bad){ev.preventDefault();location.href=normalize(u,curLang());}},true);
   })();
   </script>
 
   <style>
-    :root { --maxw: 960px; }
-    body { margin:0; line-height:1.45; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto; }
-    header, main, footer { max-width: var(--maxw); margin: 0 auto; padding: 16px; }
-    nav a { margin-right: 12px; text-decoration: none; }
-    .grid { display:grid; gap:12px; grid-template-columns: repeat(2, minmax(0,1fr)); }
-    .card { border:1px solid #e5e7eb; border-radius:14px; padding:16px; }
-    .note { font-size:12px; opacity:.8; }
+    :root{--maxw:960px}
+    body{margin:0;line-height:1.45;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto}
+    header,main,footer{max-width:var(--maxw);margin:0 auto;padding:16px}
+    nav a{margin-right:12px;text-decoration:none}
+    .grid{display:grid;gap:12px;grid-template-columns:repeat(2,minmax(0,1fr))}
+    .card{border:1px solid #e5e7eb;border-radius:14px;padding:16px}
+    .note{font-size:12px;opacity:.8}
   </style>
 </head>
 <body>
 <header>
   <nav aria-label="Main">
     <a href="../index.html" data-i18n="nav.home">Home</a>
-    <a href="../feeding/feeding.html" data-i18n="nav.calculator">Calculator</a>
+    <a href="../feeding.html" data-i18n="nav.calculator">Calculator</a>
     <a href="../feedback.html" data-i18n="nav.feedback">Feedback</a>
   </nav>
   <div id="lang-slot" style="display:none"></div>
@@ -112,10 +70,10 @@
 </footer>
 
 <script>
-(function(){ // 页面埋点
-  function lang(){ try{var u=new URL(location.href); return u.searchParams.get('lang')||localStorage.getItem('lang')||'en';}catch(e){return 'en';} }
-  function page(name, props){ try{ if (window.ps && ps.events && ps.events.page) ps.events.page(name, props); else plausible('pageview', { props: Object.assign({ page_name: name, lang: lang() }, props||{}) }); }catch(e){} }
-  document.addEventListener('DOMContentLoaded', function(){ page('visit_transition_page'); });
+(function(){
+  function lang(){try{var u=new URL(location.href);return u.searchParams.get('lang')||localStorage.getItem('lang')||'en'}catch(e){return'en'}}
+  function page(name,props){try{if(window.ps&&ps.events&&ps.events.page)ps.events.page(name,props);else plausible('pageview',{props:Object.assign({page_name:name,lang:lang()},props||{})})}catch(e){}}
+  document.addEventListener('DOMContentLoaded',function(){page('visit_transition_page')});
 })();
 </script>
 </body>
