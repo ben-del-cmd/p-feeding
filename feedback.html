@@ -1,41 +1,187 @@
-<!doctype html><html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Feedback</title>
-<link rel="stylesheet" href="assets/site.css?v=20250923e">
-<style>
-:root,body{color-scheme:dark}
-#ps-lang-select{min-width:140px;max-width:180px}
-select{appearance:auto;background:rgba(255,255,255,.04);color:#e7eefc;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:.4rem .6rem}
-select option{background:#0e172a;color:#e7eefc}
-</style>
-<script defer data-domain="" src="https://plausible.io/js/script.js"></script>
-</head><body>
-<header style="display:flex;gap:16px;align-items:center">
-  <nav style="display:flex;gap:16px">
-    <a href="index.html">Home</a>
-    <a href="feeding/feeding.html">Calculator</a>
-    <a href="cards/transition-7.html">7-Day Switch</a>
-    <a href="feedback.html">Feedback</a>
-  </nav>
-  <select id="ps-lang-select" style="margin-left:auto">
-    <option value="en">English</option><option value="es">Español</option>
-    <option value="zh">中文</option><option value="fr">Français</option>
-  </select>
-</header>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Feedback — Pet Scan</title>
 
-<main>
-  <h1>Feedback</h1>
-  <section class="card">
-    <p class="note">We use anonymous analytics to improve features. Informational only. Not medical advice.</p>
-    <p>If you spot an issue or have suggestions, please share details (screenshots help).</p>
-    <div style="display:flex;gap:12px;flex-wrap:wrap">
-      <a class="btn" href="mailto:hello@example.com?subject=Pet%20Scan%20Feedback">Send Email</a>
-      <a class="btn" href="index.html">Back to Home</a>
-    </div>
-  </section>
-</main>
+  <!-- 站点样式 -->
+  <link rel="stylesheet" href="assets/site.css" />
 
-<script src="i18n.js"></script>
-<script src="assets/js/events.js?v=20250923e"></script>
-<script>if('serviceWorker'in navigator){navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister()))}</script>
-</body></html>
+  <!-- 可选：匿名统计（自动取当前域名；不需要可删除） -->
+  <script defer data-domain="" src="https://plausible.io/js/script.js"></script>
+
+  <!-- 仅本页用到的一点点样式（不影响全站） -->
+  <style>
+    .panel {
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 16px;
+      background: rgba(255,255,255,.03);
+      padding: 20px 24px;
+    }
+    .btns { display:flex; gap:14px; flex-wrap:wrap; margin-top:16px; }
+    .btn { display:inline-flex; align-items:center; gap:.5rem; padding:.7rem 1.1rem;
+           border-radius:12px; background:#20d3a6; color:#001417; font-weight:700; }
+    .btn.secondary { background: rgba(255,255,255,.08); color:#e8f6ff; }
+    .small { opacity:.9; }
+
+    /* 语言下拉：短款 + 深色选项（避免白底不清晰） */
+    .lang-select{
+      min-width: 220px; max-width: 280px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.14);
+      color: #eaf7ff; border-radius: 12px; padding: .55rem .9rem;
+    }
+    .lang-select option{
+      background-color:#0f1a23; color:#eaf7ff;
+    }
+  </style>
+</head>
+<body>
+  <!-- 顶部导航（根目录） -->
+  <header class="topbar">
+    <nav class="nav">
+      <a href="./index.html" data-i18n="nav.home">Home</a>
+      <a href="./feeding/feeding.html" data-i18n="nav.calculator">Calculator</a>
+      <a href="./cards/transition-7.html" data-i18n="nav.transition7">7-Day Switch</a>
+      <a href="./feedback.html" data-i18n="nav.feedback">Feedback</a>
+    </nav>
+
+    <!-- 语言（默认英文优先；其余：西/中/法） -->
+    <select id="langSelect" class="lang-select" aria-label="Language">
+      <option value="en">English</option>
+      <option value="es">Español</option>
+      <option value="zh">中文</option>
+      <option value="fr">Français</option>
+    </select>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h1 data-i18n="feedback.title">Feedback</h1>
+      <p class="small" data-i18n="feedback.lead">
+        We use anonymous analytics to improve features. Informational only. Not medical advice.
+      </p>
+    </section>
+
+    <section class="panel">
+      <p data-i18n="feedback.body">
+        If you spot an issue or have suggestions, please share details (screenshots help).
+      </p>
+      <div class="btns">
+        <a id="sendEmail" class="btn" href="mailto:petscan-feedback@example.com"
+           data-i18n="feedback.action_email">Send Email</a>
+        <a class="btn secondary" href="./index.html"
+           data-i18n="feedback.action_home">Back to Home</a>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== 语言与导航修复（核心：无“??%3F”） ===== -->
+  <script>
+    (function () {
+      const ALLOWED = ["en","es","zh","fr"];
+
+      function getLang(){
+        const u = new URL(location.href);
+        let lang = (u.searchParams.get("lang") || localStorage.getItem("ps.lang") || "en").toLowerCase();
+        if (!ALLOWED.includes(lang)) lang = "en";
+        return lang;
+      }
+
+      function setLang(lang){
+        if (!ALLOWED.includes(lang)) lang = "en";
+
+        // 1) 安全设置 URL（不会出现 ?? 或 %3F）
+        const u = new URL(location.href);
+        u.searchParams.set("lang", lang);
+        if (u.toString() !== location.href) history.replaceState(null, "", u);
+
+        // 2) 记忆
+        localStorage.setItem("ps.lang", lang);
+
+        // 3) 同步下拉
+        const sel = document.getElementById("langSelect");
+        if (sel && sel.value !== lang) sel.value = lang;
+
+        // 4) 给站内 .html 链接统一补/改 lang
+        document.querySelectorAll('a[href$=".html"], a[href$=".htm"]').forEach(a=>{
+          try{
+            const url = new URL(a.getAttribute("href"), location.href);
+            if (!/\.html?$/.test(url.pathname)) return;
+            url.searchParams.set("lang", lang);
+            a.setAttribute("href", url.pathname + "?" + url.searchParams.toString());
+          }catch(e){}
+        });
+
+        // 5) 渲染本页翻译
+        applyI18n(lang);
+      }
+
+      // ——最小 i18n 词典（仅本页用到的键）——
+      const I18N = {
+        en: {
+          "nav.home":"Home","nav.calculator":"Calculator","nav.transition7":"7-Day Switch","nav.feedback":"Feedback",
+          "feedback.title":"Feedback",
+          "feedback.lead":"We use anonymous analytics to improve features. Informational only. Not medical advice.",
+          "feedback.body":"If you spot an issue or have suggestions, please share details (screenshots help).",
+          "feedback.action_email":"Send Email",
+          "feedback.action_home":"Back to Home"
+        },
+        es: {
+          "nav.home":"Inicio","nav.calculator":"Calculadora","nav.transition7":"Cambio 7 días","nav.feedback":"Comentarios",
+          "feedback.title":"Comentarios",
+          "feedback.lead":"Usamos analítica anónima para mejorar funciones. Solo informativo. No es consejo médico.",
+          "feedback.body":"Si detectas un problema o tienes sugerencias, comparte detalles (capturas ayudan).",
+          "feedback.action_email":"Enviar correo",
+          "feedback.action_home":"Volver al inicio"
+        },
+        zh: {
+          "nav.home":"首页","nav.calculator":"喂食计算器","nav.transition7":"7天换粮","nav.feedback":"反馈",
+          "feedback.title":"反馈",
+          "feedback.lead":"我们使用匿名统计改进功能。仅供信息参考，并非医疗建议。",
+          "feedback.body":"如发现问题或有建议，请尽量描述清楚（截图有助定位）。",
+          "feedback.action_email":"发送邮件",
+          "feedback.action_home":"返回首页"
+        },
+        fr: {
+          "nav.home":"Accueil","nav.calculator":"Calculateur","nav.transition7":"Transition 7 jours","nav.feedback":"Retour",
+          "feedback.title":"Retour",
+          "feedback.lead":"Nous utilisons des analyses anonymes pour améliorer les fonctions. Informatif uniquement. Pas de conseil médical.",
+          "feedback.body":"Si vous trouvez un problème ou avez des suggestions, partagez des détails (captures d’écran utiles).",
+          "feedback.action_email":"Envoyer un e-mail",
+          "feedback.action_home":"Retour à l’accueil"
+        }
+      };
+
+      function applyI18n(lang){
+        const dict = I18N[lang] || I18N.en;
+        document.querySelectorAll("[data-i18n]").forEach(el=>{
+          const k = el.getAttribute("data-i18n");
+          if (dict[k]) el.textContent = dict[k];
+        });
+      }
+
+      // 初始化
+      const initLang = getLang();
+      setLang(initLang);
+
+      // 语言选择
+      const sel = document.getElementById("langSelect");
+      if (sel){
+        sel.value = initLang;
+        sel.addEventListener("change", e => setLang(e.target.value));
+      }
+
+      // 事件上报（可选）
+      try{ window.plausible && window.plausible("visit_feedback_page"); }catch(e){}
+      const emailBtn = document.getElementById("sendEmail");
+      if (emailBtn){
+        emailBtn.addEventListener("click", ()=> {
+          try{ window.plausible && window.plausible("feedback_open"); }catch(e){}
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
