@@ -1,94 +1,99 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Feedback — Pet Scan</title>
-<link rel="stylesheet" href="assets/site.css?v=202509" />
-<script defer src="i18n.js"></script>
-<script defer src="events.js"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Feedback — Pet Scan</title>
+  <link rel="stylesheet" href="assets/site.css" />
+  <script defer data-domain="" src="https://plausible.io/js/script.js"></script>
+  <style>
+    .container{max-width:980px;margin:0 auto;padding:32px 16px;}
+    header{display:flex;align-items:center;gap:24px;justify-content:space-between;}
+    nav{display:flex;gap:20px;align-items:center;}
+    .right{display:flex;align-items:center;gap:12px}
+    select#lang-select{min-width:170px}
+    .panel{margin-top:18px;padding:18px;border-radius:18px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04)}
+    .btn{padding:12px 18px;border-radius:12px;border:none;cursor:pointer}
+    .btn-primary{background:#18c08f;color:#062028;font-weight:600}
+    .row{display:flex;gap:14px;flex-wrap:wrap;margin:6px 0 14px}
+    label.badge{padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.2);cursor:pointer}
+    textarea{width:100%;min-height:140px;border-radius:12px;border:1px solid rgba(255,255,255,.16);background:rgba(0,0,0,.25);color:#fff;padding:10px}
+  </style>
 </head>
-<body>
-<div class="container">
-  <nav class="nav">
-    <a data-keep-lang href="index.html">Home</a>
-    <a data-keep-lang href="feeding.html">Calculator</a>
-    <a data-keep-lang href="cards/transition-7.html">7-Day Switch</a>
-    <a data-keep-lang href="feedback.html">Feedback</a>
-    <div class="spacer"></div>
-    <select id="lang" class="locale-select" aria-label="Language">
-      <option value="en">English</option>
-      <option value="es">Español</option>
-      <option value="zh">中文</option>
-      <option value="fr">Français</option>
-    </select>
-  </nav>
-
-  <h1 class="h1">Feedback</h1>
-
-  <div class="card">
-    <p class="muted">We use anonymous analytics to improve features. Informational only. Not medical advice.</p>
-
-    <div class="grid-2" style="margin-top:10px">
-      <div>
-        <label>Type</label>
-        <select id="ftype">
-          <option>Bug</option>
-          <option>Content unclear</option>
-          <option>Feature request</option>
-          <option>Other</option>
+<body data-page="feedback.html">
+  <div class="container">
+    <header>
+      <nav>
+        <a data-page="index.html">Home</a>
+        <a data-page="feeding.html">Calculator</a>
+        <a data-page="cards/transition-7.html">7-Day Switch</a>
+        <a data-page="feedback.html">Feedback</a>
+      </nav>
+      <div class="right">
+        <select id="lang-select" aria-label="Language">
+          <option value="en">English</option>
+          <option value="es">Español</option>
+          <option value="zh">中文</option>
+          <option value="fr">Français</option>
         </select>
       </div>
-      <div>
-        <label>Your email (optional)</label>
-        <input id="fmail" type="email" placeholder="you@example.com" />
+    </header>
+
+    <h1>Feedback</h1>
+
+    <section class="panel">
+      <p>We use anonymous analytics to improve features. Informational only. Not medical advice.</p>
+
+      <div class="row" id="type-row" role="group" aria-label="Feedback type">
+        <label class="badge"><input type="radio" name="ftype" value="Bug" checked style="margin-right:6px">Bug</label>
+        <label class="badge"><input type="radio" name="ftype" value="Issue/Question" style="margin-right:6px">Issue / Question</label>
+        <label class="badge"><input type="radio" name="ftype" value="Feature" style="margin-right:6px">Feature request</label>
+        <label class="badge"><input type="radio" name="ftype" value="Other" style="margin-right:6px">Other</label>
       </div>
-    </div>
 
-    <div style="margin-top:10px">
-      <label>Details</label>
-      <textarea id="ftext" style="width:100%;height:120px" placeholder="Describe the issue/suggestion…"></textarea>
-    </div>
+      <textarea id="msg" placeholder="Describe what’s unclear or missing (screenshots help)."></textarea>
 
-    <div style="margin-top:14px;display:flex;gap:12px">
-      <a id="sendMail" class="btn" href="#">Send Email</a>
-      <a class="btn secondary" data-keep-lang href="index.html">Back to Home</a>
-    </div>
+      <div class="row">
+        <a class="btn btn-primary" id="send-mail">Send Email</a>
+        <a class="btn" data-page="index.html">Back to Home</a>
+      </div>
+    </section>
   </div>
 
-  <footer>© Pet Scan</footer>
-</div>
+  <!-- 统一：保留/切换 ?lang + 站内链接（兜底脚本） -->
+  <script>
+  (function initLinksLang(){
+    if (window.__linkInitDone) return; window.__linkInitDone = true;
+    const usp = new URLSearchParams(location.search);
+    const lang = (usp.get('lang') || 'en').toLowerCase();
+    const m = location.pathname.match(/^\/[^/]+\/?/);
+    const ROOT = (m ? m[0] : '/').replace(/\/?$/, '/');
 
-<script>
-(function(){
-  const sel = document.getElementById('lang');
-  const usp = new URLSearchParams(location.search);
-  const lang = (usp.get('lang') || 'en').toLowerCase();
-  if ([...sel.options].some(o => o.value === lang)) sel.value = lang;
-  sel.addEventListener('change', () => {
-    const u = new URL(location.href);
-    u.searchParams.set('lang', sel.value);
-    location.href = u.pathname + '?' + u.searchParams.toString();
-  });
-  document.querySelectorAll('a[data-keep-lang]').forEach(a=>{
-    const u = new URL(a.getAttribute('href'), location.origin);
-    u.searchParams.set('lang', sel.value);
-    a.href = u.pathname + '?' + u.searchParams.toString();
-  });
+    document.querySelectorAll('a[data-page]').forEach(a=>{
+      const page = a.getAttribute('data-page');
+      a.setAttribute('href', ROOT + page + '?lang=' + lang);
+    });
 
-  // 简单 mailto 组合
-  const mailBtn = document.getElementById('sendMail');
-  mailBtn.addEventListener('click', (e)=>{
-    e.preventDefault();
-    const type = document.getElementById('ftype').value;
-    const mail = document.getElementById('fmail').value.trim();
-    const txt  = document.getElementById('ftext').value.trim() || '(no details)';
+    const sel = document.getElementById('lang-select');
+    if (sel){
+      if ([...sel.options].some(o=>o.value===lang)) sel.value = lang; else sel.value = 'en';
+      sel.addEventListener('change', ()=>{
+        const newLang = sel.value || 'en';
+        const page = document.body.dataset.page || 'feedback.html';
+        location.href = ROOT + page + '?lang=' + newLang;
+      });
+    }
 
-    const subject = encodeURIComponent(`[Pet Scan] ${type}`);
-    const body = encodeURIComponent(`${txt}\n\nlang=${lang}${mail ? `\nfrom=${mail}` : ''}`);
-    location.href = `mailto:hello@example.com?subject=${subject}&body=${body}`;
-  });
-})();
-</script>
+    // 发送邮件（可替换你的邮箱）
+    document.getElementById('send-mail').addEventListener('click', ()=>{
+      const type = (document.querySelector('input[name="ftype"]:checked')||{}).value || 'Feedback';
+      const body = encodeURIComponent(document.getElementById('msg').value || '');
+      const mailto = `mailto:?subject=${encodeURIComponent('Pet Scan ' + type + ' ['+ (sel?.value||'en') +']')}&body=${body}`;
+      location.href = mailto;
+    });
+  })();
+  </script>
+
+  <script src="assets/app.js"></script>
 </body>
 </html>
