@@ -1,70 +1,88 @@
-<!-- /i18n.js -->
+<!-- 放在仓库根：/i18n.js -->
 <script>
-/* Pet Scan i18n & link-preserver (single source of truth)
-   - Forces one and only one ?lang=<xx>
-   - Keeps links relative & clean (no ?? or %3F)
-   - Small, framework-free
-*/
-(function () {
-  const DEFAULT_LANG = 'en';
-  // 当前按你的要求：英文、中文、西语、法语；可随时扩展
-  const LABELS = [
-    ['en','English'],
-    ['es','Español'],
-    ['zh','中文'],
-    ['fr','Français'],
+// Minimal i18n helper for p-feeding
+(function (w, d) {
+  const LANGS = [
+    { code: 'en', label: 'English' },
+    { code: 'es', label: 'Español' },
+    { code: 'zh', label: '中文' },
+    { code: 'fr', label: 'Français' },
   ];
-  const SUPPORTED = LABELS.map(([v])=>v);
 
-  // 解析当前语言（URL → localStorage → 默认）
-  const curUrl = new URL(location.href);
-  let lang = curUrl.searchParams.get('lang');
-  if (!lang || !SUPPORTED.includes(lang)) {
-    const saved = localStorage.getItem('ps.lang');
-    lang = (saved && SUPPORTED.includes(saved)) ? saved : DEFAULT_LANG;
-  }
-  // 把 lang 写回 URL（如果没有）
-  if (!curUrl.searchParams.get('lang')) {
-    curUrl.searchParams.set('lang', lang);
-    history.replaceState(null, '', curUrl);
-  }
-  localStorage.setItem('ps.lang', lang);
+  const i18n = {
+    getLang() {
+      const p = new URLSearchParams(location.search);
+      const lang = (p.get('lang') || '').toLowerCase();
+      const ok = LANGS.some(l => l.code === lang);
+      return ok ? lang : 'en';
+    },
+    setLang(newLang) {
+      const url = new URL(location.href);
+      url.searchParams.set('lang', newLang);
+      location.href = url.toString();
+    },
+    // 给所有站内链接追加/合并 ?lang
+    applyLangToLinks() {
+      const lang = this.getLang();
+      const anchors = d.querySelectorAll('a[href]');
+      anchors.forEach(a => {
+        const href = a.getAttribute('href');
+        if (!href) return;
 
-  // 语言下拉（短款）
-  const sel = document.querySelector('[data-role="lang-select"]');
-  if (sel) {
-    sel.innerHTML = LABELS.map(([v,t]) =>
-      `<option value="${v}">${t}</option>`).join('');
-    sel.value = lang;
-    sel.addEventListener('change', e => {
-      const next = e.target.value;
-      localStorage.setItem('ps.lang', next);
-      const u = new URL(location.href);
-      u.searchParams.set('lang', next);
-      rewriteLinks(next);
-      location.href = u; // 直接跳到新语言
-    });
-  }
+        // 忽略外链 & 锚点 & 协议式链接
+        if (/^https?:\/\//i.test(href) || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) return;
 
-  // 只改站内链接：追加/更新 ?lang=，不产生 ?? 或 %3F
-  function rewriteLinks(currentLang) {
-    document.querySelectorAll('a[href]').forEach(a => {
-      const h = a.getAttribute('href');
-      if (!h || h.startsWith('#') || h.startsWith('mailto:') || h.startsWith('tel:')
-          || /^https?:\/\//i.test(h)) return;
-      const u = new URL(h, location.origin);
-      u.searchParams.set('lang', currentLang);
-      // 只写相对路径 + 查询 + hash，避免绝对地址
-      a.setAttribute('href', `${u.pathname}${u.search}${u.hash}`);
-    });
-  }
-  rewriteLinks(lang);
+        // 构造相对 URL，合并 lang
+        const url = new URL(href, location.origin);
+        // 保持相对路径（不把相对路径转绝对写回去）
+        const rel = href;
 
-  // 暴露少量方法，便于 Console 自检
-  window.psI18n = {
-    getLang: () => lang,
-    setLang: (v) => { if (sel) { sel.value=v; sel.dispatchEvent(new Event('change')); } },
-    rewrite: rewriteLinks
+        const u = new URL(rel, location.href);
+        // 仅对本仓库内页面处理
+        const sameOrigin = u.origin === location.origin;
+        if (!sameOrigin) return;
+
+        const params = new URLSearchParams(u.search);
+        params.set('lang', lang);
+        // 不重新拼 ?，让浏览器去做
+        const out = u.pathname + '?' + params.toString() + (u.hash || '');
+        a.setAttribute('href', out);
+      });
+    },
+    // 填充右上角语言选择
+    mountSelect() {
+      // 允许 select id="lang" 或 data-role="lang"
+      const sel = d.querySelector('select#lang, select[data-role="lang"]');
+      if (!sel) return;
+
+      sel.innerHTML = ''; // 清空再填
+      LANGS.forEach(({ code, label }) => {
+        const opt = d.createElement('option');
+        opt.value = code;
+        opt.textContent = label;
+        sel.appendChild(opt);
+      });
+
+      // 选中当前
+      sel.value = this.getLang();
+
+      // 变化时切换
+      sel.addEventListener('change', () => this.setLang(sel.value));
+    },
+    init() {
+      this.mountSelect();
+      this.applyLangToLinks();
+    }
   };
-})();
+
+  w.ps = w.ps || {};
+  w.ps.i18n = i18n;
+
+  // DOM 就绪后自动跑
+  if (d.readyState === 'loading') {
+    d.addEventListener('DOMContentLoaded', () => i18n.init());
+  } else {
+    i18n.init();
+  }
+})(window, document);
 </script>
