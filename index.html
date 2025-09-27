@@ -1,137 +1,107 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Feeding — Calculator</title>
-<link rel="stylesheet" href="assets/site.css?v=202509" />
-<script defer src="i18n.js"></script>
-<script defer src="events.js"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pet Scan — Home</title>
+  <link rel="stylesheet" href="assets/site.css" />
+  <script defer data-domain="" src="https://plausible.io/js/script.js"></script>
+  <style>
+    .container{max-width:1100px;margin:0 auto;padding:32px 16px;}
+    header{display:flex;align-items:center;gap:24px;justify-content:space-between;}
+    nav{display:flex;gap:20px;align-items:center;}
+    .hero{padding:40px 0 16px;}
+    .cta{display:flex;gap:16px;flex-wrap:wrap;margin:16px 0 32px;}
+    .btn{padding:12px 18px;border-radius:12px;border:none;cursor:pointer}
+    .btn-primary{background:#18c08f;color:#062028;font-weight:600}
+    .cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+    @media (max-width:900px){.cards{grid-template-columns:1fr}}
+    .card{padding:22px;border-radius:18px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04)}
+    .right{display:flex;align-items:center;gap:12px}
+    select#lang-select{min-width:170px}
+  </style>
 </head>
-<body>
-<div class="container">
-  <nav class="nav">
-    <a data-keep-lang href="index.html">Home</a>
-    <a data-keep-lang href="feeding.html">Calculator</a>
-    <a data-keep-lang href="cards/transition-7.html">7-Day Switch</a>
-    <a data-keep-lang href="feedback.html">Feedback</a>
-    <div class="spacer"></div>
-    <select id="lang" class="locale-select" aria-label="Language">
-      <option value="en">English</option>
-      <option value="es">Español</option>
-      <option value="zh">中文</option>
-      <option value="fr">Français</option>
-    </select>
-  </nav>
-
-  <h1 class="h1">Feeding Calculator</h1>
-  <p class="muted">Informational only. Not medical advice.</p>
-
-  <div class="card">
-    <div class="grid-2">
-      <div>
-        <label>Pet</label>
-        <select id="pet">
-          <option value="dog" selected>Dog</option>
-          <option value="cat">Cat</option>
+<body data-page="index.html">
+  <div class="container">
+    <header>
+      <nav>
+        <a data-page="index.html">Home</a>
+        <a data-page="feeding.html">Calculator</a>
+        <a data-page="cards/transition-7.html">7-Day Switch</a>
+        <a data-page="feedback.html">Feedback</a>
+      </nav>
+      <div class="right">
+        <select id="lang-select" aria-label="Language">
+          <option value="en">English</option>
+          <option value="es">Español</option>
+          <option value="zh">中文</option>
+          <option value="fr">Français</option>
         </select>
       </div>
+    </header>
 
-      <div>
-        <label>Weight</label>
-        <input id="weight" type="number" inputmode="decimal" placeholder="Enter weight" />
+    <section class="hero">
+      <h1>Turn pet food labels into simple, actionable feeding.</h1>
+      <p>Informational only. Not medical advice.</p>
+      <div class="cta">
+        <a class="btn btn-primary" data-page="feeding.html">Open Calculator</a>
+        <a class="btn btn-primary" data-page="cards/transition-7.html">View 7-Day Card</a>
+        <a class="btn btn-primary" data-page="feedback.html">Feedback</a>
       </div>
+    </section>
 
-      <div>
-        <label>Unit</label>
-        <select id="unit">
-          <option value="kg" selected>kg</option>
-          <option value="lb">lb</option>
-        </select>
-      </div>
-
-      <div>
-        <label>Activity</label>
-        <select id="activity">
-          <option value="rest">Resting</option>
-          <option value="normal" selected>Normal</option>
-          <option value="active">Active</option>
-        </select>
-      </div>
-
-      <div>
-        <label>kcal per cup</label>
-        <input id="kcalPerCup" type="number" value="350" />
-      </div>
-
-      <div>
-        <label>grams per cup</label>
-        <input id="gPerCup" type="number" value="110" />
-      </div>
-    </div>
-
-    <div style="margin-top:16px;display:flex;gap:12px">
-      <button id="calc" class="btn">Calculate</button>
-      <a class="btn secondary" data-keep-lang href="index.html">Back to Home</a>
-    </div>
+    <section class="cards">
+      <article class="card">
+        <h3>Calculator</h3>
+        <p>RER = 70 × weight^0.75; MER = RER × activity.</p>
+      </article>
+      <article class="card">
+        <h3>7-Day Transition Card</h3>
+        <p>90/10 → 0/100</p>
+      </article>
+      <article class="card">
+        <h3>Feedback</h3>
+        <p>Anonymous analytics to improve features.</p>
+      </article>
+    </section>
   </div>
 
-  <div class="card" style="margin-top:18px">
-    <h3>Result</h3>
-    <div id="result" class="muted">—</div>
-  </div>
+  <!-- 统一：保留/切换 ?lang，修正站内链接与返回主页（兜底脚本） -->
+  <script>
+  (function initLinksLang(){
+    if (window.__linkInitDone) return; window.__linkInitDone = true;
+    const usp = new URLSearchParams(location.search);
+    const lang = (usp.get('lang') || 'en').toLowerCase();
+    // 仓库根： /p-feeding/ 或 /
+    const m = location.pathname.match(/^\/[^/]+\/?/);
+    const ROOT = (m ? m[0] : '/').replace(/\/?$/, '/');
 
-  <footer>© Pet Scan</footer>
-</div>
+    // 设置导航 href
+    document.querySelectorAll('a[data-page]').forEach(a=>{
+      const page = a.getAttribute('data-page');
+      a.setAttribute('href', ROOT + page + '?lang=' + lang);
+    });
 
-<script>
-(function(){
-  // 语言处理 & 保留
-  const sel = document.getElementById('lang');
-  const usp = new URLSearchParams(location.search);
-  const lang = (usp.get('lang') || 'en').toLowerCase();
-  if ([...sel.options].some(o => o.value === lang)) sel.value = lang;
-  sel.addEventListener('change', () => {
-    const u = new URL(location.href);
-    u.searchParams.set('lang', sel.value);
-    location.href = u.pathname + '?' + u.searchParams.toString();
-  });
-  document.querySelectorAll('a[data-keep-lang]').forEach(a => {
-    const u = new URL(a.getAttribute('href'), location.origin);
-    u.searchParams.set('lang', sel.value);
-    a.href = u.pathname + '?' + u.searchParams.toString();
-  });
+    // 初始化语言选择
+    const sel = document.getElementById('lang-select');
+    if (sel){
+      if ([...sel.options].some(o=>o.value===lang)) sel.value = lang; else sel.value = 'en';
+      sel.addEventListener('change', ()=>{
+        const newLang = sel.value || 'en';
+        const page = document.body.dataset.page || 'index.html';
+        location.href = ROOT + page + '?lang=' + newLang;
+      });
+    }
 
-  // 计算逻辑（简单版，与你之前一致的公式）
-  const $ = id => document.getElementById(id);
-  const pow = Math.pow;
-  function toKg(w, unit){ return unit === 'lb' ? w * 0.45359237 : w; }
-  function fmt(n){ return (Math.round(n * 100)/100).toString(); }
-
-  $('calc').addEventListener('click', () => {
-    const w = parseFloat($('weight').value);
-    if (!w || w <= 0) { $('result').textContent = 'Please enter weight.'; return; }
-
-    const unit = $('unit').value;
-    const kg = toKg(w, unit);
-    const act = $('activity').value;
-
-    const RER = 70 * pow(kg, 0.75);
-    const factor = act === 'rest' ? 1.0 : (act === 'active' ? 1.6 : 1.2);
-    const MER = RER * factor;
-
-    const kcalPerCup = Math.max(1, parseFloat($('kcalPerCup').value) || 350);
-    const gPerCup = Math.max(1, parseFloat($('gPerCup').value) || 110);
-
-    const cups = MER / kcalPerCup;
-    const grams = cups * gPerCup;
-
-    $('result').innerHTML =
-      `RER: <b>${fmt(RER)}</b> kcal/day<br>` +
-      `MER: <b>${fmt(MER)}</b> kcal/day<br><br>` +
-      `Daily: <b>${fmt(cups)}</b> cups ≈ <b>${fmt(grams)}</b> g`;
-  });
-})();
-</script>
+    // 按钮样式 <a> 也可点击
+    document.querySelectorAll('a.btn').forEach(b=>{
+      b.addEventListener('click', e=>{
+        const href = b.getAttribute('href');
+        if (!href) e.preventDefault();
+      });
+    });
+  })();
+  </script>
+  <script src="assets/app.js"></script>
 </body>
 </html>
