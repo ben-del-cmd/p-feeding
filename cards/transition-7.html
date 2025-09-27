@@ -1,183 +1,45 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>7-Day Transition Card — Pet Scan</title>
-
-  <!-- 站点样式（包含语言下拉 .lang-select 等） -->
-  <link rel="stylesheet" href="../assets/site.css" />
-
-  <!-- 可选：匿名统计（自动取当前域名；不需要可删） -->
-  <script defer data-domain="" src="https://plausible.io/js/script.js"></script>
-
-  <!-- 仅本页用到的一点点排版（不改变全站样式） -->
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>7-Day Transition Card</title>
+  <link rel="stylesheet" href="../assets/site.css">
   <style>
-    .day-grid{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-      gap:16px;
-    }
-    .day-card{
-      border:1px solid rgba(255,255,255,.12);
-      border-radius:16px;
-      padding:18px 20px;
-      background:rgba(255,255,255,.03);
-    }
-    .day-title{ font-weight:700; font-size:1.125rem; margin:0 0 8px; }
-    .day-desc{ opacity:.9; }
+    .lang-wrap{display:flex;align-items:center;gap:.5rem}
+    .lang-select{min-width:140px;max-width:180px;width:auto;background:rgba(255,255,255,.04);color:#e8eef6;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:.5rem .75rem}
+    .lang-select:focus{box-shadow:0 0 0 3px rgba(16,185,129,.35);border-color:rgba(16,185,129,.55)}
+    .day{padding:1rem;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:rgba(255,255,255,.03);margin-bottom:1rem}
   </style>
 </head>
 <body>
+<header class="container">
+  <nav class="nav">
+    <a href="../index.html">Home</a>
+    <a href="../feeding.html">Calculator</a>
+    <a href="../cards/transition-7.html">7-Day Switch</a>
+    <a href="../feedback.html">Feedback</a>
+    <div class="lang-wrap" style="margin-left:auto">
+      <select id="lang" class="lang-select" aria-label="Language"></select>
+    </div>
+  </nav>
+</header>
 
-  <!-- 顶部导航：从 /cards/ 子目录指向其它页面 -->
-  <header class="topbar">
-    <nav class="nav">
-      <a href="../index.html" data-i18n="nav.home">Home</a>
-      <a href="../feeding/feeding.html" data-i18n="nav.calculator">Calculator</a>
-      <a href="./transition-7.html" data-i18n="nav.transition7">7-Day Switch</a>
-      <a href="../feedback.html" data-i18n="nav.feedback">Feedback</a>
-    </nav>
+<main class="container">
+  <h1>7-Day Transition</h1>
+  <div class="day"><h3>Day 1</h3><p>90/10</p></div>
+  <div class="day"><h3>Day 2</h3><p>70/30</p></div>
+  <div class="day"><h3>Day 3</h3><p>60/40</p></div>
+  <div class="day"><h3>Day 4</h3><p>50/50</p></div>
+  <div class="day"><h3>Day 5</h3><p>40/60</p></div>
+  <div class="day"><h3>Day 6</h3><p>20/80</p></div>
+  <div class="day"><h3>Day 7</h3><p>0/100</p></div>
 
-    <!-- 语言下拉（短款深色） -->
-    <select id="langSelect" class="lang-select" aria-label="Language">
-      <option value="en">English</option>
-      <option value="es">Español</option>
-      <option value="zh">中文</option>
-      <option value="fr">Français</option>
-    </select>
-  </header>
+  <div class="actions" style="margin-top:1rem">
+    <a class="btn" href="../index.html">Back to Home</a>
+  </div>
+</main>
 
-  <main class="container">
-    <section class="hero">
-      <h1 data-i18n="transition.title">7-Day Transition Card</h1>
-      <p class="small" data-i18n="transition.subtitle">90/10 → 0/100</p>
-    </section>
-
-    <section class="card">
-      <div id="dayGrid" class="day-grid" aria-live="polite"></div>
-    </section>
-  </main>
-
-  <!-- ========== 语言与导航修复（核心：无“??%3F”） ========== -->
-  <script>
-    (function () {
-      const ALLOWED = ["en", "es", "zh", "fr"];
-
-      function getLang(){
-        const u = new URL(location.href);
-        let lang = (u.searchParams.get("lang") || localStorage.getItem("ps.lang") || "en").toLowerCase();
-        if (!ALLOWED.includes(lang)) lang = "en";
-        return lang;
-      }
-
-      function setLang(lang){
-        if (!ALLOWED.includes(lang)) lang = "en";
-
-        // 1) 当前 URL 安全设参（不会出现 ?? 或 %3F）
-        const u = new URL(location.href);
-        u.searchParams.set("lang", lang);
-        if (u.toString() !== location.href) history.replaceState(null, "", u);
-
-        // 2) 记忆
-        localStorage.setItem("ps.lang", lang);
-
-        // 3) 同步下拉
-        const sel = document.getElementById("langSelect");
-        if (sel && sel.value !== lang) sel.value = lang;
-
-        // 4) 给站内 .html 链接统一补/改 lang
-        document.querySelectorAll('a[href$=".html"], a[href$=".htm"]').forEach(a=>{
-          try{
-            const url = new URL(a.getAttribute("href"), location.href);
-            if (!/\.html?$/.test(url.pathname)) return;
-            url.searchParams.set("lang", lang);
-            a.setAttribute("href", url.pathname + "?" + url.searchParams.toString());
-          }catch(e){}
-        });
-
-        // 5) 渲染本页文案
-        applyI18n(lang);
-      }
-
-      // ——最小 i18n：只覆盖本页用到的键——
-      const I18N = {
-        en: {
-          "nav.home":"Home","nav.calculator":"Calculator","nav.transition7":"7-Day Switch","nav.feedback":"Feedback",
-          "transition.title":"7-Day Transition Card","transition.subtitle":"90/10 → 0/100",
-          "transition.day_prefix":"Day "
-        },
-        es: {
-          "nav.home":"Inicio","nav.calculator":"Calculadora","nav.transition7":"Cambio 7 días","nav.feedback":"Comentarios",
-          "transition.title":"Tarjeta de transición de 7 días","transition.subtitle":"90/10 → 0/100",
-          "transition.day_prefix":"Día "
-        },
-        zh: {
-          "nav.home":"首页","nav.calculator":"喂食计算器","nav.transition7":"7天换粮","nav.feedback":"反馈",
-          "transition.title":"7 天换粮卡","transition.subtitle":"90/10 → 0/100",
-          "transition.day_prefix":"第"
-        },
-        fr: {
-          "nav.home":"Accueil","nav.calculator":"Calculateur","nav.transition7":"Transition 7 jours","nav.feedback":"Retour",
-          "transition.title":"Carte de transition sur 7 jours","transition.subtitle":"90/10 → 0/100",
-          "transition.day_prefix":"Jour "
-        }
-      };
-
-      function applyI18n(lang){
-        const dict = I18N[lang] || I18N.en;
-        document.querySelectorAll("[data-i18n]").forEach(el=>{
-          const k = el.getAttribute("data-i18n");
-          if (dict[k]) el.textContent = dict[k];
-        });
-        // 重新渲染卡片（为了 “第N天 / Día N / Jour N”）
-        renderDays(lang);
-      }
-
-      // ——渲染 7 天计划——
-      function renderDays(lang){
-        const dict = I18N[lang] || I18N.en;
-        const dayPrefix = dict["transition.day_prefix"] || "Day ";
-        const plan = [
-          [90,10],[80,20],[70,30],[60,40],
-          [50,50],[25,75],[0,100]
-        ];
-        const grid = document.getElementById("dayGrid");
-        grid.innerHTML = "";
-        plan.forEach((p, i)=>{
-          const [oldPct, newPct] = p;
-          const card = document.createElement("div");
-          card.className = "day-card";
-          const h = document.createElement("h3");
-          h.className = "day-title";
-          if (lang === "zh") {
-            h.textContent = `${dayPrefix}${i+1}天`;
-          } else {
-            h.textContent = `${dayPrefix}${i+1}`;
-          }
-          const d = document.createElement("p");
-          d.className = "day-desc";
-          d.textContent = `${oldPct}% / ${newPct}%`;
-          card.appendChild(h);
-          card.appendChild(d);
-          grid.appendChild(card);
-        });
-      }
-
-      // 初始化
-      const initLang = getLang();
-      setLang(initLang);
-
-      // 语言选择
-      const sel = document.getElementById("langSelect");
-      if (sel){
-        sel.value = initLang;
-        sel.addEventListener("change", e => setLang(e.target.value));
-      }
-
-      // 可选：曝光事件
-      try{ window.plausible && window.plausible("visit_transition_page"); }catch(e){}
-    })();
-  </script>
+<script defer src="../i18n.js"></script>
 </body>
 </html>
