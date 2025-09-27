@@ -1,65 +1,95 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>7-Day Transition Card</title>
-<link rel="stylesheet" href="../assets/site.css?v=202509" />
-<script defer src="../i18n.js"></script>
-<script defer src="../events.js"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>7-Day Transition Card</title>
+  <link rel="stylesheet" href="../assets/site.css" />
+  <script defer data-domain="" src="https://plausible.io/js/script.js"></script>
+  <style>
+    .container{max-width:1000px;margin:0 auto;padding:32px 16px;}
+    header{display:flex;align-items:center;gap:24px;justify-content:space-between;}
+    nav{display:flex;gap:20px;align-items:center;}
+    .right{display:flex;align-items:center;gap:12px}
+    select#lang-select{min-width:170px}
+    .list{margin-top:18px;display:flex;flex-direction:column;gap:12px}
+    .item{padding:16px 18px;border-radius:16px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04)}
+    .actions{margin-top:14px}
+    .btn{padding:10px 16px;border-radius:12px;border:none;cursor:pointer}
+  </style>
 </head>
-<body>
-<div class="container">
-  <nav class="nav">
-    <a data-keep-lang href="../index.html">Home</a>
-    <a data-keep-lang href="../feeding.html">Calculator</a>
-    <a data-keep-lang href="transition-7.html">7-Day Switch</a>
-    <a data-keep-lang href="../feedback.html">Feedback</a>
-    <div class="spacer"></div>
-    <select id="lang" class="locale-select" aria-label="Language">
-      <option value="en">English</option>
-      <option value="es">Español</option>
-      <option value="zh">中文</option>
-      <option value="fr">Français</option>
-    </select>
-  </nav>
+<body data-page="cards/transition-7.html">
+  <div class="container">
+    <header>
+      <nav>
+        <a data-page="index.html">Home</a>
+        <a data-page="../feeding.html">Calculator</a>
+        <a data-page="cards/transition-7.html">7-Day Switch</a>
+        <a data-page="../feedback.html">Feedback</a>
+      </nav>
+      <div class="right">
+        <select id="lang-select" aria-label="Language">
+          <option value="en">English</option>
+          <option value="es">Español</option>
+          <option value="zh">中文</option>
+          <option value="fr">Français</option>
+        </select>
+      </div>
+    </header>
 
-  <h1 class="h1">7-Day Transition</h1>
+    <h2>7-Day Transition</h2>
+    <div class="list" id="dlist"></div>
 
-  <div class="card">
-    <div class="block">Day 1 — 90/10</div>
-    <div class="block">Day 2 — 70/30</div>
-    <div class="block">Day 3 — 60/40</div>
-    <div class="block">Day 4 — 50/50</div>
-    <div class="block">Day 5 — 40/60</div>
-    <div class="block">Day 6 — 20/80</div>
-    <div class="block">Day 7 — 0/100</div>
-    <p style="margin-top:14px">
-      <a class="btn secondary" data-keep-lang href="../index.html">Back to Home</a>
-    </p>
+    <div class="actions">
+      <a class="btn" data-page="../index.html">Back to Home</a>
+    </div>
   </div>
 
-  <footer>© Pet Scan</footer>
-</div>
+  <!-- 统一：保留/切换 ?lang + 站内链接（兜底脚本） -->
+  <script>
+  (function initLinksLang(){
+    if (window.__linkInitDone) return; window.__linkInitDone = true;
+    const usp = new URLSearchParams(location.search);
+    const lang = (usp.get('lang') || 'en').toLowerCase();
+    const m = location.pathname.match(/^\/[^/]+\/?/);
+    const ROOT = (m ? m[0] : '/').replace(/\/?$/, '/');
 
-<script>
-(function(){
-  // 语言 & 保留
-  const sel = document.getElementById('lang');
-  const usp = new URLSearchParams(location.search);
-  const lang = (usp.get('lang') || 'en').toLowerCase();
-  if ([...sel.options].some(o => o.value === lang)) sel.value = lang;
-  sel.addEventListener('change', () => {
-    const u = new URL(location.href);
-    u.searchParams.set('lang', sel.value);
-    location.href = u.pathname + '?' + u.searchParams.toString();
-  });
-  document.querySelectorAll('a[data-keep-lang]').forEach(a=>{
-    const u = new URL(a.getAttribute('href'), location.origin);
-    u.searchParams.set('lang', sel.value);
-    a.href = u.pathname + '?' + u.searchParams.toString();
-  });
-})();
-</script>
+    document.querySelectorAll('a[data-page]').forEach(a=>{
+      const page = a.getAttribute('data-page').replace(/^\.\.\//,''); // 统一到仓库根
+      a.setAttribute('href', ROOT + page + '?lang=' + lang);
+    });
+
+    const sel = document.getElementById('lang-select');
+    if (sel){
+      if ([...sel.options].some(o=>o.value===lang)) sel.value = lang; else sel.value = 'en';
+      sel.addEventListener('change', ()=>{
+        const newLang = sel.value || 'en';
+        const page = document.body.dataset.page || 'cards/transition-7.html';
+        location.href = ROOT + page + '?lang=' + newLang;
+      });
+    }
+  })();
+  </script>
+
+  <!-- 生成 7 天 90/10 → 0/100 列表 -->
+  <script>
+  (function build(){
+    const data = [
+      {d:1,a:90,b:10},
+      {d:2,a:70,b:30},
+      {d:3,a:60,b:40},
+      {d:4,a:50,b:50},
+      {d:5,a:40,b:60},
+      {d:6,a:20,b:80},
+      {d:7,a:0 ,b:100},
+    ];
+    const wrap = document.getElementById('dlist');
+    wrap.innerHTML = data.map(x =>
+      `<div class="item"><strong>Day ${x.d}</strong><div style="opacity:.8">${x.a}/${x.b}</div></div>`
+    ).join('');
+  })();
+  </script>
+
+  <script src="../assets/app.js"></script>
 </body>
 </html>
