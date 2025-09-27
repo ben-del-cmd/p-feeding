@@ -1,109 +1,179 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Feeding — Calculator</title>
-  <link rel="stylesheet" href="assets/site.css">
+  <link rel="stylesheet" href="assets/site.css" />
+  <script defer data-domain="" src="https://plausible.io/js/script.js"></script>
   <style>
-    .lang-wrap{display:flex;align-items:center;gap:.5rem}
-    .lang-select{min-width:140px;max-width:180px;width:auto;background:rgba(255,255,255,.04);color:#e8eef6;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:.5rem .75rem}
-    .lang-select:focus{box-shadow:0 0 0 3px rgba(16,185,129,.35);border-color:rgba(16,185,129,.55)}
-    .grid{display:grid;gap:1rem;grid-template-columns:repeat(12,1fr)}
-    .col{grid-column:span 12}
-    @media(min-width:900px){.col{grid-column:span 6}}
-    .panel{padding:1rem;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:rgba(255,255,255,.03)}
+    .container{max-width:1100px;margin:0 auto;padding:32px 16px;}
+    header{display:flex;align-items:center;gap:24px;justify-content:space-between;}
+    nav{display:flex;gap:20px;align-items:center;}
+    .right{display:flex;align-items:center;gap:12px}
+    select#lang-select{min-width:170px}
+    .panel{margin-top:16px;padding:18px;border-radius:18px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04)}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    @media (max-width:900px){.grid{grid-template-columns:1fr}}
+    .row{display:flex;flex-direction:column;gap:8px}
+    .btn{padding:12px 18px;border-radius:12px;border:none;cursor:pointer}
+    .btn-primary{background:#18c08f;color:#062028;font-weight:600}
+    .actions{display:flex;gap:12px;margin-top:12px;flex-wrap:wrap}
+    input,select{height:44px;border-radius:12px;padding:0 12px;border:1px solid rgba(255,255,255,.16);background:rgba(0,0,0,.25);color:#fff}
+    .result-card{margin-top:18px;padding:18px;border-radius:18px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.03)}
+    footer{padding:28px 0;text-align:center;opacity:.65}
   </style>
 </head>
-<body>
-<header class="container">
-  <nav class="nav">
-    <a href="index.html">Home</a>
-    <a href="feeding.html">Calculator</a>
-    <a href="cards/transition-7.html">7-Day Switch</a>
-    <a href="feedback.html">Feedback</a>
-    <div class="lang-wrap" style="margin-left:auto">
-      <select id="lang" class="lang-select" aria-label="Language"></select>
-    </div>
-  </nav>
-</header>
+<body data-page="feeding.html">
+  <div class="container">
+    <header>
+      <nav>
+        <a data-page="index.html">Home</a>
+        <a data-page="feeding.html">Calculator</a>
+        <a data-page="cards/transition-7.html">7-Day Switch</a>
+        <a data-page="feedback.html">Feedback</a>
+      </nav>
+      <div class="right">
+        <select id="lang-select" aria-label="Language">
+          <option value="en">English</option>
+          <option value="es">Español</option>
+          <option value="zh">中文</option>
+          <option value="fr">Français</option>
+        </select>
+      </div>
+    </header>
 
-<main class="container">
-  <h1>Feeding Calculator</h1>
-  <p>Informational only. Not medical advice.</p>
+    <h1>Feeding Calculator</h1>
+    <p>Informational only. Not medical advice.</p>
 
-  <section class="grid panel">
-    <div class="col">
-      <label>Pet</label>
-      <select id="pet" class="input"><option>Dog</option><option>Cat</option></select>
-    </div>
-    <div class="col">
-      <label>Weight</label>
-      <input id="weight" class="input" type="number" placeholder="Enter weight">
-    </div>
-    <div class="col">
-      <label>Unit</label>
-      <select id="unit" class="input"><option value="kg">kg</option><option value="lb">lb</option></select>
-    </div>
-    <div class="col">
-      <label>Activity</label>
-      <select id="activity" class="input">
-        <option value="rest">Resting</option>
-        <option value="normal">Normal</option>
-        <option value="active">Active</option>
-      </select>
-    </div>
+    <section class="panel">
+      <div class="grid">
+        <div class="row">
+          <label for="pet">Pet</label>
+          <select id="pet">
+            <option value="dog">Dog</option>
+            <option value="cat">Cat</option>
+          </select>
+        </div>
 
-    <div class="col">
-      <label>kcal per cup</label>
-      <input id="kcal" class="input" type="number" value="350">
-    </div>
-    <div class="col">
-      <label>grams per cup</label>
-      <input id="gpc" class="input" type="number" value="110">
-    </div>
-  </section>
+        <div class="row">
+          <label for="weight">Weight</label>
+          <input id="weight" type="number" inputmode="decimal" placeholder="Enter weight" />
+        </div>
 
-  <div class="actions" style="margin:1rem 0">
-    <button id="calc" class="btn">Calculate</button>
-    <a class="btn" href="index.html">Back to Home</a>
+        <div class="row">
+          <label for="unit">Unit</label>
+          <select id="unit">
+            <option value="kg">kg</option>
+            <option value="lb">lb</option>
+          </select>
+        </div>
+
+        <div class="row">
+          <label for="activity">Activity</label>
+          <select id="activity">
+            <option value="resting">Resting</option>
+            <option value="normal" selected>Normal</option>
+            <option value="active">Active</option>
+          </select>
+        </div>
+
+        <div class="row">
+          <label for="kcal">kcal per cup</label>
+          <input id="kcal" type="number" inputmode="decimal" value="350" />
+        </div>
+
+        <div class="row">
+          <label for="gpc">grams per cup</label>
+          <input id="gpc" type="number" inputmode="decimal" value="110" />
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary" id="btn-calc">Calculate</button>
+        <a class="btn" data-page="index.html" id="btn-home">Back to Home</a>
+      </div>
+
+      <div class="result-card" id="result">
+        <h3>Result</h3>
+        <div id="result-body">—</div>
+      </div>
+    </section>
+
+    <footer>© Pet Scan</footer>
   </div>
 
-  <section id="result" class="panel" style="display:none"></section>
-</main>
+  <!-- 统一：保留/切换 ?lang + 站内链接（兜底脚本） -->
+  <script>
+  (function initLinksLang(){
+    if (window.__linkInitDone) return; window.__linkInitDone = true;
+    const usp = new URLSearchParams(location.search);
+    const lang = (usp.get('lang') || 'en').toLowerCase();
+    const m = location.pathname.match(/^\/[^/]+\/?/);
+    const ROOT = (m ? m[0] : '/').replace(/\/?$/, '/');
 
-<script defer src="i18n.js"></script>
-<script>
-  // 极简示例计算，你可以替换为自己的完整逻辑
-  function toKg(val, unit){ return unit==='lb' ? (val*0.45359237) : val; }
-  function rerKg(kg){ return 70 * Math.pow(kg, 0.75); }
-  function mer(rer, act){
-    const map={rest:1.0, normal:1.4, active:1.8};
-    return rer * (map[act] || 1.4);
-  }
-  document.getElementById('calc').addEventListener('click', ()=>{
-    const unit = document.getElementById('unit').value;
-    const kg = toKg(parseFloat(document.getElementById('weight').value||0), unit);
-    if (!kg){ alert('Enter weight'); return; }
+    document.querySelectorAll('a[data-page]').forEach(a=>{
+      const page = a.getAttribute('data-page');
+      a.setAttribute('href', ROOT + page + '?lang=' + lang);
+    });
 
-    const outRer = rerKg(kg);
-    const outMer = mer(outRer, document.getElementById('activity').value);
+    const sel = document.getElementById('lang-select');
+    if (sel){
+      if ([...sel.options].some(o=>o.value===lang)) sel.value = lang; else sel.value = 'en';
+      sel.addEventListener('change', ()=>{
+        const newLang = sel.value || 'en';
+        const page = document.body.dataset.page || 'feeding.html';
+        location.href = ROOT + page + '?lang=' + newLang;
+      });
+    }
+  })();
+  </script>
 
-    const kcalPerCup = parseFloat(document.getElementById('kcal').value||350);
-    const gPerCup = parseFloat(document.getElementById('gpc').value||110);
+  <!-- 计算逻辑（单位换算 + RER/MER + 每日杯/克） -->
+  <script>
+  (function calcInit(){
+    const $ = id=>document.getElementById(id);
+    const fmt = n => Math.round(n*100)/100;
 
-    const cups = outMer / kcalPerCup;
-    const grams = cups * gPerCup;
+    function activityFactor(kind, level){
+      // 经验系数（可微调）
+      const base = level==='resting' ? 1.0 : level==='normal' ? 1.5 : 2.0;
+      // 猫稍低一点
+      return kind==='cat' ? base*0.9 : base;
+    }
 
-    const box = document.getElementById('result');
-    box.style.display = 'block';
-    box.innerHTML = `
-      <h3>Result</h3>
-      <p><b>RER:</b> ${outRer.toFixed(0)} kcal/day<br>
-         <b>MER:</b> ${outMer.toFixed(0)} kcal/day</p>
-      <p><b>Daily:</b> ${cups.toFixed(2)} cups ≈ ${grams.toFixed(0)} g</p>
-    `;
-  });
-</script>
+    function render(res){
+      const div = $('result-body');
+      div.innerHTML =
+        `RER: <strong>${fmt(res.rer)}</strong> kcal/day<br/>
+         MER: <strong>${fmt(res.mer)}</strong> kcal/day<br/><br/>
+         Daily: <strong>${fmt(res.cups)}</strong> cups ≈
+         <strong>${fmt(res.grams)}</strong> g`;
+    }
+
+    function calc(){
+      const pet = $('pet').value;                 // dog/cat
+      const unit = $('unit').value;               // kg/lb
+      const w = parseFloat($('weight').value||'0');
+      const kcal = parseFloat($('kcal').value||'350');
+      const gpc  = parseFloat($('gpc').value ||'110');
+      const level= $('activity').value;           // resting/normal/active
+      if (!w || !kcal || !gpc){
+        $('result-body').textContent = '—';
+        return;
+      }
+      const kg = unit==='kg' ? w : w*0.45359237;
+      const rer = 70*Math.pow(kg,0.75);
+      const mer = rer * activityFactor(pet, level);
+      const cups = mer / kcal;
+      const grams = cups * gpc;
+      render({rer, mer, cups, grams});
+    }
+
+    document.getElementById('btn-calc').addEventListener('click', calc);
+  })();
+  </script>
+
+  <script src="assets/app.js"></script>
 </body>
 </html>
