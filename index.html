@@ -1,60 +1,80 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Pet Scan — Home</title>
-  <link rel="stylesheet" href="assets/site.css">
-  <style>
-    /* 也可以把这段删掉，仅保留 assets/site.css 中的追加 */
-    .lang-wrap{display:flex;align-items:center;gap:.5rem}
-    .lang-select{min-width:140px;max-width:180px;width:auto;background:rgba(255,255,255,.04);color:#e8eef6;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:.5rem .75rem;outline:none}
-    .lang-select:focus{box-shadow:0 0 0 3px rgba(16,185,129,.35);border-color:rgba(16,185,129,.55)}
-    .actions{display:flex;gap:.75rem;flex-wrap:wrap}
-    .card-grid{display:grid;gap:1rem;grid-template-columns:repeat(12,1fr)}
-    .card{grid-column:span 12}
-    @media(min-width:900px){.card{grid-column:span 4}}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Pet Scan — Home</title>
+<link rel="stylesheet" href="assets/site.css?v=202509" />
+<script defer src="i18n.js"></script>
+<script defer src="events.js"></script>
 </head>
 <body>
-<header class="container">
-  <nav class="nav">
-    <a href="index.html">Home</a>
-    <a href="feeding.html">Calculator</a>
-    <a href="cards/transition-7.html">7-Day Switch</a>
-    <a href="feedback.html">Feedback</a>
-    <div class="lang-wrap" style="margin-left:auto">
-      <select id="lang" class="lang-select" aria-label="Language"></select>
-    </div>
-  </nav>
-</header>
+  <div class="container">
+    <nav class="nav">
+      <a data-keep-lang href="index.html">Home</a>
+      <a data-keep-lang href="feeding.html">Calculator</a>
+      <a data-keep-lang href="cards/transition-7.html">7-Day Switch</a>
+      <a data-keep-lang href="feedback.html">Feedback</a>
+      <div class="spacer"></div>
 
-<main class="container">
-  <h1>Turn pet food labels into simple, actionable feeding.</h1>
-  <p>Informational only. Not medical advice.</p>
+      <!-- 静态语言 options，英/西/中/法；不依赖脚本插入 -->
+      <select id="lang" class="locale-select" aria-label="Language">
+        <option value="en">English</option>
+        <option value="es">Español</option>
+        <option value="zh">中文</option>
+        <option value="fr">Français</option>
+      </select>
+    </nav>
 
-  <div class="actions" style="margin:1rem 0 1.5rem">
-    <a class="btn" href="feeding.html">Open Calculator</a>
-    <a class="btn" href="cards/transition-7.html">View 7-Day Card</a>
-    <a class="btn" href="feedback.html">Feedback</a>
+    <header>
+      <h1 class="h1">Turn pet food labels into simple, actionable feeding.</h1>
+      <p class="muted">Informational only. Not medical advice.</p>
+      <p style="margin:18px 0 24px">
+        <a class="btn" data-keep-lang href="feeding.html">Open Calculator</a>
+        <a class="btn secondary" data-keep-lang href="cards/transition-7.html">View 7-Day Card</a>
+        <a class="btn secondary" data-keep-lang href="feedback.html">Feedback</a>
+      </p>
+    </header>
+
+    <section class="grid-2">
+      <div class="card">
+        <h3>Calculator</h3>
+        <p>RER = 70 × weight^0.75; MER = RER × activity.</p>
+      </div>
+      <div class="card">
+        <h3>7-Day Transition Card</h3>
+        <p>90/10 → 0/100</p>
+      </div>
+      <div class="card">
+        <h3>Feedback</h3>
+        <p>Anonymous analytics to improve features.</p>
+      </div>
+    </section>
+
+    <footer>© Pet Scan</footer>
   </div>
 
-  <section class="card-grid">
-    <article class="card">
-      <h3>Calculator</h3>
-      <p>RER = 70 × weight^0.75; MER = RER × activity.</p>
-    </article>
-    <article class="card">
-      <h3>7-Day Transition Card</h3>
-      <p>90/10 → 0/100</p>
-    </article>
-    <article class="card">
-      <h3>Feedback</h3>
-      <p>Anonymous analytics to improve features.</p>
-    </article>
-  </section>
-</main>
+<script>
+(function() {
+  // 读取/设置语言
+  const sel = document.getElementById('lang');
+  const usp = new URLSearchParams(location.search);
+  const lang = (usp.get('lang') || 'en').toLowerCase();
+  if ([...sel.options].some(o => o.value === lang)) sel.value = lang;
 
-<script defer src="i18n.js"></script>
+  sel.addEventListener('change', () => {
+    const u = new URL(location.href);
+    u.searchParams.set('lang', sel.value);
+    location.href = u.pathname + '?' + u.searchParams.toString();
+  });
+
+  // 站内链接保留 ?lang
+  document.querySelectorAll('a[data-keep-lang]').forEach(a => {
+    const u = new URL(a.getAttribute('href'), location.origin);
+    u.searchParams.set('lang', sel.value);
+    a.setAttribute('href', u.pathname + '?' + u.searchParams.toString());
+  });
+})();
+</script>
 </body>
 </html>
