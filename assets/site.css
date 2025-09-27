@@ -1,90 +1,84 @@
-/* ==== Base ==== */
-:root {
-  --bg: #061a23;
-  --panel: #0e2430;
-  --panel-2: #102c3a;
-  --text: #e8fbff;
-  --muted: #9cc9d0;
-  --brand: #19c39c;
-  --brand-2: #0aa387;
-  color-scheme: dark;
+/* ================================
+   Dark Select (desktop-friendly)
+   统一深色下拉外观 + 短款尺寸
+   追加到 assets/site.css 末尾即可
+   ================================ */
+
+:root{
+  --sel-bg: #0f1f28;               /* 下拉面板背景 */
+  --sel-surface:#0f2733;           /* 选择框背景 */
+  --sel-text:#e9f1f3;              /* 文本颜色 */
+  --sel-border:rgba(255,255,255,.18);
+  --sel-hover:#153747;             /* 选中/悬停项 */
+  --sel-focus:#18c08f;             /* 焦点高亮 */
 }
 
-html, body {
-  background: radial-gradient(1200px 800px at 20% 0%, #0a2430 0%, #061a23 60%, #051821 100%) fixed;
-  color: var(--text);
-  margin: 0;
-  font: 16px/1.6 system-ui, -apple-system, Segoe UI, Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+/* 去除各浏览器原生样式，便于统一风格 */
+select{
+  -webkit-appearance:none;
+  -moz-appearance:none;
+  appearance:none;
+  background-color:var(--sel-surface);
+  color:var(--sel-text);
+  border:1px solid var(--sel-border);
+  border-radius:12px;
+  padding:10px 36px 10px 12px;
+  line-height:1.2;
+  min-height:44px;
 }
 
-/* ==== Layout ==== */
-.container { max-width: 1100px; margin: 0 auto; padding: 24px 20px 80px; }
-.nav { display:flex; align-items:center; gap:20px; }
-.nav a { color: var(--text); text-decoration:none; opacity:.9 }
-.nav a:hover { opacity:1 }
-.nav .spacer { flex:1 }
-
-/* ==== Cards & Buttons ==== */
-.card {
-  background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02));
-  border: 1px solid rgba(255,255,255,.06);
-  border-radius: 16px;
-  padding: 18px 20px;
-  box-shadow: 0 6px 24px rgba(0,0,0,.25), inset 0 0 0 1px rgba(255,255,255,.03);
+/* 短款尺寸（用于语言菜单等） */
+#lang-select,
+select.short,
+select[data-ui="lang"]{
+  min-width:160px;
+  max-width:200px;
 }
 
-.btn {
-  display:inline-block;
-  font-weight:600;
-  border:0;
-  color:#052824;
-  background: linear-gradient(180deg, var(--brand) 0%, var(--brand-2) 100%);
-  padding: 12px 18px;
-  border-radius: 12px;
-  text-decoration:none;
-  box-shadow: 0 10px 32px rgba(25,195,156,.28);
+/* 自定义下拉箭头（SVG，不依赖图片文件） */
+select:not([multiple]){
+  background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 24 24" fill="none" stroke="%23a7c4c9" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>');
+  background-repeat:no-repeat;
+  background-position:right 12px center;
+  background-size:14px 10px;
 }
-.btn:focus-visible { outline:2px solid #19c39c66; outline-offset:2px; }
-.btn.secondary {
-  background: #183744;
-  color: var(--text);
-  box-shadow: none;
+select::-ms-expand{display:none;} /* 旧版 Edge/IE 的箭头 */
+
+/* 焦点/键盘可达性 */
+select:focus{
+  outline:none;
+  border-color:var(--sel-focus);
+  box-shadow:0 0 0 3px rgba(24,192,143,.35);
 }
 
-/* ==== Inputs / Selects（全站统一深色下拉） ==== */
-input, select {
-  width: 100%;
-  box-sizing: border-box;
-  color: var(--text);
-  background: #0f2531;
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 12px;
-  padding: 12px 14px;
-  outline: none;
+/* 真正的下拉面板（多数桌面浏览器可生效） */
+select option,
+select optgroup{
+  background:var(--sel-bg);
+  color:var(--sel-text);
 }
-input:focus, select:focus {
-  border-color: #19c39c88;
-  box-shadow: 0 0 0 3px #19c39c33;
+select option:hover,
+select option:checked{
+  background:var(--sel-hover);
+  color:#fff;
 }
 
-/* 关键：让各浏览器下拉菜单用深色配色 */
-select, option, optgroup { color-scheme: dark; }
-option { background-color: #0d202a; color: var(--text); }
-select::-ms-expand { display:none; } /* old IE edge */
+/* 滚动条（WebKit/Blink） */
+select::-webkit-scrollbar{
+  width:10px;
+  height:10px;
+}
+select::-webkit-scrollbar-thumb{
+  background:rgba(255,255,255,.18);
+  border-radius:8px;
+}
+select::-webkit-scrollbar-track{
+  background:rgba(255,255,255,.06);
+}
 
-/* 语言下拉的短款宽度 */
-.locale-select { width: 180px; max-width: 45vw; }
-
-/* 计算器网格 */
-.grid-2 { display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
-@media (max-width: 840px){ .grid-2{ grid-template-columns: 1fr; } }
-
-/* Typography */
-.h1 { font-size: clamp(28px, 4vw, 44px); font-weight: 800; letter-spacing:.2px; margin: 10px 0 12px; }
-.muted { color: var(--muted); }
-
-/* Tables / list blocks in cards page */
-.block { background:#0f2531; border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:14px 16px; }
-
-/* Footer */
-footer { color: var(--muted); margin-top: 42px; font-size: 14px; text-align: center; }
+/* Firefox 焦点样式微调 */
+@-moz-document url-prefix(){
+  select:focus{
+    box-shadow:0 0 0 2px rgba(24,192,143,.4),0 0 0 1px var(--sel-focus) inset;
+  }
+}
