@@ -1,45 +1,65 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>7-Day Transition Card</title>
-  <link rel="stylesheet" href="../assets/site.css">
-  <style>
-    .lang-wrap{display:flex;align-items:center;gap:.5rem}
-    .lang-select{min-width:140px;max-width:180px;width:auto;background:rgba(255,255,255,.04);color:#e8eef6;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:.5rem .75rem}
-    .lang-select:focus{box-shadow:0 0 0 3px rgba(16,185,129,.35);border-color:rgba(16,185,129,.55)}
-    .day{padding:1rem;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:rgba(255,255,255,.03);margin-bottom:1rem}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>7-Day Transition Card</title>
+<link rel="stylesheet" href="../assets/site.css?v=202509" />
+<script defer src="../i18n.js"></script>
+<script defer src="../events.js"></script>
 </head>
 <body>
-<header class="container">
+<div class="container">
   <nav class="nav">
-    <a href="../index.html">Home</a>
-    <a href="../feeding.html">Calculator</a>
-    <a href="../cards/transition-7.html">7-Day Switch</a>
-    <a href="../feedback.html">Feedback</a>
-    <div class="lang-wrap" style="margin-left:auto">
-      <select id="lang" class="lang-select" aria-label="Language"></select>
-    </div>
+    <a data-keep-lang href="../index.html">Home</a>
+    <a data-keep-lang href="../feeding.html">Calculator</a>
+    <a data-keep-lang href="transition-7.html">7-Day Switch</a>
+    <a data-keep-lang href="../feedback.html">Feedback</a>
+    <div class="spacer"></div>
+    <select id="lang" class="locale-select" aria-label="Language">
+      <option value="en">English</option>
+      <option value="es">Español</option>
+      <option value="zh">中文</option>
+      <option value="fr">Français</option>
+    </select>
   </nav>
-</header>
 
-<main class="container">
-  <h1>7-Day Transition</h1>
-  <div class="day"><h3>Day 1</h3><p>90/10</p></div>
-  <div class="day"><h3>Day 2</h3><p>70/30</p></div>
-  <div class="day"><h3>Day 3</h3><p>60/40</p></div>
-  <div class="day"><h3>Day 4</h3><p>50/50</p></div>
-  <div class="day"><h3>Day 5</h3><p>40/60</p></div>
-  <div class="day"><h3>Day 6</h3><p>20/80</p></div>
-  <div class="day"><h3>Day 7</h3><p>0/100</p></div>
+  <h1 class="h1">7-Day Transition</h1>
 
-  <div class="actions" style="margin-top:1rem">
-    <a class="btn" href="../index.html">Back to Home</a>
+  <div class="card">
+    <div class="block">Day 1 — 90/10</div>
+    <div class="block">Day 2 — 70/30</div>
+    <div class="block">Day 3 — 60/40</div>
+    <div class="block">Day 4 — 50/50</div>
+    <div class="block">Day 5 — 40/60</div>
+    <div class="block">Day 6 — 20/80</div>
+    <div class="block">Day 7 — 0/100</div>
+    <p style="margin-top:14px">
+      <a class="btn secondary" data-keep-lang href="../index.html">Back to Home</a>
+    </p>
   </div>
-</main>
 
-<script defer src="../i18n.js"></script>
+  <footer>© Pet Scan</footer>
+</div>
+
+<script>
+(function(){
+  // 语言 & 保留
+  const sel = document.getElementById('lang');
+  const usp = new URLSearchParams(location.search);
+  const lang = (usp.get('lang') || 'en').toLowerCase();
+  if ([...sel.options].some(o => o.value === lang)) sel.value = lang;
+  sel.addEventListener('change', () => {
+    const u = new URL(location.href);
+    u.searchParams.set('lang', sel.value);
+    location.href = u.pathname + '?' + u.searchParams.toString();
+  });
+  document.querySelectorAll('a[data-keep-lang]').forEach(a=>{
+    const u = new URL(a.getAttribute('href'), location.origin);
+    u.searchParams.set('lang', sel.value);
+    a.href = u.pathname + '?' + u.searchParams.toString();
+  });
+})();
+</script>
 </body>
 </html>
