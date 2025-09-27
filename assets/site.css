@@ -1,161 +1,90 @@
-/* =======================================================================
-   Pet Scan — Site CSS  (full replace)
-   Dark gradient theme + compact UI
-   ======================================================================= */
-
-:root{
-  --bg-start: #0A1626;
-  --bg-end:   #0E2239;
-  --text:     #E8EEF6;
-  --muted:    #A7B4C6;
-  --line:     rgba(255,255,255,.10);
-  --line-2:   rgba(255,255,255,.06);
-  --card:     rgba(255,255,255,.03);
-  --card-2:   rgba(255,255,255,.04);
-  --brand:    #10B981; /* teal-500 */
-  --brand-2:  #34D399; /* teal-400 */
-  --brand-3:  rgba(16,185,129,.35);
-  --radius-lg: 16px;
-  --radius-md: 12px;
-  --radius-sm: 10px;
-  --shadow-1: 0 8px 32px rgba(0,0,0,.35);
-  --shadow-2: 0 10px 40px rgba(16,185,129,.18);
-  --container: 1120px;
-  --space: .75rem;
+/* ==== Base ==== */
+:root {
+  --bg: #061a23;
+  --panel: #0e2430;
+  --panel-2: #102c3a;
+  --text: #e8fbff;
+  --muted: #9cc9d0;
+  --brand: #19c39c;
+  --brand-2: #0aa387;
+  color-scheme: dark;
 }
 
-/* Reset-ish */
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0;
-  font: 400 16px/1.55 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Noto Sans","Helvetica Neue",Arial,"Apple Color Emoji","Segoe UI Emoji";
-  color:var(--text);
-  background:
-    radial-gradient(1200px 800px at 35% -10%, rgba(32,188,255,.10), transparent 70%),
-    radial-gradient(1200px 800px at 90% 10%, rgba(16,185,129,.10), transparent 70%),
-    linear-gradient(180deg, var(--bg-start), var(--bg-end));
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-img{max-width:100%;display:block}
-a{color:inherit;text-decoration:none}
-a:hover{opacity:.95}
-
-/* Layout */
-.container{
-  max-width:var(--container);
-  margin:0 auto;
-  padding: 20px clamp(16px, 3vw, 28px);
-}
-
-.nav{
-  display:flex; align-items:center; gap:1rem; flex-wrap:wrap;
-  padding:8px 0 18px;
-}
-.nav a{
-  color:var(--text);
-  opacity:.9;
-  padding:.35rem .55rem;
-  border-radius:8px;
-}
-.nav a:hover{
-  background:var(--card-2);
-  border:1px solid var(--line-2);
-}
-
-/* Headings */
-h1{font-size:clamp(28px,4vw,44px); line-height:1.15; margin:18px 0 8px}
-h2{font-size:clamp(22px,3vw,28px); line-height:1.2; margin:14px 0 8px}
-h3{font-size:clamp(18px,2.2vw,22px); line-height:1.25; margin:10px 0 6px}
-p, .muted{color:var(--muted)}
-
-/* Buttons */
-.btn{
-  display:inline-flex; align-items:center; justify-content:center;
-  background:var(--brand);
-  color:#052016;
-  font-weight:600;
-  padding:.72rem 1.05rem;
-  border-radius: var(--radius-md);
-  border:1px solid rgba(5,32,22,.15);
-  box-shadow: var(--shadow-2);
-  transition:.2s ease;
-}
-.btn:hover{
-  transform: translateY(-1px);
-  box-shadow: 0 12px 44px rgba(16,185,129,.30);
-}
-.btn:active{transform: translateY(0) scale(.99)}
-.btn.secondary{
-  background:transparent; color:var(--text);
-  border:1px solid var(--line);
-  box-shadow:none;
-}
-.actions{display:flex; gap:.75rem; flex-wrap:wrap}
-
-/* Cards / Panels */
-.card,
-.panel{
-  background:var(--card);
-  border:1px solid var(--line);
-  border-radius: var(--radius-lg);
-  padding:1rem clamp(14px,2.6vw,20px);
-  box-shadow:var(--shadow-1);
-}
-
-/* Grid helpers */
-.card-grid{display:grid; gap: 1rem; grid-template-columns: repeat(12,1fr)}
-.card{grid-column: span 12}
-@media (min-width: 900px){ .card{grid-column: span 4} }
-
-/* Inputs */
-.input,
-input[type="text"], input[type="number"], input[type="email"], input[type="search"],
-select, textarea{
-  width:100%;
-  color:var(--text);
-  background:rgba(255,255,255,.04);
-  border:1px solid var(--line);
-  border-radius: var(--radius-md);
-  padding:.75rem .85rem;
-  outline:none;
-}
-.input:focus,
-input:focus, select:focus, textarea:focus{
-  border-color: var(--brand-3);
-  box-shadow: 0 0 0 3px var(--brand-3);
-}
-label{display:block; margin:.2rem 0 .35rem; color:var(--muted)}
-
-/* -----------------------------------------------------------------------
-   Language select - short & dark (works for #lang or [data-role="lang"])
-   ----------------------------------------------------------------------- */
-.lang-wrap{display:flex; align-items:center; gap:.5rem}
-#lang, select[data-role="lang"], .lang-select{
-  min-width: 140px; max-width: 180px; width:auto;
-  background: rgba(255,255,255,.04);
+html, body {
+  background: radial-gradient(1200px 800px at 20% 0%, #0a2430 0%, #061a23 60%, #051821 100%) fixed;
   color: var(--text);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-  padding: .55rem .75rem;
+  margin: 0;
+  font: 16px/1.6 system-ui, -apple-system, Segoe UI, Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+/* ==== Layout ==== */
+.container { max-width: 1100px; margin: 0 auto; padding: 24px 20px 80px; }
+.nav { display:flex; align-items:center; gap:20px; }
+.nav a { color: var(--text); text-decoration:none; opacity:.9 }
+.nav a:hover { opacity:1 }
+.nav .spacer { flex:1 }
+
+/* ==== Cards & Buttons ==== */
+.card {
+  background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02));
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 16px;
+  padding: 18px 20px;
+  box-shadow: 0 6px 24px rgba(0,0,0,.25), inset 0 0 0 1px rgba(255,255,255,.03);
+}
+
+.btn {
+  display:inline-block;
+  font-weight:600;
+  border:0;
+  color:#052824;
+  background: linear-gradient(180deg, var(--brand) 0%, var(--brand-2) 100%);
+  padding: 12px 18px;
+  border-radius: 12px;
+  text-decoration:none;
+  box-shadow: 0 10px 32px rgba(25,195,156,.28);
+}
+.btn:focus-visible { outline:2px solid #19c39c66; outline-offset:2px; }
+.btn.secondary {
+  background: #183744;
+  color: var(--text);
+  box-shadow: none;
+}
+
+/* ==== Inputs / Selects（全站统一深色下拉） ==== */
+input, select {
+  width: 100%;
+  box-sizing: border-box;
+  color: var(--text);
+  background: #0f2531;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 12px;
+  padding: 12px 14px;
   outline: none;
 }
-#lang:focus, select[data-role="lang"]:focus, .lang-select:focus{
-  border-color: var(--brand-3);
-  box-shadow: 0 0 0 3px var(--brand-3);
+input:focus, select:focus {
+  border-color: #19c39c88;
+  box-shadow: 0 0 0 3px #19c39c33;
 }
 
-/* Tables (if any future use) */
-table{width:100%; border-collapse:separate; border-spacing:0}
-th,td{padding:.65rem .75rem; border-bottom:1px solid var(--line)}
-th{text-align:left; color:var(--muted); font-weight:600}
+/* 关键：让各浏览器下拉菜单用深色配色 */
+select, option, optgroup { color-scheme: dark; }
+option { background-color: #0d202a; color: var(--text); }
+select::-ms-expand { display:none; } /* old IE edge */
 
-/* Utilities */
-.mt-1{margin-top:.5rem} .mt-2{margin-top:1rem} .mt-3{margin-top:1.5rem}
-.mb-1{margin-bottom:.5rem} .mb-2{margin-bottom:1rem} .mb-3{margin-bottom:1.5rem}
-.center{display:flex;align-items:center;justify-content:center}
+/* 语言下拉的短款宽度 */
+.locale-select { width: 180px; max-width: 45vw; }
 
-/* Footer (optional) */
-footer{color:var(--muted); font-size:14px; padding:26px 0 36px}
+/* 计算器网格 */
+.grid-2 { display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
+@media (max-width: 840px){ .grid-2{ grid-template-columns: 1fr; } }
+
+/* Typography */
+.h1 { font-size: clamp(28px, 4vw, 44px); font-weight: 800; letter-spacing:.2px; margin: 10px 0 12px; }
+.muted { color: var(--muted); }
+
+/* Tables / list blocks in cards page */
+.block { background:#0f2531; border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:14px 16px; }
+
+/* Footer */
+footer { color: var(--muted); margin-top: 42px; font-size: 14px; text-align: center; }
