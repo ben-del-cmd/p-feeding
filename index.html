@@ -2,106 +2,53 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Pet Scan — Home</title>
-  <link rel="stylesheet" href="assets/site.css" />
-  <script defer data-domain="" src="https://plausible.io/js/script.js"></script>
-  <style>
-    .container{max-width:1100px;margin:0 auto;padding:32px 16px;}
-    header{display:flex;align-items:center;gap:24px;justify-content:space-between;}
-    nav{display:flex;gap:20px;align-items:center;}
-    .hero{padding:40px 0 16px;}
-    .cta{display:flex;gap:16px;flex-wrap:wrap;margin:16px 0 32px;}
-    .btn{padding:12px 18px;border-radius:12px;border:none;cursor:pointer}
-    .btn-primary{background:#18c08f;color:#062028;font-weight:600}
-    .cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
-    @media (max-width:900px){.cards{grid-template-columns:1fr}}
-    .card{padding:22px;border-radius:18px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04)}
-    .right{display:flex;align-items:center;gap:12px}
-    select#lang-select{min-width:170px}
-  </style>
+  <link rel="stylesheet" href="/p-feeding/assets/site.css" />
 </head>
-<body data-page="index.html">
-  <div class="container">
-    <header>
-      <nav>
-        <a data-page="index.html">Home</a>
-        <a data-page="feeding.html">Calculator</a>
-        <a data-page="cards/transition-7.html">7-Day Switch</a>
-        <a data-page="feedback.html">Feedback</a>
+<body>
+  <!-- 顶部导航 -->
+  <header class="navbar">
+    <div class="container">
+      <nav class="nav-links">
+        <a href="/p-feeding/index.html" data-i18n="nav.home"></a>
+        <a href="/p-feeding/feeding.html" data-i18n="nav.calculator"></a>
+        <a href="/p-feeding/cards/transition-7.html" data-i18n="nav.transition7"></a>
+        <a href="/p-feeding/feedback.html" data-i18n="nav.feedback"></a>
       </nav>
-      <div class="right">
-        <select id="lang-select" aria-label="Language">
-          <option value="en">English</option>
-          <option value="es">Español</option>
-          <option value="zh">中文</option>
-          <option value="fr">Français</option>
-        </select>
-      </div>
-    </header>
+      <select id="lang-select" aria-label="Language"></select>
+    </div>
+  </header>
 
-    <section class="hero">
-      <h1>Turn pet food labels into simple, actionable feeding.</h1>
-      <p>Informational only. Not medical advice.</p>
-      <div class="cta">
-        <a class="btn btn-primary" data-page="feeding.html">Open Calculator</a>
-        <a class="btn btn-primary" data-page="cards/transition-7.html">View 7-Day Card</a>
-        <a class="btn btn-primary" data-page="feedback.html">Feedback</a>
-      </div>
-    </section>
+  <main class="hero">
+    <h1 data-i18n="home.hero.title"></h1>
+    <p class="sub" data-i18n="home.hero.subtitle"></p>
+
+    <div class="cta-row">
+      <a id="to-calc" class="btn" href="/p-feeding/feeding.html" data-i18n="home.cta.open_calculator"></a>
+      <a id="to-card" class="btn" href="/p-feeding/cards/transition-7.html" data-i18n="home.cta.view_transition_card"></a>
+      <a id="to-feedback" class="btn" href="/p-feeding/feedback.html" data-i18n="home.cta.feedback"></a>
+    </div>
 
     <section class="cards">
       <article class="card">
-        <h3>Calculator</h3>
-        <p>RER = 70 × weight^0.75; MER = RER × activity.</p>
+        <h3 data-i18n="home.card.calc.title"></h3>
+        <p data-i18n="home.card.calc.desc"></p>
       </article>
       <article class="card">
-        <h3>7-Day Transition Card</h3>
-        <p>90/10 → 0/100</p>
+        <h3 data-i18n="home.card.t7.title"></h3>
+        <p data-i18n="home.card.t7.desc"></p>
       </article>
       <article class="card">
-        <h3>Feedback</h3>
-        <p>Anonymous analytics to improve features.</p>
+        <h3 data-i18n="home.card.fb.title"></h3>
+        <p data-i18n="home.card.fb.desc"></p>
       </article>
     </section>
-  </div>
+  </main>
 
-  <!-- 统一：保留/切换 ?lang，修正站内链接与返回主页（兜底脚本） -->
-  <script>
-  (function initLinksLang(){
-    if (window.__linkInitDone) return; window.__linkInitDone = true;
-    const usp = new URLSearchParams(location.search);
-    const lang = (usp.get('lang') || 'en').toLowerCase();
-    // 仓库根： /p-feeding/ 或 /
-    const m = location.pathname.match(/^\/[^/]+\/?/);
-    const ROOT = (m ? m[0] : '/').replace(/\/?$/, '/');
+  <footer class="foot">© Pet Scan</footer>
 
-    // 设置导航 href
-    document.querySelectorAll('a[data-page]').forEach(a=>{
-      const page = a.getAttribute('data-page');
-      a.setAttribute('href', ROOT + page + '?lang=' + lang);
-    });
-
-    // 初始化语言选择
-    const sel = document.getElementById('lang-select');
-    if (sel){
-      if ([...sel.options].some(o=>o.value===lang)) sel.value = lang; else sel.value = 'en';
-      sel.addEventListener('change', ()=>{
-        const newLang = sel.value || 'en';
-        const page = document.body.dataset.page || 'index.html';
-        location.href = ROOT + page + '?lang=' + newLang;
-      });
-    }
-
-    // 按钮样式 <a> 也可点击
-    document.querySelectorAll('a.btn').forEach(b=>{
-      b.addEventListener('click', e=>{
-        const href = b.getAttribute('href');
-        if (!href) e.preventDefault();
-      });
-    });
-  })();
-  </script>
-  <script src="assets/app.js"></script>
+  <script src="/p-feeding/assets/i18n.js" defer></script>
+  <script src="/p-feeding/assets/app.js" defer></script>
 </body>
 </html>
