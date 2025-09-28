@@ -2,178 +2,134 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Feeding — Calculator</title>
-  <link rel="stylesheet" href="assets/site.css" />
-  <script defer data-domain="" src="https://plausible.io/js/script.js"></script>
-  <style>
-    .container{max-width:1100px;margin:0 auto;padding:32px 16px;}
-    header{display:flex;align-items:center;gap:24px;justify-content:space-between;}
-    nav{display:flex;gap:20px;align-items:center;}
-    .right{display:flex;align-items:center;gap:12px}
-    select#lang-select{min-width:170px}
-    .panel{margin-top:16px;padding:18px;border-radius:18px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04)}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-    @media (max-width:900px){.grid{grid-template-columns:1fr}}
-    .row{display:flex;flex-direction:column;gap:8px}
-    .btn{padding:12px 18px;border-radius:12px;border:none;cursor:pointer}
-    .btn-primary{background:#18c08f;color:#062028;font-weight:600}
-    .actions{display:flex;gap:12px;margin-top:12px;flex-wrap:wrap}
-    input,select{height:44px;border-radius:12px;padding:0 12px;border:1px solid rgba(255,255,255,.16);background:rgba(0,0,0,.25);color:#fff}
-    .result-card{margin-top:18px;padding:18px;border-radius:18px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.03)}
-    footer{padding:28px 0;text-align:center;opacity:.65}
-  </style>
+  <link rel="stylesheet" href="/p-feeding/assets/site.css" />
 </head>
-<body data-page="feeding.html">
-  <div class="container">
-    <header>
-      <nav>
-        <a data-page="index.html">Home</a>
-        <a data-page="feeding.html">Calculator</a>
-        <a data-page="cards/transition-7.html">7-Day Switch</a>
-        <a data-page="feedback.html">Feedback</a>
+<body>
+  <header class="navbar">
+    <div class="container">
+      <nav class="nav-links">
+        <a href="/p-feeding/index.html" data-i18n="nav.home"></a>
+        <a href="/p-feeding/feeding.html" data-i18n="nav.calculator"></a>
+        <a href="/p-feeding/cards/transition-7.html" data-i18n="nav.transition7"></a>
+        <a href="/p-feeding/feedback.html" data-i18n="nav.feedback"></a>
       </nav>
-      <div class="right">
-        <select id="lang-select" aria-label="Language">
-          <option value="en">English</option>
-          <option value="es">Español</option>
-          <option value="zh">中文</option>
-          <option value="fr">Français</option>
+      <select id="lang-select" aria-label="Language"></select>
+    </div>
+  </header>
+
+  <main class="page">
+    <h1 data-i18n="feeding.title"></h1>
+    <p class="sub" data-i18n="legal.note"></p>
+
+    <form class="panel grid-2" id="calc-form" onsubmit="return false;">
+      <div class="field">
+        <label for="pet" data-i18n="feeding.pet.label"></label>
+        <select id="pet">
+          <option value="dog" data-i18n="feeding.pet.dog"></option>
+          <option value="cat" data-i18n="feeding.pet.cat"></option>
         </select>
       </div>
-    </header>
 
-    <h1>Feeding Calculator</h1>
-    <p>Informational only. Not medical advice.</p>
+      <div class="field">
+        <label for="weight" data-i18n="feeding.weight.label"></label>
+        <input id="weight" type="number" min="0" step="0.01"
+               data-i18n-placeholder="feeding.weight.placeholder" />
+      </div>
 
-    <section class="panel">
-      <div class="grid">
-        <div class="row">
-          <label for="pet">Pet</label>
-          <select id="pet">
-            <option value="dog">Dog</option>
-            <option value="cat">Cat</option>
-          </select>
-        </div>
+      <div class="field">
+        <label for="unit" data-i18n="feeding.unit.label"></label>
+        <select id="unit">
+          <option value="kg" data-i18n="feeding.unit.kg"></option>
+          <option value="lb" data-i18n="feeding.unit.lb"></option>
+        </select>
+      </div>
 
-        <div class="row">
-          <label for="weight">Weight</label>
-          <input id="weight" type="number" inputmode="decimal" placeholder="Enter weight" />
-        </div>
+      <div class="field">
+        <label for="activity" data-i18n="feeding.activity.label"></label>
+        <select id="activity">
+          <option value="resting" data-i18n="feeding.activity.resting"></option>
+          <option value="normal" data-i18n="feeding.activity.normal"></option>
+          <option value="active" data-i18n="feeding.activity.active"></option>
+        </select>
+      </div>
 
-        <div class="row">
-          <label for="unit">Unit</label>
-          <select id="unit">
-            <option value="kg">kg</option>
-            <option value="lb">lb</option>
-          </select>
-        </div>
+      <div class="field">
+        <label for="kcal" data-i18n="feeding.kcal_per_cup.label"></label>
+        <input id="kcal" type="number" min="1" step="1" value="350" />
+      </div>
 
-        <div class="row">
-          <label for="activity">Activity</label>
-          <select id="activity">
-            <option value="resting">Resting</option>
-            <option value="normal" selected>Normal</option>
-            <option value="active">Active</option>
-          </select>
-        </div>
-
-        <div class="row">
-          <label for="kcal">kcal per cup</label>
-          <input id="kcal" type="number" inputmode="decimal" value="350" />
-        </div>
-
-        <div class="row">
-          <label for="gpc">grams per cup</label>
-          <input id="gpc" type="number" inputmode="decimal" value="110" />
-        </div>
+      <div class="field">
+        <label for="grams" data-i18n="feeding.grams_per_cup.label"></label>
+        <input id="grams" type="number" min="1" step="1" value="110" />
       </div>
 
       <div class="actions">
-        <button class="btn btn-primary" id="btn-calc">Calculate</button>
-        <a class="btn" data-page="index.html" id="btn-home">Back to Home</a>
+        <button id="btn-calc" class="btn" type="button" data-i18n="feeding.btn.calc"></button>
+        <a id="to-home" class="btn ghost" href="/p-feeding/index.html" data-i18n="feeding.btn.back"></a>
       </div>
+    </form>
 
-      <div class="result-card" id="result">
-        <h3>Result</h3>
-        <div id="result-body">—</div>
-      </div>
+    <section class="panel result">
+      <h2 data-i18n="feeding.result.title"></h2>
+      <div id="result-box" class="mono">—</div>
     </section>
+  </main>
 
-    <footer>© Pet Scan</footer>
-  </div>
+  <footer class="foot">© Pet Scan</footer>
 
-  <!-- 统一：保留/切换 ?lang + 站内链接（兜底脚本） -->
+  <script src="/p-feeding/assets/i18n.js" defer></script>
+  <script src="/p-feeding/assets/app.js" defer></script>
+
+  <!-- 只有本页需要的轻量计算逻辑 -->
   <script>
-  (function initLinksLang(){
-    if (window.__linkInitDone) return; window.__linkInitDone = true;
-    const usp = new URLSearchParams(location.search);
-    const lang = (usp.get('lang') || 'en').toLowerCase();
-    const m = location.pathname.match(/^\/[^/]+\/?/);
-    const ROOT = (m ? m[0] : '/').replace(/\/?$/, '/');
+    document.addEventListener('DOMContentLoaded', () => {
+      const $ = (id) => document.getElementById(id);
+      const weight = $('weight');
+      const unit = $('unit');
+      const activity = $('activity');
+      const kcal = $('kcal');
+      const grams = $('grams');
+      const resultBox = $('result-box');
 
-    document.querySelectorAll('a[data-page]').forEach(a=>{
-      const page = a.getAttribute('data-page');
-      a.setAttribute('href', ROOT + page + '?lang=' + lang);
-    });
-
-    const sel = document.getElementById('lang-select');
-    if (sel){
-      if ([...sel.options].some(o=>o.value===lang)) sel.value = lang; else sel.value = 'en';
-      sel.addEventListener('change', ()=>{
-        const newLang = sel.value || 'en';
-        const page = document.body.dataset.page || 'feeding.html';
-        location.href = ROOT + page + '?lang=' + newLang;
-      });
-    }
-  })();
-  </script>
-
-  <!-- 计算逻辑（单位换算 + RER/MER + 每日杯/克） -->
-  <script>
-  (function calcInit(){
-    const $ = id=>document.getElementById(id);
-    const fmt = n => Math.round(n*100)/100;
-
-    function activityFactor(kind, level){
-      // 经验系数（可微调）
-      const base = level==='resting' ? 1.0 : level==='normal' ? 1.5 : 2.0;
-      // 猫稍低一点
-      return kind==='cat' ? base*0.9 : base;
-    }
-
-    function render(res){
-      const div = $('result-body');
-      div.innerHTML =
-        `RER: <strong>${fmt(res.rer)}</strong> kcal/day<br/>
-         MER: <strong>${fmt(res.mer)}</strong> kcal/day<br/><br/>
-         Daily: <strong>${fmt(res.cups)}</strong> cups ≈
-         <strong>${fmt(res.grams)}</strong> g`;
-    }
-
-    function calc(){
-      const pet = $('pet').value;                 // dog/cat
-      const unit = $('unit').value;               // kg/lb
-      const w = parseFloat($('weight').value||'0');
-      const kcal = parseFloat($('kcal').value||'350');
-      const gpc  = parseFloat($('gpc').value ||'110');
-      const level= $('activity').value;           // resting/normal/active
-      if (!w || !kcal || !gpc){
-        $('result-body').textContent = '—';
-        return;
+      function toNumber(v, def = 0) {
+        const n = Number(v);
+        return Number.isFinite(n) ? n : def;
       }
-      const kg = unit==='kg' ? w : w*0.45359237;
-      const rer = 70*Math.pow(kg,0.75);
-      const mer = rer * activityFactor(pet, level);
-      const cups = mer / kcal;
-      const grams = cups * gpc;
-      render({rer, mer, cups, grams});
-    }
 
-    document.getElementById('btn-calc').addEventListener('click', calc);
-  })();
+      function calc() {
+        const w = toNumber(weight.value);
+        if (w <= 0) { resultBox.textContent = '—'; return; }
+
+        let kg = w;
+        if (unit.value === 'lb') kg = w * 0.45359237;
+
+        // RER & MER
+        const RER = 70 * Math.pow(kg, 0.75);
+        const factor = activity.value === 'resting' ? 1.0
+                      : activity.value === 'normal' ? 1.6
+                      : 2.0;
+        const MER = RER * factor;
+
+        const kcalPerCup = Math.max(1, toNumber(kcal.value, 350));
+        const gramsPerCup = Math.max(1, toNumber(grams.value, 110));
+        const cups = MER / kcalPerCup;
+        const gramsDay = cups * gramsPerCup;
+
+        const lang = (window.appGetLang && appGetLang()) || 'en';
+        const t = (k) => (window.I18N && I18N.t(k, lang)) || k;
+
+        const fmt = (n) => n.toFixed(2).replace(/\.00$/, '');
+        resultBox.innerHTML =
+          `${t('feeding.result.rer')}: ${fmt(RER)} kcal/day<br>` +
+          `${t('feeding.result.mer')}: ${fmt(MER)} kcal/day<br><br>` +
+          `${t('feeding.result.daily')}: <b>${fmt(cups)}</b> ${t('feeding.result.cups')} ` +
+          `≈ <b>${fmt(gramsDay)}</b> g`;
+      }
+
+      document.getElementById('btn-calc').addEventListener('click', calc);
+    });
   </script>
-
-  <script src="assets/app.js"></script>
 </body>
 </html>
