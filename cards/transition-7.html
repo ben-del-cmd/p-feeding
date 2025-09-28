@@ -2,94 +2,42 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>7-Day Transition Card</title>
-  <link rel="stylesheet" href="../assets/site.css" />
-  <script defer data-domain="" src="https://plausible.io/js/script.js"></script>
-  <style>
-    .container{max-width:1000px;margin:0 auto;padding:32px 16px;}
-    header{display:flex;align-items:center;gap:24px;justify-content:space-between;}
-    nav{display:flex;gap:20px;align-items:center;}
-    .right{display:flex;align-items:center;gap:12px}
-    select#lang-select{min-width:170px}
-    .list{margin-top:18px;display:flex;flex-direction:column;gap:12px}
-    .item{padding:16px 18px;border-radius:16px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04)}
-    .actions{margin-top:14px}
-    .btn{padding:10px 16px;border-radius:12px;border:none;cursor:pointer}
-  </style>
+  <link rel="stylesheet" href="/p-feeding/assets/site.css" />
 </head>
-<body data-page="cards/transition-7.html">
-  <div class="container">
-    <header>
-      <nav>
-        <a data-page="index.html">Home</a>
-        <a data-page="../feeding.html">Calculator</a>
-        <a data-page="cards/transition-7.html">7-Day Switch</a>
-        <a data-page="../feedback.html">Feedback</a>
+<body>
+  <header class="navbar">
+    <div class="container">
+      <nav class="nav-links">
+        <a href="/p-feeding/index.html" data-i18n="nav.home"></a>
+        <a href="/p-feeding/feeding.html" data-i18n="nav.calculator"></a>
+        <a href="/p-feeding/cards/transition-7.html" data-i18n="nav.transition7"></a>
+        <a href="/p-feeding/feedback.html" data-i18n="nav.feedback"></a>
       </nav>
-      <div class="right">
-        <select id="lang-select" aria-label="Language">
-          <option value="en">English</option>
-          <option value="es">Español</option>
-          <option value="zh">中文</option>
-          <option value="fr">Français</option>
-        </select>
-      </div>
-    </header>
-
-    <h2>7-Day Transition</h2>
-    <div class="list" id="dlist"></div>
-
-    <div class="actions">
-      <a class="btn" data-page="../index.html">Back to Home</a>
+      <select id="lang-select" aria-label="Language"></select>
     </div>
-  </div>
+  </header>
 
-  <!-- 统一：保留/切换 ?lang + 站内链接（兜底脚本） -->
-  <script>
-  (function initLinksLang(){
-    if (window.__linkInitDone) return; window.__linkInitDone = true;
-    const usp = new URLSearchParams(location.search);
-    const lang = (usp.get('lang') || 'en').toLowerCase();
-    const m = location.pathname.match(/^\/[^/]+\/?/);
-    const ROOT = (m ? m[0] : '/').replace(/\/?$/, '/');
+  <main class="page">
+    <h1 data-i18n="transition.title"></h1>
 
-    document.querySelectorAll('a[data-page]').forEach(a=>{
-      const page = a.getAttribute('data-page').replace(/^\.\.\//,''); // 统一到仓库根
-      a.setAttribute('href', ROOT + page + '?lang=' + lang);
-    });
+    <section class="panel list">
+      <div class="item"><strong>Day 1</strong> — 90/10</div>
+      <div class="item"><strong>Day 2</strong> — 70/30</div>
+      <div class="item"><strong>Day 3</strong> — 60/40</div>
+      <div class="item"><strong>Day 4</strong> — 50/50</div>
+      <div class="item"><strong>Day 5</strong> — 40/60</div>
+      <div class="item"><strong>Day 6</strong> — 20/80</div>
+      <div class="item"><strong>Day 7</strong> — 0/100</div>
+    </section>
 
-    const sel = document.getElementById('lang-select');
-    if (sel){
-      if ([...sel.options].some(o=>o.value===lang)) sel.value = lang; else sel.value = 'en';
-      sel.addEventListener('change', ()=>{
-        const newLang = sel.value || 'en';
-        const page = document.body.dataset.page || 'cards/transition-7.html';
-        location.href = ROOT + page + '?lang=' + newLang;
-      });
-    }
-  })();
-  </script>
+    <a id="to-home" class="btn" href="/p-feeding/index.html" data-i18n="feeding.btn.back"></a>
+  </main>
 
-  <!-- 生成 7 天 90/10 → 0/100 列表 -->
-  <script>
-  (function build(){
-    const data = [
-      {d:1,a:90,b:10},
-      {d:2,a:70,b:30},
-      {d:3,a:60,b:40},
-      {d:4,a:50,b:50},
-      {d:5,a:40,b:60},
-      {d:6,a:20,b:80},
-      {d:7,a:0 ,b:100},
-    ];
-    const wrap = document.getElementById('dlist');
-    wrap.innerHTML = data.map(x =>
-      `<div class="item"><strong>Day ${x.d}</strong><div style="opacity:.8">${x.a}/${x.b}</div></div>`
-    ).join('');
-  })();
-  </script>
+  <footer class="foot">© Pet Scan</footer>
 
-  <script src="../assets/app.js"></script>
+  <script src="/p-feeding/assets/i18n.js" defer></script>
+  <script src="/p-feeding/assets/app.js" defer></script>
 </body>
 </html>
