@@ -4,39 +4,42 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Feedback — Pet Scan</title>
-  <link rel="stylesheet" href="/p-feeding/assets/site.css" />
+
+  <link rel="stylesheet" href="./assets/site.css" />
+  <script src="./assets/i18n.js" defer></script>
+  <script src="./assets/app.js" defer></script>
 </head>
 <body>
   <header class="navbar">
     <div class="container">
-      <nav class="nav-links">
-        <a href="/p-feeding/index.html" data-i18n="nav.home"></a>
-        <a href="/p-feeding/feeding.html" data-i18n="nav.calculator"></a>
-        <a href="/p-feeding/cards/transition-7.html" data-i18n="nav.transition7"></a>
-        <a href="/p-feeding/feedback.html" data-i18n="nav.feedback"></a>
+      <nav class="links">
+        <a data-i18n="nav.home" href="./index.html">Home</a>
+        <a data-i18n="nav.calculator" href="./feeding.html">Calculator</a>
+        <a data-i18n="nav.transition7" href="./cards/transition-7.html">7-Day Switch</a>
+        <a data-i18n="nav.feedback" href="./feedback.html">Feedback</a>
       </nav>
-      <select id="lang-select" aria-label="Language"></select>
+      <select id="langSelect" class="lang-select" aria-label="Language">
+        <option value="en">English</option>
+        <option value="es">Español</option>
+        <option value="zh">中文</option>
+        <option value="fr">Français</option>
+      </select>
     </div>
   </header>
 
-  <main class="page">
-    <h1 data-i18n="feedback.title"></h1>
-
-    <section class="panel">
-      <p data-i18n="feedback.note"></p>
-
-      <div class="actions">
-        <a class="btn" id="send-mail" href="mailto:pet-scan@example.com?subject=Feedback"> 
-          <span data-i18n="feedback.btn.send"></span>
-        </a>
-        <a id="to-home" class="btn ghost" href="/p-feeding/index.html" data-i18n="feedback.btn.back"></a>
+  <main class="container">
+    <h1 data-i18n="feedback.title">Feedback</h1>
+    <div class="card">
+      <p data-i18n="feedback.body">
+        We use anonymous analytics to improve features. Informational only. Not medical advice.
+      </p>
+      <div class="row">
+        <a class="btn" data-i18n="feedback.email" href="mailto:ben-del-cmd@users.noreply.github.com?subject=Pet%20Scan%20Feedback">Send Email</a>
+        <a class="btn ghost" data-i18n="feedback.back" href="./index.html">Back to Home</a>
       </div>
-    </section>
+    </div>
   </main>
 
-  <footer class="foot">© Pet Scan</footer>
-
-  <script src="/p-feeding/assets/i18n.js" defer></script>
-  <script src="/p-feeding/assets/app.js" defer></script>
+  <footer class="footer"><small>© Pet Scan</small></footer>
 </body>
 </html>
