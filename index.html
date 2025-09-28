@@ -4,51 +4,57 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Pet Scan — Home</title>
-  <link rel="stylesheet" href="/p-feeding/assets/site.css" />
+
+  <link rel="stylesheet" href="./assets/site.css" />
+  <script src="./assets/i18n.js" defer></script>
+  <script src="./assets/app.js" defer></script>
 </head>
 <body>
-  <!-- 顶部导航 -->
   <header class="navbar">
     <div class="container">
-      <nav class="nav-links">
-        <a href="/p-feeding/index.html" data-i18n="nav.home"></a>
-        <a href="/p-feeding/feeding.html" data-i18n="nav.calculator"></a>
-        <a href="/p-feeding/cards/transition-7.html" data-i18n="nav.transition7"></a>
-        <a href="/p-feeding/feedback.html" data-i18n="nav.feedback"></a>
+      <nav class="links">
+        <a data-i18n="nav.home" href="./index.html">Home</a>
+        <a data-i18n="nav.calculator" href="./feeding.html">Calculator</a>
+        <a data-i18n="nav.transition7" href="./cards/transition-7.html">7-Day Switch</a>
+        <a data-i18n="nav.feedback" href="./feedback.html">Feedback</a>
       </nav>
-      <select id="lang-select" aria-label="Language"></select>
+      <select id="langSelect" class="lang-select" aria-label="Language">
+        <option value="en">English</option>
+        <option value="es">Español</option>
+        <option value="zh">中文</option>
+        <option value="fr">Français</option>
+      </select>
     </div>
   </header>
 
-  <main class="hero">
-    <h1 data-i18n="home.hero.title"></h1>
-    <p class="sub" data-i18n="home.hero.subtitle"></p>
+  <main class="container">
+    <section class="hero">
+      <h1 data-i18n="home.hero.title">Turn pet food labels into simple, actionable feeding.</h1>
+      <p class="muted" data-i18n="home.hero.subtitle">Informational only. Not medical advice.</p>
 
-    <div class="cta-row">
-      <a id="to-calc" class="btn" href="/p-feeding/feeding.html" data-i18n="home.cta.open_calculator"></a>
-      <a id="to-card" class="btn" href="/p-feeding/cards/transition-7.html" data-i18n="home.cta.view_transition_card"></a>
-      <a id="to-feedback" class="btn" href="/p-feeding/feedback.html" data-i18n="home.cta.feedback"></a>
-    </div>
+      <div class="cta-row">
+        <a class="btn" data-i18n="home.cta.open_calculator" href="./feeding.html">Open Calculator</a>
+        <a class="btn" data-i18n="home.cta.view_transition_card" href="./cards/transition-7.html">View 7-Day Card</a>
+        <a class="btn" data-i18n="nav.feedback" href="./feedback.html">Feedback</a>
+      </div>
 
-    <section class="cards">
-      <article class="card">
-        <h3 data-i18n="home.card.calc.title"></h3>
-        <p data-i18n="home.card.calc.desc"></p>
-      </article>
-      <article class="card">
-        <h3 data-i18n="home.card.t7.title"></h3>
-        <p data-i18n="home.card.t7.desc"></p>
-      </article>
-      <article class="card">
-        <h3 data-i18n="home.card.fb.title"></h3>
-        <p data-i18n="home.card.fb.desc"></p>
-      </article>
+      <div class="cards">
+        <div class="card">
+          <h3 data-i18n="home.card.calculator.title">Calculator</h3>
+          <p data-i18n="home.card.calculator.desc">RER = 70 × weight^0.75; MER = RER × activity.</p>
+        </div>
+        <div class="card">
+          <h3 data-i18n="home.card.transition.title">7-Day Transition Card</h3>
+          <p data-i18n="home.card.transition.desc">90/10 → 0/100</p>
+        </div>
+        <div class="card">
+          <h3 data-i18n="home.card.feedback.title">Feedback</h3>
+          <p data-i18n="home.card.feedback.desc">Anonymous analytics to improve features.</p>
+        </div>
+      </div>
     </section>
   </main>
 
-  <footer class="foot">© Pet Scan</footer>
-
-  <script src="/p-feeding/assets/i18n.js" defer></script>
-  <script src="/p-feeding/assets/app.js" defer></script>
+  <footer class="footer"><small>© Pet Scan</small></footer>
 </body>
 </html>
