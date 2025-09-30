@@ -1,36 +1,27 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>7-Day Transition Card</title>
-
-  <link rel="stylesheet" href="../assets/site.css" />
-  <script src="../assets/i18n.js" defer></script>
-  <script src="../assets/app.js" defer></script>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title data-i18n="transition.title">7-Day Transition Card</title>
+  <link rel="stylesheet" href="../assets/site.css"/>
+  <script src="../assets/i18n.js"></script>
+  <script src="../assets/app.js"></script>
 </head>
 <body>
-  <header class="navbar">
+  <nav class="navbar">
     <div class="container">
-      <nav class="links">
-        <a data-i18n="nav.home" href="../index.html">Home</a>
-        <a data-i18n="nav.calculator" href="../feeding.html">Calculator</a>
-        <a data-i18n="nav.transition7" href="./transition-7.html">7-Day Switch</a>
-        <a data-i18n="nav.feedback" href="../feedback.html">Feedback</a>
-      </nav>
-      <select id="langSelect" class="lang-select" aria-label="Language">
-        <option value="en">English</option>
-        <option value="es">Español</option>
-        <option value="zh">中文</option>
-        <option value="fr">Français</option>
-      </select>
+      <a href="../index.html" data-i18n="nav.home">Home</a>
+      <a href="../feeding.html" data-i18n="nav.calculator">Calculator</a>
+      <a href="transition-7.html" data-i18n="nav.transition7">7-Day Switch</a>
+      <a href="../feedback.html" data-i18n="nav.feedback">Feedback</a>
+      <select id="langSelect" aria-label="Language"></select>
     </div>
-  </header>
+  </nav>
 
   <main class="container">
     <h1 data-i18n="transition.title">7-Day Transition Card</h1>
-
-    <ul class="transition-list">
+    <ul class="card">
       <li><strong data-i18n="transition.day1">Day 1</strong> — 90/10</li>
       <li><strong data-i18n="transition.day2">Day 2</strong> — 70/30</li>
       <li><strong data-i18n="transition.day3">Day 3</strong> — 60/40</li>
@@ -41,6 +32,6 @@
     </ul>
   </main>
 
-  <footer class="footer"><small>© Pet Scan</small></footer>
+  <footer class="container">© Pet Scan</footer>
 </body>
 </html>
