@@ -1,14 +1,13 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Pet Scan — Home</title>
-  <link rel="stylesheet" href="assets/site.css"/>
-  <script src="assets/i18n.js"></script>
-  <script src="assets/app.js"></script>
+  <link rel="stylesheet" href="assets/site.css" />
 </head>
 <body>
+  <!-- Nav -->
   <nav class="navbar">
     <div class="container">
       <a href="index.html" data-i18n="nav.home">Home</a>
@@ -16,7 +15,12 @@
       <a href="cards/transition-7.html" data-i18n="nav.transition7">7-Day Switch</a>
       <a href="feedback.html" data-i18n="nav.feedback">Feedback</a>
 
-      <select id="langSelect" aria-label="Language"></select>
+      <select id="langSelect" aria-label="Language">
+        <option value="en">English</option>
+        <option value="es">Español</option>
+        <option value="zh">中文</option>
+        <option value="fr">Français</option>
+      </select>
     </div>
   </nav>
 
@@ -24,28 +28,33 @@
     <h1 data-i18n="home.hero.title">Turn pet food labels into simple, actionable feeding.</h1>
     <p data-i18n="home.hero.subtitle">Informational only. Not medical advice.</p>
 
-    <div class="actions">
+    <p class="cta">
       <a class="btn" href="feeding.html" data-i18n="home.cta.open_calculator">Open Calculator</a>
       <a class="btn" href="cards/transition-7.html" data-i18n="home.cta.view_transition_card">View 7-Day Card</a>
       <a class="btn" href="feedback.html" data-i18n="home.cta.feedback">Feedback</a>
-    </div>
+    </p>
 
-    <section class="card">
-      <h3 data-i18n="home.card.calculator.title">Calculator</h3>
-      <p data-i18n="home.card.calculator.desc">RER = 70 × weight^0.75; MER = RER × activity.</p>
-    </section>
+    <section class="cards">
+      <article class="card">
+        <h3 data-i18n="home.card.calculator.title">Calculator</h3>
+        <p data-i18n="home.card.calculator.desc">RER = 70 × weight^0.75; MER = RER × activity.</p>
+      </article>
 
-    <section class="card">
-      <h3 data-i18n="home.card.transition.title">7-Day Transition Card</h3>
-      <p data-i18n="home.card.transition.desc">90/10 → 0/100</p>
-    </section>
+      <article class="card">
+        <h3 data-i18n="home.card.transition.title">7-Day Transition Card</h3>
+        <p data-i18n="home.card.transition.desc">90/10 → 0/100</p>
+      </article>
 
-    <section class="card">
-      <h3 data-i18n="home.card.feedback.title">Feedback</h3>
-      <p data-i18n="home.card.feedback.desc">Anonymous analytics to improve features.</p>
+      <article class="card">
+        <h3 data-i18n="home.card.feedback.title">Feedback</h3>
+        <p data-i18n="home.card.feedback.desc">Anonymous analytics to improve features.</p>
+      </article>
     </section>
   </main>
 
-  <footer class="container">© Pet Scan</footer>
+  <footer class="container"><small>© Pet Scan</small></footer>
+
+  <script defer src="assets/i18n.js"></script>
+  <script defer src="assets/app.js"></script>
 </body>
 </html>
