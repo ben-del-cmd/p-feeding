@@ -3,60 +3,529 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pet Scan — Home</title>
-  <link rel="stylesheet" href="./assets/site.css" />
+  <title>Pet A Plan — Info Tool</title>
+  <meta name="description" content="Scan, understand, and act on pet food & grooming labels. Informational only. Not medical advice." />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <meta name="theme-color" content="#0b0f15" />
+  <!-- Mild CSP (allows inline for this single-file app) -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; base-uri 'self'; form-action 'self' mailto:;">
+  <style>
+    :root{
+      --bg:#0b0f15;
+      --panel:#111824;
+      --panel-2:#0f1723;
+      --muted:#94a3b8;
+      --text:#e5edf7;
+      --accent:#6ea8fe;
+      --good:#22c55e;
+      --warn:#f59e0b;
+      --danger:#ef4444;
+      --border:#223047;
+      --shadow:0 8px 28px rgba(0,0,0,.35);
+      --radius:16px;
+      --maxw:980px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, Segoe UI, Roboto, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji;
+      background:linear-gradient(180deg, #0a0e14, #0b0f15 30%, #0a0e14);
+      color:var(--text);
+    }
+    a{color:var(--accent);text-decoration:none}
+    a:hover{text-decoration:underline}
+    header{
+      position:sticky; top:0; z-index:20;
+      background:rgba(11,15,21,.85);
+      backdrop-filter: blur(8px);
+      border-bottom:1px solid var(--border);
+    }
+    .nav{
+      max-width:var(--maxw); margin:0 auto; padding:12px 16px;
+      display:flex; gap:12px; align-items:center; justify-content:space-between;
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:.2px;
+    }
+    .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 16px var(--accent)}
+    .links{display:flex; gap:12px; align-items:center; flex-wrap:wrap}
+    .links a{
+      padding:8px 10px; border-radius:10px; background:transparent; border:1px solid transparent;
+    }
+    .links a.active{background:var(--panel); border-color:var(--border)}
+    .right{display:flex; align-items:center; gap:10px}
+    .lang-select{
+      width:120px; max-width:140px;
+      background: #0b1220; color:var(--text);
+      border:1px solid var(--border); border-radius:10px;
+      padding:8px 10px; appearance:none;
+      background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+      background-position: calc(100% - 18px) calc(1em - 2px), calc(100% - 13px) calc(1em - 2px);
+      background-size:5px 5px, 5px 5px; background-repeat:no-repeat;
+    }
+    main{max-width:var(--maxw); margin:18px auto; padding:0 16px 80px}
+    .panel{
+      background:linear-gradient(180deg, var(--panel), var(--panel-2));
+      border:1px solid var(--border); border-radius:var(--radius);
+      box-shadow:var(--shadow);
+    }
+    .hero{padding:24px}
+    .hero h1{margin:0 0 8px 0; font-size:28px}
+    .muted{color:var(--muted)}
+    .grid{display:grid; gap:16px}
+    @media(min-width:840px){ .grid.cols-2{grid-template-columns:1fr 1fr} }
+    .card{padding:18px; border:1px solid var(--border); border-radius:14px; background:#0b1320}
+    .card h3{margin:0 0 10px 0}
+    .btn{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:10px 14px; border-radius:12px; border:1px solid var(--border);
+      background: #0e1523; color:var(--text); cursor:pointer
+    }
+    .btn:hover{background:#111a2b}
+    .btn.primary{background:#0b3a7a;border-color:#0f4fa3}
+    .btn.primary:hover{background:#0c438b}
+    .toolbar{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    .field{display:flex; flex-direction:column; gap:6px}
+    .field label{font-size:12px; color:var(--muted)}
+    .field input,.field select,.field textarea{
+      width:100%; padding:10px 12px; border-radius:12px; border:1px solid var(--border);
+      background:#0a1220; color:var(--text);
+    }
+    .seg{
+      display:inline-grid; grid-auto-flow:column; gap:6px; padding:6px; border:1px solid var(--border);
+      border-radius:12px; background:#0a1220
+    }
+    .seg input{display:none}
+    .seg label{
+      padding:8px 12px; border-radius:9px; cursor:pointer; user-select:none; border:1px solid transparent;
+    }
+    .seg input:checked + label{ background:#0d1a2b; border-color:#16345a}
+    .result-grid{display:grid; gap:12px}
+    @media(min-width:720px){ .result-grid{grid-template-columns:repeat(3,1fr)} }
+    .metric{
+      padding:14px; background:#0b1424; border:1px solid var(--border); border-radius:12px;
+    }
+    .metric .val{font-size:22px; font-weight:700}
+    .metric .unit{font-size:12px; color:var(--muted)}
+    .list{margin:0; padding-left:18px}
+    .disclaimer{
+      margin-top:16px; font-size:12px; color:var(--muted)
+    }
+    footer{
+      max-width:var(--maxw); margin:24px auto; padding:0 16px 40px; color:var(--muted); font-size:12px
+    }
+    .tag{display:inline-block; padding:2px 8px; border:1px solid var(--border); border-radius:999px; background:#0a1220; color:var(--muted); font-size:12px}
+    .table{width:100%; border-collapse:collapse; border:1px solid var(--border); border-radius:12px; overflow:hidden}
+    .table th,.table td{border-bottom:1px solid var(--border); padding:10px; text-align:left}
+    .table th{background:#0c1626; color:#c9d5e8}
+    .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size:12px; padding:2px 6px; border:1px solid var(--border); border-radius:6px; background:#0c1424; color:#c7d3e8}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  </style>
 </head>
 <body>
-  <nav class="navbar">
-    <div class="container">
-      <a href="./index.html" data-i18n="nav.home">Home</a>
-      <a href="./feeding.html" data-i18n="nav.calculator">Calculator</a>
-      <a href="./cards/transition-7.html" data-i18n="nav.transition7">7-Day Switch</a>
-      <a href="./feedback.html" data-i18n="nav.feedback">Feedback</a>
+  <a class="sr-only" href="#main" tabindex="0">Skip to content</a>
+  <header>
+    <nav class="nav" aria-label="Primary">
+      <div class="brand">
+        <span class="dot" aria-hidden="true"></span>
+        <span>Pet&nbsp;A&nbsp;Plan</span>
+        <span class="tag" id="appVersion" aria-label="version">v1.2.3 · SPA</span>
+      </div>
+      <div class="links" role="tablist">
+        <a href="#home" data-link="#home" role="tab" aria-controls="home" data-i18n="nav.home">Home</a>
+        <a href="#calc" data-link="#calc" role="tab" aria-controls="calc" data-i18n="nav.calc">Feeding Calc</a>
+        <a href="#switch" data-link="#switch" role="tab" aria-controls="switch" data-i18n="nav.switch">7-Day Switch</a>
+        <a href="#feedback" data-link="#feedback" role="tab" aria-controls="feedback" data-i18n="nav.feedback">Feedback</a>
+      </div>
+      <div class="right">
+        <label for="lang" class="sr-only" data-i18n="labels.language">Language</label>
+        <select id="lang" class="lang-select" aria-label="Language">
+          <option value="en">English</option>
+          <option value="zh">中文</option>
+          <option value="es">Español</option>
+          <option value="fr">Français</option>
+        </select>
+      </div>
+    </nav>
+  </header>
 
-      <select id="langSelect" aria-label="Language" style="margin-left:auto">
-        <option value="en">English</option>
-        <option value="zh">中文</option>
-        <option value="es">Español</option>
-        <option value="fr">Français</option>
-      </select>
-      <script>
-        document.addEventListener("change", (e) => {
-          if (e.target && e.target.id === "langSelect") I18N.setLang(e.target.value);
-        });
-      </script>
-    </div>
-  </nav>
-
-  <main class="container">
-    <h1 data-i18n="home.hero.title">Turn pet food labels into simple, actionable feeding.</h1>
-    <p data-i18n="home.hero.subtitle">Informational only. Not medical advice.</p>
-
-    <p>
-      <a href="./feeding.html" data-i18n="home.cta.open_calculator">Open Calculator</a>
-      <a href="./cards/transition-7.html" data-i18n="home.cta.view_transition_card">View 7-Day Card</a>
-      <a href="./feedback.html" data-i18n="home.cta.feedback">Feedback</a>
-    </p>
-
-    <section>
-      <h2 data-i18n="home.card.calculator.title">Calculator</h2>
-      <p data-i18n="home.card.calculator.desc">RER = 70 × weight^0.75; MER = RER × activity.</p>
-
-      <h2 data-i18n="home.card.transition.title">7-Day Transition Card</h2>
-      <p data-i18n="home.card.transition.desc">90/10 → 0/100</p>
-
-      <h2 data-i18n="home.card.feedback.title">Feedback</h2>
-      <p data-i18n="home.card.feedback.desc">Anonymous analytics to improve features.</p>
+  <main id="main">
+    <!-- HOME -->
+    <section id="home" class="panel hero" data-route="#home" tabindex="-1" aria-labelledby="homeTitle">
+      <h1 id="homeTitle" data-i18n="home.title">Turn pet labels into clear, actionable guidance.</h1>
+      <p class="muted" data-i18n="home.subtitle">Scan or browse products → unify terms → personalized feeding & smooth switching → restock & follow-up. Informational only.</p>
+      <div class="grid cols-2" style="margin-top:14px">
+        <div class="card">
+          <h3 data-i18n="home.k1">Why this matters</h3>
+          <ul class="list">
+            <li data-i18n="home.k1a">Nutrition math (RER/MER) is transparent & reproducible.</li>
+            <li data-i18n="home.k1b">Data is time-stamped & sourced.</li>
+            <li data-i18n="home.k1c">Reusable for restock, family collaboration, and weekly review.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3 data-i18n="home.k2">Quick start</h3>
+          <ol class="list">
+            <li data-i18n="home.q1">Open <span class="kbd">Feeding Calc</span> and enter weight.</li>
+            <li data-i18n="home.q2">Pick activity factor (resting/normal/active).</li>
+            <li data-i18n="home.q3">Optionally tune kcal/g & g/cup to match your food label.</li>
+          </ol>
+        </div>
+      </div>
+      <p class="disclaimer" data-i18n="legal.note"><strong>Informational only.</strong> Not medical advice. For conditions or prescription diets, talk to your veterinarian.</p>
     </section>
 
-    <footer>
-      <p>© Pet Scan · <span data-i18n="legal.info_boundary">Informational only. Not medical advice.</span></p>
-    </footer>
+    <!-- CALC -->
+    <section id="calc" class="panel hero" data-route="#calc" hidden tabindex="-1" aria-labelledby="calcTitle">
+      <h2 id="calcTitle" data-i18n="calc.title">Feeding Calculator</h2>
+      <p class="muted" data-i18n="calc.caption">RER = 70 × weight(kg)<sup>0.75</sup>. MER = RER × factor.</p>
+
+      <div class="grid cols-2" style="margin-top:12px">
+        <div class="card">
+          <div class="grid" style="grid-template-columns:1fr; gap:12px">
+            <div class="field">
+              <label data-i18n="calc.weight">Weight</label>
+              <div class="toolbar">
+                <input id="weight" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.0" aria-describedby="unitHelp" aria-label="Weight" />
+                <span id="unitHelp" class="sr-only">Choose unit below</span>
+                <div class="seg" role="radiogroup" aria-label="Unit">
+                  <input type="radio" name="unit" id="u-kg" value="kg" checked />
+                  <label for="u-kg" class="kbd">kg</label>
+                  <input type="radio" name="unit" id="u-lb" value="lb" />
+                  <label for="u-lb" class="kbd">lb</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="factor" data-i18n="calc.factor">Activity factor</label>
+              <select id="factor" aria-label="Activity factor">
+                <option value="1.0" data-i18n="calc.factors.resting">Resting (1.0)</option>
+                <option value="1.6" selected data-i18n="calc.factors.normal">Normal (1.6)</option>
+                <option value="2.0" data-i18n="calc.factors.active">Active (2.0)</option>
+              </select>
+            </div>
+
+            <details class="card" style="margin:4px 0 0 0">
+              <summary data-i18n="calc.adv">Food specifics (optional)</summary>
+              <div class="grid" style="margin-top:10px; grid-template-columns:1fr 1fr; gap:10px">
+                <div class="field">
+                  <label data-i18n="calc.kcalg">kcal per gram</label>
+                  <input id="kcalPerG" type="number" min="0" step="0.01" value="3.6" />
+                </div>
+                <div class="field">
+                  <label data-i18n="calc.gcup">grams per cup</label>
+                  <input id="gPerCup" type="number" min="0" step="1" value="110" />
+                </div>
+              </div>
+              <p class="muted" style="margin-top:8px" data-i18n="calc.advNote">Use your bag’s label or brand site if available.</p>
+            </details>
+
+            <div class="toolbar" style="justify-content:flex-start">
+              <button class="btn primary" id="btnCalc" data-i18n="calc.cta">Calculate</button>
+              <button class="btn" id="btnReset" data-i18n="calc.reset">Reset</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" aria-live="polite" aria-atomic="true">
+          <h3 data-i18n="calc.results">Daily amounts</h3>
+          <div class="result-grid" id="results">
+            <div class="metric">
+              <div class="label" data-i18n="calc.mer">MER</div>
+              <div class="val" id="outKcal">–</div>
+              <div class="unit">kcal/day</div>
+            </div>
+            <div class="metric">
+              <div class="label" data-i18n="calc.grams">Food</div>
+              <div class="val" id="outGrams">–</div>
+              <div class="unit" data-i18n="calc.gperday">grams/day</div>
+            </div>
+            <div class="metric">
+              <div class="label" data-i18n="calc.cups">Cups</div>
+              <div class="val" id="outCups">–</div>
+              <div class="unit" data-i18n="calc.cupsperday">cups/day</div>
+            </div>
+          </div>
+          <p class="disclaimer" style="margin-top:12px" data-i18n="legal.note"><strong>Informational only.</strong> Not medical advice. For conditions or prescription diets, talk to your veterinarian.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7-DAY SWITCH -->
+    <section id="switch" class="panel hero" data-route="#switch" hidden tabindex="-1" aria-labelledby="switchTitle">
+      <h2 id="switchTitle" data-i18n="switch.title">7-Day Food Switch Card</h2>
+      <p class="muted" data-i18n="switch.caption">Gradually mix new food over 7 days to support gut comfort.</p>
+      <div class="card" style="overflow:auto">
+        <table class="table" aria-describedby="switchCaption">
+          <thead>
+            <tr>
+              <th data-i18n="switch.day">Day</th>
+              <th data-i18n="switch.old">Old food</th>
+              <th data-i18n="switch.new">New food</th>
+              <th data-i18n="switch.tip">Tip</th>
+            </tr>
+          </thead>
+        <tbody id="switchRows"></tbody>
+        </table>
+        <p id="switchCaption" class="disclaimer" data-i18n="switch.note">Adjust pace if stool is loose: hold or step back a day. Water & routine help.</p>
+        <div class="toolbar" style="margin-top:8px">
+          <button class="btn" id="copySwitch" data-i18n="switch.copy">Copy table</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEEDBACK -->
+    <section id="feedback" class="panel hero" data-route="#feedback" hidden tabindex="-1" aria-labelledby="fbTitle">
+      <h2 id="fbTitle" data-i18n="fb.title">Feedback</h2>
+      <p class="muted" data-i18n="fb.caption">Thanks for helping improve this tool.</p>
+      <div class="grid cols-2" style="margin-top:8px">
+        <div class="card">
+          <div class="field">
+            <label for="fbType" data-i18n="fb.type">Category</label>
+            <select id="fbType" aria-label="Category">
+              <option value="bug" data-i18n="fb.bug">Bug</option>
+              <option value="idea" data-i18n="fb.idea">Idea</option>
+              <option value="other" data-i18n="fb.other">Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="fbMsg" data-i18n="fb.msg">Message</label>
+            <textarea id="fbMsg" rows="6" placeholder="..."></textarea>
+          </div>
+          <div class="toolbar">
+            <a id="fbMail" class="btn primary" href="#" data-i18n="fb.send">Send via email</a>
+            <button class="btn" id="fbClear" data-i18n="fb.clear">Clear</button>
+          </div>
+          <p class="disclaimer" data-i18n="fb.privacy">No tracking. Your email client opens with a prefilled draft.</p>
+        </div>
+        <div class="card">
+          <h3 data-i18n="fb.include">Helpful to include</h3>
+          <ul class="list">
+            <li data-i18n="fb.inc1">What you expected vs what happened</li>
+            <li data-i18n="fb.inc2">Steps to reproduce (for bugs)</li>
+            <li data-i18n="fb.inc3">Product brand/SKU or label snippet (if relevant)</li>
+          </ul>
+        </div>
+      </div>
+      <p class="disclaimer" data-i18n="legal.note"><strong>Informational only.</strong> Not medical advice. For conditions or prescription diets, talk to your veterinarian.</p>
+    </section>
   </main>
 
-  <!-- i18n -->
-  <script src="./assets/i18n.js"></script>
-  <!-- 你的其他脚本（如果有） -->
-  <script src="./assets/app.js" defer></script>
+  <footer>
+    <span data-i18n="foot.copy">© 2025 Pet A Plan. All rights reserved.</span>
+    · <span data-i18n="foot.boundary">Informational only. Not medical advice.</span>
+    · <a href="#home" data-i18n="foot.back">Back to top</a>
+  </footer>
+
+  <script>
+  (function(){
+    // ------------------ CONFIG ------------------
+    const FEEDBACK_EMAIL = "feedback@example.com"; // update later if needed
+    const DEFAULTS = { kcalPerG:3.6, gPerCup:110, factor:1.6, unit:"kg", lang:"en" };
+
+    // ------------------ I18N ------------------
+    const I18N = {
+      en: {
+        "nav.home":"Home","nav.calc":"Feeding Calc","nav.switch":"7-Day Switch","nav.feedback":"Feedback",
+        "labels.language":"Language",
+        "home.title":"Turn pet labels into clear, actionable guidance.",
+        "home.subtitle":"Scan or browse products → unify terms → personalized feeding & smooth switching → restock & follow-up. Informational only.",
+        "home.k1":"Why this matters","home.k1a":"Nutrition math (RER/MER) is transparent & reproducible.","home.k1b":"Data is time-stamped & sourced.","home.k1c":"Reusable for restock, family collaboration, and weekly review.","home.k2":"Quick start","home.q1":"Open <Feeding Calc> and enter weight.","home.q2":"Pick activity factor (resting/normal/active).","home.q3":"Optionally tune kcal/g & g/cup to match your food label.",
+        "calc.title":"Feeding Calculator","calc.caption":"RER = 70 × weight(kg)^0.75. MER = RER × factor.","calc.weight":"Weight","calc.factor":"Activity factor","calc.factors.resting":"Resting (1.0)","calc.factors.normal":"Normal (1.6)","calc.factors.active":"Active (2.0)","calc.adv":"Food specifics (optional)","calc.kcalg":"kcal per gram","calc.gcup":"grams per cup","calc.advNote":"Use your bag’s label or brand site if available.","calc.cta":"Calculate","calc.reset":"Reset","calc.results":"Daily amounts","calc.mer":"MER","calc.grams":"Food","calc.gperday":"grams/day","calc.cups":"Cups","calc.cupsperday":"cups/day",
+        "switch.title":"7-Day Food Switch Card","switch.caption":"Gradually mix new food over 7 days to support gut comfort.","switch.day":"Day","switch.old":"Old food","switch.new":"New food","switch.tip":"Tip","switch.note":"Adjust pace if stool is loose: hold or step back a day. Water & routine help.","switch.copy":"Copy table",
+        "fb.title":"Feedback","fb.caption":"Thanks for helping improve this tool.","fb.type":"Category","fb.bug":"Bug","fb.idea":"Idea","fb.other":"Other","fb.msg":"Message","fb.send":"Send via email","fb.clear":"Clear","fb.privacy":"No tracking. Your email client opens with a prefilled draft.","fb.include":"Helpful to include","fb.inc1":"What you expected vs what happened","fb.inc2":"Steps to reproduce (for bugs)","fb.inc3":"Product brand/SKU or label snippet (if relevant)",
+        "foot.copy":"© 2025 Pet A Plan. All rights reserved.","foot.boundary":"Informational only. Not medical advice.","foot.back":"Back to top","legal.note":"Informational only. Not medical advice. For conditions or prescription diets, talk to your veterinarian."
+      },
+      zh: {"nav.home":"首页","nav.calc":"喂食计算器","nav.switch":"7天换粮卡","nav.feedback":"反馈","labels.language":"语言",
+        "home.title":"把宠物标签翻成可执行建议。",
+        "home.subtitle":"扫描/浏览 → 统一口径 → 个性化喂量与平滑换粮 → 补货与随访。仅供信息参考。",
+        "home.k1":"为什么重要","home.k1a":"营养计算（RER/MER）透明可复现。","home.k1b":"数据含时间戳与来源。","home.k1c":"可复用于补货、家庭协作与周报。","home.k2":"快速开始","home.q1":"打开<喂食计算器>并输入体重。","home.q2":"选择活动因子（静息/常规/活跃）。","home.q3":"可按食品标签微调 kcal/g 与 g/杯。",
+        "calc.title":"喂食计算器","calc.caption":"RER = 70 × 体重(kg)^0.75；MER = RER × 因子。","calc.weight":"体重","calc.factor":"活动因子","calc.factors.resting":"静息 (1.0)","calc.factors.normal":"常规 (1.6)","calc.factors.active":"活跃 (2.0)","calc.adv":"食物参数（可选）","calc.kcalg":"每克千卡","calc.gcup":"每杯克数","calc.advNote":"优先使用包装或官网标注。","calc.cta":"计算","calc.reset":"重置","calc.results":"每日量","calc.mer":"能量需求","calc.grams":"食物","calc.gperday":"克/天","calc.cups":"杯数","calc.cupsperday":"杯/天",
+        "switch.title":"7天换粮卡","switch.caption":"7天逐步混合新粮，帮助肠胃适应。","switch.day":"第几天","switch.old":"旧粮","switch.new":"新粮","switch.tip":"提示","switch.note":"若便便变稀可放慢或回退一天；保证饮水与规律。","switch.copy":"复制表格",
+        "fb.title":"反馈","fb.caption":"感谢你帮助改进本工具。","fb.type":"分类","fb.bug":"缺陷","fb.idea":"想法","fb.other":"其它","fb.msg":"留言","fb.send":"邮件发送","fb.clear":"清空","fb.privacy":"无跟踪。将打开你的邮件客户端并预填草稿。","fb.include":"建议附上","fb.inc1":"期望结果 vs 实际发生","fb.inc2":"复现步骤（若为缺陷）","fb.inc3":"品牌/SKU 或标签片段（如相关）",
+        "foot.copy":"© 2025 Pet A Plan。保留所有权利。","foot.boundary":"仅供信息参考，非医疗建议。","foot.back":"回到顶部","legal.note":"仅供信息参考，非医疗建议。如有疾病或处方粮请咨询兽医。"
+      },
+      es: {"nav.home":"Inicio","nav.calc":"Cálculo de ración","nav.switch":"Cambio en 7 días","nav.feedback":"Comentarios","labels.language":"Idioma",
+        "home.title":"Convierte etiquetas de mascotas en guías claras y accionables.","home.subtitle":"Escanear → unificar términos → ración personalizada & cambio suave → reabastecer & seguimiento. Solo informativo.","home.k1":"Por qué importa","home.k1a":"El cálculo nutricional (RER/MER) es transparente y reproducible.","home.k1b":"Datos con marca temporal y fuente.","home.k1c":"Reutilizable para reabastecer, familia y reportes semanales.","home.k2":"Inicio rápido","home.q1":"Abre <Cálculo de ración> e ingresa el peso.","home.q2":"Elige el factor de actividad (reposo/normal/activo).","home.q3":"Ajusta kcal/g y g/taza según la etiqueta.",
+        "calc.title":"Cálculo de ración","calc.caption":"RER = 70 × peso(kg)^0.75. MER = RER × factor.","calc.weight":"Peso","calc.factor":"Factor de actividad","calc.factors.resting":"Reposo (1.0)","calc.factors.normal":"Normal (1.6)","calc.factors.active":"Activo (2.0)","calc.adv":"Datos del alimento (opcional)","calc.kcalg":"kcal por gramo","calc.gcup":"gramos por taza","calc.advNote":"Usa la etiqueta del saco o el sitio de la marca.","calc.cta":"Calcular","calc.reset":"Reiniciar","calc.results":"Cantidades diarias","calc.mer":"MER","calc.grams":"Alimento","calc.gperday":"gramos/día","calc.cups":"Tazas","calc.cupsperday":"tazas/día",
+        "switch.title":"Tarjeta de cambio en 7 días","switch.caption":"Mezcla gradualmente el alimento nuevo durante 7 días.","switch.day":"Día","switch.old":"Alimento antiguo","switch.new":"Alimento nuevo","switch.tip":"Consejo","switch.note":"Si hay heces blandas, desacelera o retrocede un día. Agua y rutina ayudan.","switch.copy":"Copiar tabla",
+        "fb.title":"Comentarios","fb.caption":"Gracias por ayudarnos a mejorar.","fb.type":"Categoría","fb.bug":"Error","fb.idea":"Idea","fb.other":"Otro","fb.msg":"Mensaje","fb.send":"Enviar por email","fb.clear":"Limpiar","fb.privacy":"Sin rastreo. Se abre tu cliente de correo con un borrador.","fb.include":"Útil incluir","fb.inc1":"Qué esperabas vs qué ocurrió","fb.inc2":"Pasos para reproducir (si es error)","fb.inc3":"Marca/SKU o etiqueta (si aplica)",
+        "foot.copy":"© 2025 Pet A Plan. Todos los derechos reservados.","foot.boundary":"Solo informativo. No es consejo médico.","foot.back":"Volver arriba","legal.note":"Solo informativo. No es consejo médico. Para condiciones o dietas de prescripción, consulta a tu veterinario."
+      },
+      fr: {"nav.home":"Accueil","nav.calc":"Calcul de ration","nav.switch":"Transition 7 jours","nav.feedback":"Retour","labels.language":"Langue",
+        "home.title":"Transformez les étiquettes en conseils clairs et actionnables.","home.subtitle":"Scanner → unifier les termes → ration personnalisée & transition douce → réappro & suivi. À titre informatif.",
+        "home.k1":"Pourquoi c’est important","home.k1a":"Calcul nutritionnel (RER/MER) transparent et reproductible.","home.k1b":"Données horodatées et sourcées.","home.k1c":"Réutilisable pour réappro, famille et rapport hebdo.","home.k2":"Démarrage rapide","home.q1":"Ouvrez <Calcul de ration> et entrez le poids.","home.q2":"Choisissez le facteur d’activité (repos/normal/actif).","home.q3":"Ajustez kcal/g & g/tasse selon l’étiquette.",
+        "calc.title":"Calcul de ration","calc.caption":"RER = 70 × poids(kg)^0.75. MER = RER × facteur.","calc.weight":"Poids","calc.factor":"Facteur d’activité","calc.factors.resting":"Repos (1.0)","calc.factors.normal":"Normal (1.6)","calc.factors.active":"Actif (2.0)","calc.adv":"Paramètres de l’aliment (optionnel)","calc.kcalg":"kcal par gramme","calc.gcup":"grammes par tasse","calc.advNote":"Utilisez l’étiquette du sac ou le site de la marque.","calc.cta":"Calculer","calc.reset":"Réinitialiser","calc.results":"Quantités quotidiennes","calc.mer":"MER","calc.grams":"Aliment","calc.gperday":"g/jour","calc.cups":"Tasses","calc.cupsperday":"tasses/jour",
+        "switch.title":"Carte de transition 7 jours","switch.caption":"Mélangez progressivement le nouvel aliment pendant 7 jours.","switch.day":"Jour","switch.old":"Ancien aliment","switch.new":"Nouvel aliment","switch.tip":"Astuce","switch.note":"Si selles molles, ralentissez ou revenez d’un jour. Eau & routine aident.","switch.copy":"Copier le tableau",
+        "fb.title":"Retour","fb.caption":"Merci d’améliorer cet outil.","fb.type":"Catégorie","fb.bug":"Anomalie","fb.idea":"Idée","fb.other":"Autre","fb.msg":"Message","fb.send":"Envoyer par email","fb.clear":"Effacer","fb.privacy":"Aucun suivi. Votre client mail s’ouvre avec un brouillon prérempli.","fb.include":"Utile d’inclure","fb.inc1":"Attendu vs observé","fb.inc2":"Étapes pour reproduire (si bug)","fb.inc3":"Marque/SKU ou extrait d’étiquette (si pertinent)",
+        "foot.copy":"© 2025 Pet A Plan. Tous droits réservés.","foot.boundary":"À titre informatif. Pas un avis médical.","foot.back":"Haut de page","legal.note":"À titre informatif, pas un avis médical. Consultez votre vétérinaire si nécessaire."
+      }
+    };
+
+    // Helpers
+    function getQueryParam(name){ const params = new URLSearchParams(location.search); return params.get(name); }
+    function getStoredLang(){ return localStorage.getItem("petaplan.lang") || null; }
+    function setStoredLang(lang){ try{ localStorage.setItem("petaplan.lang", lang) }catch(e){} }
+    function currentLang(){
+      // Default MUST be English (ignore navigator)
+      const urlLang = getQueryParam("lang");
+      if(urlLang && I18N[urlLang]){ return urlLang; }
+      const stored = getStoredLang();
+      if(stored && I18N[stored]) return stored;
+      return DEFAULTS.lang;
+    }
+    function applyLang(lang){
+      document.documentElement.lang = lang;
+      const select = document.getElementById("lang");
+      if(select.value !== lang) select.value = lang;
+      const dict = I18N[lang] || {};
+      document.querySelectorAll("[data-i18n]").forEach(el=>{
+        const key = el.getAttribute("data-i18n");
+        const t = dict[key] ?? I18N.en[key];
+        if(typeof t === "string" && t.trim().length){
+          // keep literal <...> visible
+          el.innerHTML = t.replace(/[<>]/g, m => ({'<':'&lt;','>':'&gt;'}[m]));
+        }
+      });
+      document.title = "Pet A Plan — " + (I18N[lang]["nav.home"] || "Home");
+      const url = new URL(location.href);
+      url.searchParams.set("lang", lang);
+      history.replaceState({}, "", url);
+      setStoredLang(lang);
+    }
+
+    // Router
+    function routeTo(hash){
+      const target = hash || "#home";
+      document.querySelectorAll("[data-route]").forEach(sec=>{
+        const show = sec.getAttribute("data-route") === target;
+        sec.hidden = !show;
+        if(show){ setTimeout(()=>sec.focus(), 0); }
+      });
+      document.querySelectorAll('.links a').forEach(a=>{
+        a.classList.toggle('active', a.getAttribute('data-link') === target);
+        a.setAttribute('aria-selected', a.classList.contains('active') ? "true" : "false");
+      });
+    }
+    window.addEventListener("hashchange", ()=>routeTo(location.hash || "#home"));
+
+    // Calculator
+    function calc(){
+      const w = parseFloat(document.getElementById("weight").value);
+      if(!(w>0)){ showResults(null); return; }
+      const unit = document.querySelector('input[name="unit"]:checked')?.value || DEFAULTS.unit;
+      const factor = parseFloat(document.getElementById("factor").value) || DEFAULTS.factor;
+      const kcalPerG = parseFloat(document.getElementById("kcalPerG").value) || DEFAULTS.kcalPerG;
+      const gPerCup = parseFloat(document.getElementById("gPerCup").value) || DEFAULTS.gPerCup;
+      const KG_PER_LB = 0.45359237;
+
+      const kg = unit === "lb" ? w * KG_PER_LB : w;
+      const RER = 70 * Math.pow(kg, 0.75);
+      const MER = RER * factor;
+      const grams = kcalPerG > 0 ? (MER / kcalPerG) : 0;
+      const cups = gPerCup > 0 ? (grams / gPerCup) : 0;
+
+      showResults({ kcal:MER, grams, cups });
+    }
+    function showResults(res){
+      const outK = document.getElementById("outKcal");
+      const outG = document.getElementById("outGrams");
+      const outC = document.getElementById("outCups");
+      if(!res){ outK.textContent="–"; outG.textContent="–"; outC.textContent="–"; return; }
+      outK.textContent = Math.round(res.kcal).toString();
+      outG.textContent = Math.round(res.grams).toString();
+      outC.textContent = (Math.round(res.cups*100)/100).toFixed(2);
+    }
+
+    // 7-day switch table
+    function buildSwitchTable(){
+      const plan = [
+        {day:1, old:90, nu:10, tip:""},
+        {day:2, old:80, nu:20, tip:""},
+        {day:3, old:70, nu:30, tip:""},
+        {day:4, old:60, nu:40, tip:""},
+        {day:5, old:50, nu:50, tip:""},
+        {day:6, old:30, nu:70, tip:""},
+        {day:7, old:10, nu:90, tip:""}
+      ];
+      const tbody = document.getElementById("switchRows");
+      tbody.innerHTML = "";
+      plan.forEach(row=>{
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${row.day}</td><td>${row.old}%</td><td>${row.nu}%</td><td>${row.tip || "—"}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+    async function copySwitchTable(){
+      const table = document.querySelector("#switch .table");
+      let text = "";
+      table.querySelectorAll("tr").forEach(tr=>{
+        text += Array.from(tr.cells).map(td=>td.innerText.trim()).join("\t") + "\n";
+      });
+      try{
+        await navigator.clipboard.writeText(text);
+        const btn = document.getElementById("copySwitch");
+        const orig = btn.textContent;
+        btn.textContent = "Copied!";
+        setTimeout(()=>btn.textContent = orig, 900);
+      }catch(e){}
+    }
+
+    // Feedback mailto
+    function buildMailto(){
+      const type = document.getElementById("fbType").value;
+      const msg = document.getElementById("fbMsg").value.trim();
+      const subject = encodeURIComponent(`[PetAPlan] ${type.toUpperCase()} feedback`);
+      const body = encodeURIComponent(`${msg}\n\n--\nLang=${currentLang()} | Route=${location.hash||"#home"} | UA=${navigator.userAgent}`);
+      const mail = `mailto:${FEEDBACK_EMAIL}?subject=${subject}&body=${body}`;
+      const link = document.getElementById("fbMail");
+      link.href = mail;
+    }
+
+    // Init
+    function initLang(){
+      const initial = currentLang();
+      document.getElementById("lang").value = initial;
+      applyLang(initial);
+    }
+    function initEvents(){
+      document.getElementById("lang").addEventListener("change", (e)=>{ applyLang(e.target.value); });
+      document.getElementById("btnCalc").addEventListener("click", calc);
+      document.getElementById("btnReset").addEventListener("click", ()=>{
+        document.getElementById("weight").value = "";
+        document.getElementById("factor").value = DEFAULTS.factor;
+        document.getElementById("kcalPerG").value = DEFAULTS.kcalPerG;
+        document.getElementById("gPerCup").value = DEFAULTS.gPerCup;
+        document.getElementById("u-kg").checked = true;
+        showResults(null);
+      });
+      document.getElementById("copySwitch").addEventListener("click", copySwitchTable);
+      document.getElementById("fbType").addEventListener("change", buildMailto);
+      document.getElementById("fbMsg").addEventListener("input", buildMailto);
+      document.getElementById("fbClear").addEventListener("click", ()=>{
+        document.getElementById("fbMsg").value = "";
+        buildMailto();
+      });
+      buildMailto();
+      document.getElementById("weight").addEventListener("keydown", (e)=>{ if(e.key==="Enter"){ calc(); } });
+    }
+    function initRoute(){
+      if(!location.hash){ location.hash = "#home"; }
+      routeTo(location.hash);
+    }
+
+    buildSwitchTable();
+    initLang();
+    initEvents();
+    initRoute();
+
+    window.addEventListener("popstate", ()=>applyLang(currentLang()));
+    document.querySelectorAll('.links a').forEach(a=>{
+      a.addEventListener('click', ()=>routeTo(a.getAttribute('data-link')));
+    });
+  })();
+  </script>
 </body>
 </html>
