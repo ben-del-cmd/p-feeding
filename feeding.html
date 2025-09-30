@@ -1,117 +1,85 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Feeding — Calculator</title>
-
-  <link rel="stylesheet" href="./assets/site.css" />
-  <script src="./assets/i18n.js" defer></script>
-  <script src="./assets/app.js" defer></script>
-  <!-- 你的计算器逻辑（如无此文件可忽略） -->
-  <script src="./events.js" defer></script>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title data-i18n="calculator.title">Feeding Calculator</title>
+  <link rel="stylesheet" href="assets/site.css"/>
+  <script src="assets/i18n.js"></script>
+  <script src="assets/app.js"></script>
 </head>
 <body>
-  <header class="navbar">
+  <nav class="navbar">
     <div class="container">
-      <nav class="links">
-        <a data-i18n="nav.home" href="./index.html">Home</a>
-        <a data-i18n="nav.calculator" href="./feeding.html">Calculator</a>
-        <a data-i18n="nav.transition7" href="./cards/transition-7.html">7-Day Switch</a>
-        <a data-i18n="nav.feedback" href="./feedback.html">Feedback</a>
-      </nav>
-      <select id="langSelect" class="lang-select" aria-label="Language">
-        <option value="en">English</option>
-        <option value="es">Español</option>
-        <option value="zh">中文</option>
-        <option value="fr">Français</option>
-      </select>
+      <a href="index.html" data-i18n="nav.home">Home</a>
+      <a href="feeding.html" data-i18n="nav.calculator">Calculator</a>
+      <a href="cards/transition-7.html" data-i18n="nav.transition7">7-Day Switch</a>
+      <a href="feedback.html" data-i18n="nav.feedback">Feedback</a>
+      <select id="langSelect" aria-label="Language"></select>
     </div>
-  </header>
+  </nav>
 
   <main class="container">
     <h1 data-i18n="calculator.title">Feeding Calculator</h1>
-    <p class="muted" data-i18n="legal.info_boundary">Informational only. Not medical advice.</p>
+    <p data-i18n="legal.info_boundary">Informational only. Not medical advice.</p>
 
-    <!-- 保留一个通用表单结构；若你的 events.js 用不同的选择器，也可继续工作 -->
-    <form id="feedForm" class="grid2">
-      <label>
-        <span data-i18n="feeding.pet_type.label">Pet</span>
-        <select id="petType">
-          <option value="dog">Dog</option>
-          <option value="cat">Cat</option>
-        </select>
-      </label>
+    <form class="form">
+      <div class="grid">
+        <label>
+          <span data-i18n="feeding.pet_type.label">Pet</span>
+          <select>
+            <option>Dog</option>
+            <option>Cat</option>
+          </select>
+        </label>
 
-      <label>
-        <span data-i18n="feeding.weight.label">Weight</span>
-        <input id="weight" type="number" inputmode="decimal" placeholder="0" data-i18n-placeholder="feeding.weight.placeholder" />
-      </label>
+        <label>
+          <span data-i18n="feeding.weight.label">Weight</span>
+          <input type="number" inputmode="decimal"
+                 data-i18n-placeholder="feeding.weight.placeholder"
+                 placeholder="Enter weight"/>
+        </label>
 
-      <label>
-        <span data-i18n="feeding.unit.label">Unit</span>
-        <select id="unit">
-          <option value="kg" data-i18n="feeding.unit.kg">kg</option>
-          <option value="lb" data-i18n="feeding.unit.lb">lb</option>
-        </select>
-      </label>
+        <label>
+          <span data-i18n="feeding.unit.label">Unit</span>
+          <select>
+            <option data-i18n="feeding.unit.kg">kg</option>
+            <option data-i18n="feeding.unit.lb">lb</option>
+          </select>
+        </label>
 
-      <label>
-        <span data-i18n="feeding.activity.label">Activity</span>
-        <select id="activity">
-          <option value="rest" data-i18n="feeding.activity.resting">Resting</option>
-          <option value="normal" data-i18n="feeding.activity.normal">Normal</option>
-          <option value="active" data-i18n="feeding.activity.active">Active</option>
-        </select>
-      </label>
+        <label>
+          <span data-i18n="feeding.activity.label">Activity</span>
+          <select>
+            <option data-i18n="feeding.activity.resting">Resting</option>
+            <option data-i18n="feeding.activity.normal">Normal</option>
+            <option data-i18n="feeding.activity.active">Active</option>
+          </select>
+        </label>
 
-      <label>
-        <span data-i18n="feeding.kcal_per_cup.label">kcal per cup</span>
-        <input id="kcalPerCup" type="number" inputmode="decimal" value="350" />
-      </label>
+        <label>
+          <span data-i18n="feeding.kcal_per_cup.label">kcal per cup</span>
+          <input type="number" inputmode="decimal" value="350"/>
+        </label>
 
-      <label>
-        <span data-i18n="feeding.grams_per_cup.label">grams per cup</span>
-        <input id="gramsPerCup" type="number" inputmode="decimal" value="110" />
-      </label>
+        <label>
+          <span data-i18n="feeding.grams_per_cup.label">grams per cup</span>
+          <input type="number" inputmode="decimal" value="110"/>
+        </label>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn" data-i18n="feeding.calculate">Calculate</button>
+        <a class="btn" href="index.html" data-i18n="feeding.back_home">Back to Home</a>
+      </div>
     </form>
 
-    <div class="row">
-      <button id="calcBtn" class="btn" data-i18n="feeding.calculate">Calculate</button>
-      <a class="btn ghost" href="./index.html" data-i18n="feeding.back_home">Back to Home</a>
-    </div>
-
-    <section class="card mt" id="resultPanel">
+    <section class="card">
       <h3 data-i18n="result.title">Result</h3>
-      <div id="resultBox">—</div>
+      <div id="result">—</div>
     </section>
   </main>
 
-  <footer class="footer"><small>© Pet Scan</small></footer>
-
-  <!-- 可选：防止没有 events.js 时完全无响应，附上兜底计算（若有 events.js，会并存不冲突） -->
-  <script>
-    (function () {
-      const byId = (id) => document.getElementById(id);
-      const btn = byId('calcBtn');
-      if (!btn) return;
-      btn.addEventListener('click', () => {
-        const w = parseFloat(byId('weight').value || '0');
-        if (!w || w <= 0) { byId('resultBox').textContent = '—'; return; }
-        const unit = byId('unit').value;
-        const kg = unit === 'lb' ? w * 0.45359237 : w;
-        const act = byId('activity').value;
-        const factor = act === 'rest' ? 1.0 : act === 'active' ? 1.6 : 1.2;
-        const rer = 70 * Math.pow(kg, 0.75);
-        const mer = rer * factor;
-        const kcalPerCup = parseFloat(byId('kcalPerCup').value || '0') || 350;
-        const gPerCup = parseFloat(byId('gramsPerCup').value || '0') || 110;
-        const cups = mer / kcalPerCup;
-        const grams = cups * gPerCup;
-        byId('resultBox').textContent =
-          `RER: ${rer.toFixed(1)} kcal/day\nMER: ${mer.toFixed(1)} kcal/day\nDaily: ${cups.toFixed(2)} cups ≈ ${grams.toFixed(0)} g`;
-      });
-    })();
-  </script>
+  <footer class="container">© Pet Scan</footer>
 </body>
 </html>
