@@ -1,12 +1,10 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title data-i18n="calculator.title">Feeding Calculator</title>
-  <link rel="stylesheet" href="assets/site.css"/>
-  <script src="assets/i18n.js"></script>
-  <script src="assets/app.js"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Feeding — Calculator</title>
+  <link rel="stylesheet" href="assets/site.css" />
 </head>
 <body>
   <nav class="navbar">
@@ -15,7 +13,13 @@
       <a href="feeding.html" data-i18n="nav.calculator">Calculator</a>
       <a href="cards/transition-7.html" data-i18n="nav.transition7">7-Day Switch</a>
       <a href="feedback.html" data-i18n="nav.feedback">Feedback</a>
-      <select id="langSelect" aria-label="Language"></select>
+
+      <select id="langSelect" aria-label="Language">
+        <option value="en">English</option>
+        <option value="es">Español</option>
+        <option value="zh">中文</option>
+        <option value="fr">Français</option>
+      </select>
     </div>
   </nav>
 
@@ -23,63 +27,102 @@
     <h1 data-i18n="calculator.title">Feeding Calculator</h1>
     <p data-i18n="legal.info_boundary">Informational only. Not medical advice.</p>
 
-    <form class="form">
-      <div class="grid">
-        <label>
-          <span data-i18n="feeding.pet_type.label">Pet</span>
-          <select>
-            <option>Dog</option>
-            <option>Cat</option>
-          </select>
-        </label>
+    <form id="calc-form" class="grid">
+      <label>
+        <span data-i18n="feeding.pet_type.label">Pet</span>
+        <select id="pet">
+          <option value="dog">Dog</option>
+          <option value="cat">Cat</option>
+        </select>
+      </label>
 
-        <label>
-          <span data-i18n="feeding.weight.label">Weight</span>
-          <input type="number" inputmode="decimal"
-                 data-i18n-placeholder="feeding.weight.placeholder"
-                 placeholder="Enter weight"/>
-        </label>
+      <label>
+        <span data-i18n="feeding.weight.label">Weight</span>
+        <input id="weight" type="number" step="0.01"
+               data-i18n-placeholder="feeding.weight.placeholder"
+               placeholder="Enter weight" />
+      </label>
 
-        <label>
-          <span data-i18n="feeding.unit.label">Unit</span>
-          <select>
-            <option data-i18n="feeding.unit.kg">kg</option>
-            <option data-i18n="feeding.unit.lb">lb</option>
-          </select>
-        </label>
+      <label>
+        <span data-i18n="feeding.unit.label">Unit</span>
+        <select id="unit">
+          <option value="kg" data-i18n="feeding.unit.kg">kg</option>
+          <option value="lb" data-i18n="feeding.unit.lb">lb</option>
+        </select>
+      </label>
 
-        <label>
-          <span data-i18n="feeding.activity.label">Activity</span>
-          <select>
-            <option data-i18n="feeding.activity.resting">Resting</option>
-            <option data-i18n="feeding.activity.normal">Normal</option>
-            <option data-i18n="feeding.activity.active">Active</option>
-          </select>
-        </label>
+      <label>
+        <span data-i18n="feeding.activity.label">Activity</span>
+        <select id="activity">
+          <option value="resting" data-i18n="feeding.activity.resting">Resting</option>
+          <option value="normal" data-i18n="feeding.activity.normal">Normal</option>
+          <option value="active" data-i18n="feeding.activity.active">Active</option>
+        </select>
+      </label>
 
-        <label>
-          <span data-i18n="feeding.kcal_per_cup.label">kcal per cup</span>
-          <input type="number" inputmode="decimal" value="350"/>
-        </label>
+      <label>
+        <span data-i18n="feeding.kcal_per_cup.label">kcal per cup</span>
+        <input id="kcalCup" type="number" step="1" value="350" />
+      </label>
 
-        <label>
-          <span data-i18n="feeding.grams_per_cup.label">grams per cup</span>
-          <input type="number" inputmode="decimal" value="110"/>
-        </label>
-      </div>
+      <label>
+        <span data-i18n="feeding.grams_per_cup.label">grams per cup</span>
+        <input id="gCup" type="number" step="1" value="110" />
+      </label>
 
-      <div class="actions">
-        <button type="button" class="btn" data-i18n="feeding.calculate">Calculate</button>
-        <a class="btn" href="index.html" data-i18n="feeding.back_home">Back to Home</a>
+      <div class="row">
+        <button id="btn-calc" type="button" class="btn" data-i18n="feeding.calculate">Calculate</button>
+        <a class="btn ghost" href="index.html" data-i18n="feeding.back_home">Back to Home</a>
       </div>
     </form>
 
-    <section class="card">
-      <h3 data-i18n="result.title">Result</h3>
-      <div id="result">—</div>
+    <section class="result" id="result">
+      <h2 data-i18n="result.title">Result</h2>
+      <pre id="resultText">—</pre>
     </section>
   </main>
 
-  <footer class="container">© Pet Scan</footer>
+  <footer class="container"><small>© Pet Scan</small></footer>
+
+  <script defer src="assets/i18n.js"></script>
+  <script defer src="assets/app.js"></script>
+
+  <!-- 轻量计算逻辑：不依赖外部库 -->
+  <script>
+    (function () {
+      const factor = {
+        resting: 1.0,
+        normal: 1.6,
+        active: 2.0
+      };
+      function toKg(weight, unit){ return unit === 'lb' ? weight / 2.20462 : weight; }
+      function pow075(x){ return Math.pow(x, 0.75); }
+
+      document.getElementById('btn-calc').addEventListener('click', () => {
+        const w = parseFloat(document.getElementById('weight').value);
+        const unit = document.getElementById('unit').value;
+        const act = document.getElementById('activity').value;
+        const kcalCup = parseFloat(document.getElementById('kcalCup').value || '0');
+        const gCup = parseFloat(document.getElementById('gCup').value || '0');
+
+        if (isNaN(w) || w <= 0) {
+          document.getElementById('resultText').textContent = '—';
+          return;
+        }
+        const wkg = toKg(w, unit);
+        const RER = 70 * pow075(wkg);
+        const MER = RER * (factor[act] || 1.6);
+        let out = [];
+        out.push(`RER: ${RER.toFixed(1)} kcal/day`);
+        out.push(`MER: ${MER.toFixed(1)} kcal/day`);
+        if (kcalCup > 0) {
+          const cups = MER / kcalCup;
+          const grams = gCup > 0 ? cups * gCup : 0;
+          out.push(`Daily: ${cups.toFixed(2)} cups` + (grams ? ` ≈ ${grams.toFixed(0)} g` : ''));
+        }
+        document.getElementById('resultText').textContent = out.join('\n');
+      });
+    })();
+  </script>
 </body>
 </html>
