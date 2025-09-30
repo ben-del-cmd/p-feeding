@@ -1,36 +1,55 @@
-/* assets/js/events.js — Plausible wrapper + keep ?lang on internal links */
-(function(){
-  function curLang(){
-    try{ var u=new URL(location.href); return u.searchParams.get('lang') || localStorage.getItem('lang') || 'en'; }
-    catch(e){ return 'en'; }
+/* assets/js/events.js — feeding calculator logic (stable) */
+(() => {
+  "use strict";
+
+  const qs = (s) => document.querySelector(s);
+
+  function toKg(value, unit) {
+    const w = Number(value) || 0;
+    return unit === "lb" ? w * 0.45359237 : w;
   }
 
-  // public wrapper
-  window.ps = window.ps || {};
-  ps.events = {
-    page: function(name, props){
-      if (typeof plausible === 'function') {
-        plausible('pageview', { props: Object.assign({ page_name: name, lang: curLang() }, props||{}) });
-      }
-    },
-    event: function(name, props){
-      if (typeof plausible === 'function') {
-        plausible(name, { props: Object.assign({ lang: curLang() }, props||{}) });
-      }
-    }
-  };
+  function rerKg(kg) {
+    return kg > 0 ? 70 * Math.pow(kg, 0.75) : 0;
+  }
 
-  // preserve ?lang across internal links
-  document.addEventListener('DOMContentLoaded', function(){
-    var lang = curLang();
-    document.querySelectorAll('a[href^="/"],a[href^="./"],a[href^="../"],a[href^="index"],a[href^="feeding"],a[href^="cards"],a[href^="feedback"]').forEach(function(a){
-      var href = a.getAttribute('href');
-      if (!href || href.startsWith('#') || /^https?:\/\//i.test(href)) return;
-      var url = new URL(href, location.href);
-      var sp = url.searchParams;
-      if (!sp.get('lang')) sp.set('lang', lang);
-      url.search = sp.toString();
-      a.setAttribute('href', url.pathname + (url.search ? '?' + url.search : '') + url.hash);
-    });
+  function activityFactor(kind, pet) {
+    // 简化常用倍数；够用且稳定
+    const mapDog = { resting: 1.0, normal: 1.6, active: 2.0 };
+    const mapCat = { resting: 1.0, normal: 1.2, active: 1.4 };
+    return (pet === "cat" ? mapCat[kind] : mapDog[kind]) || 1.6;
+    // 兜底 1.6
+  }
+
+  function fmt(n, d = 2) {
+    return (Number(n) || 0).toFixed(d);
+  }
+
+  function calcOnce() {
+    const pet = qs("#pet")?.value || "dog";
+    const unit = qs("#unit")?.value || "kg";
+    const activity = qs("#activity")?.value || "normal";
+    const kg = toKg(qs("#weight")?.value, unit);
+    const kcalPerCup = Number(qs("#kcalPerCup")?.value) || 350;
+    const gramsPerCup = Number(qs("#gramsPerCup")?.value) || 110;
+
+    const rer = rerKg(kg);
+    const mer = rer * activityFactor(activity, pet);
+
+    let cups = 0, grams = 0;
+    if (kcalPerCup > 0) {
+      cups = mer / kcalPerCup;
+      grams = cups * gramsPerCup;
+    }
+
+    qs("#result").innerHTML =
+      `RER: <strong>${fmt(rer,1)}</strong> kcal/day<br>` +
+      `MER: <strong>${fmt(mer,1)}</strong> kcal/day<br>` +
+      `Daily: <strong>${fmt(cups,2)}</strong> cups ≈ <strong>${fmt(grams,0)}</strong> g`;
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const btn = qs("#btnCalc");
+    if (btn) btn.addEventListener("click", calcOnce);
   });
 })();
