@@ -1,45 +1,36 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Feedback — Pet Scan</title>
-
-  <link rel="stylesheet" href="./assets/site.css" />
-  <script src="./assets/i18n.js" defer></script>
-  <script src="./assets/app.js" defer></script>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title data-i18n="nav.feedback">Feedback</title>
+  <link rel="stylesheet" href="assets/site.css"/>
+  <script src="assets/i18n.js"></script>
+  <script src="assets/app.js"></script>
 </head>
 <body>
-  <header class="navbar">
+  <nav class="navbar">
     <div class="container">
-      <nav class="links">
-        <a data-i18n="nav.home" href="./index.html">Home</a>
-        <a data-i18n="nav.calculator" href="./feeding.html">Calculator</a>
-        <a data-i18n="nav.transition7" href="./cards/transition-7.html">7-Day Switch</a>
-        <a data-i18n="nav.feedback" href="./feedback.html">Feedback</a>
-      </nav>
-      <select id="langSelect" class="lang-select" aria-label="Language">
-        <option value="en">English</option>
-        <option value="es">Español</option>
-        <option value="zh">中文</option>
-        <option value="fr">Français</option>
-      </select>
+      <a href="index.html" data-i18n="nav.home">Home</a>
+      <a href="feeding.html" data-i18n="nav.calculator">Calculator</a>
+      <a href="cards/transition-7.html" data-i18n="nav.transition7">7-Day Switch</a>
+      <a href="feedback.html" data-i18n="nav.feedback">Feedback</a>
+      <select id="langSelect" aria-label="Language"></select>
     </div>
-  </header>
+  </nav>
 
   <main class="container">
     <h1 data-i18n="feedback.title">Feedback</h1>
-    <div class="card">
-      <p data-i18n="feedback.body">
-        We use anonymous analytics to improve features. Informational only. Not medical advice.
-      </p>
-      <div class="row">
-        <a class="btn" data-i18n="feedback.email" href="mailto:ben-del-cmd@users.noreply.github.com?subject=Pet%20Scan%20Feedback">Send Email</a>
-        <a class="btn ghost" data-i18n="feedback.back" href="./index.html">Back to Home</a>
-      </div>
-    </div>
+    <p data-i18n="feedback.body">
+      We use anonymous analytics to improve features. Informational only. Not medical advice.
+    </p>
+
+    <p class="actions">
+      <a class="btn" href="mailto:hello@example.com" data-i18n="feedback.email">Send Email</a>
+      <a class="btn" href="index.html" data-i18n="feedback.back">Back to Home</a>
+    </p>
   </main>
 
-  <footer class="footer"><small>© Pet Scan</small></footer>
+  <footer class="container">© Pet Scan</footer>
 </body>
 </html>
