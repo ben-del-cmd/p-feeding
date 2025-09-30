@@ -4,56 +4,74 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Pet Scan — Home</title>
-  <link rel="stylesheet" href="/p-feeding/assets/site.css" />
+  <link rel="stylesheet" href="./assets/site.css" />
 </head>
 <body>
-  <!-- 顶部导航 -->
   <nav class="navbar">
     <div class="container">
-      <a id="navHome" data-i18n="nav.home" href="/p-feeding/index.html">Home</a>
-      <a id="navCalc" data-i18n="nav.calculator" href="/p-feeding/feeding.html">Calculator</a>
-      <a id="navT7"   data-i18n="nav.transition7" href="/p-feeding/cards/transition-7.html">7-Day Switch</a>
-      <a id="navFb"   data-i18n="nav.feedback" href="/p-feeding/feedback.html">Feedback</a>
+      <a href="./index.html" data-i18n="nav.home">Home</a>
+      <a href="./feeding.html" data-i18n="nav.calculator">Calculator</a>
+      <a href="./cards/transition-7.html" data-i18n="nav.transition7">7-Day Switch</a>
+      <a href="./feedback.html" data-i18n="nav.feedback">Feedback</a>
 
-      <select id="langSelect" class="lang">
+      <select id="langSelect" aria-label="Language">
         <option value="en">English</option>
-        <option value="es">Español</option>
         <option value="zh">中文</option>
+        <option value="es">Español</option>
         <option value="fr">Français</option>
       </select>
     </div>
   </nav>
 
   <main class="container">
-    <h1 data-i18n="home.hero.title">Turn pet food labels into simple, actionable feeding.</h1>
-    <p data-i18n="home.hero.subtitle">Informational only. Not medical advice.</p>
+    <header class="hero">
+      <h1 data-i18n="home.hero.title">Turn pet food labels into simple, actionable feeding.</h1>
+      <p data-i18n="home.hero.subtitle">Informational only. Not medical advice.</p>
+      <div class="actions">
+        <a class="btn" href="./feeding.html" data-i18n="home.cta.open_calculator">Open Calculator</a>
+        <a class="btn" href="./cards/transition-7.html" data-i18n="home.cta.view_transition_card">View 7-Day Card</a>
+        <a class="btn" href="./feedback.html" data-i18n="home.cta.feedback">Feedback</a>
+      </div>
+    </header>
 
-    <p>
-      <a class="btn" id="ctaCalc" data-i18n="home.cta.open_calculator" href="/p-feeding/feeding.html">Open Calculator</a>
-      <a class="btn" id="ctaT7" data-i18n="home.cta.view_transition_card" href="/p-feeding/cards/transition-7.html">View 7-Day Card</a>
-      <a class="btn" id="ctaFb" data-i18n="home.cta.feedback" href="/p-feeding/feedback.html">Feedback</a>
-    </p>
-
-    <section class="card">
+    <section>
       <h2 data-i18n="home.card.calculator.title">Calculator</h2>
       <p data-i18n="home.card.calculator.desc">RER = 70 × weight^0.75; MER = RER × activity.</p>
     </section>
 
-    <section class="card">
+    <section>
       <h2 data-i18n="home.card.transition.title">7-Day Transition Card</h2>
       <p data-i18n="home.card.transition.desc">90/10 → 0/100</p>
     </section>
 
-    <section class="card">
+    <section>
       <h2 data-i18n="home.card.feedback.title">Feedback</h2>
       <p data-i18n="home.card.feedback.desc">Anonymous analytics to improve features.</p>
     </section>
+
+    <footer class="footnote">
+      © Pet Scan · <span data-i18n="legal.info_boundary">Informational only. Not medical advice.</span>
+    </footer>
   </main>
 
-  <footer class="container">© Pet Scan</footer>
-
-  <!-- 必须按此顺序加载 -->
-  <script src="/p-feeding/assets/i18n.js"></script>
-  <script src="/p-feeding/assets/app.js"></script>
+  <script src="./assets/i18n.js"></script>
+  <script src="./assets/app.js" defer></script>
+  <script src="./assets/js/events.js" defer></script>
+  <script>
+    // 兜底初始化（即使外部脚本未绑定，也能工作）
+    document.addEventListener('DOMContentLoaded', () => {
+      const sel = document.getElementById('langSelect');
+      if (window.I18N) {
+        try {
+          const lang = I18N.getLang ? I18N.getLang() : 'en';
+          if (sel) {
+            sel.value = lang;
+            sel.onchange = (e) => I18N.setLang(e.target.value);
+          }
+          I18N.apply && I18N.apply(lang);
+        } catch {}
+      }
+    });
+  </script>
 </body>
 </html>
