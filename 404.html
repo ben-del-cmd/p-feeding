@@ -1,0 +1,31 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Redirecting…</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body{background:#0b0f15;color:#cbd5e1;font-family:system-ui;margin:24px}
+</style>
+<p>Redirecting…</p>
+<noscript><meta http-equiv="refresh" content="0; url=./index.html?lang=en#home"></noscript>
+<script>
+  (function () {
+    // 计算项目根路径（如 /p-feeding/；若是自定义域名则为 /）
+    function basePath(){
+      var parts = location.pathname.split('/').filter(Boolean);
+      return parts.length ? '/' + parts[0] + '/' : '/';
+    }
+    // 根据历史路径，推断要跳到哪个 hash 路由
+    var last = (location.pathname.split('/').pop() || '').toLowerCase();
+    var hash = '#home';
+    if (last.includes('feed') && !last.includes('feedback')) hash = '#calc';
+    else if (last.includes('card') || last.includes('transition')) hash = '#switch';
+    else if (last.includes('feedback')) hash = '#feedback';
+
+    // 保留 ?lang，默认为 en
+    var lang = new URLSearchParams(location.search).get('lang') || 'en';
+
+    // 跳到 SPA 首页
+    var target = basePath() + 'index.html?lang=' + encodeURIComponent(lang) + hash;
+    location.replace(target);
+  })();
+</script>
