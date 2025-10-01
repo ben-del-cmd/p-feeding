@@ -1,2 +1,10 @@
-# Default owner for everything
-* @ben-del-cmd
+# 默认：没人匹配时由你负责 
+*               @ben-del-cmd
+
+# 页面
+/index.html     @ben-del-cmd
+/404.html       @ben-del-cmd
+
+# 示例：若以后有文档或脚本目录，可指派给团队/多人
+# /docs/**        @org/docs-team
+# /scripts/**     @alice @bob
