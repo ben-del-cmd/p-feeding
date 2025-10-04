@@ -42,3 +42,5 @@ Settings → Pages →
 在 `index.html` 搜索并设置你的邮箱（留空也可用，按钮会打开空收件人）：
 ```js
 const FEEDBACK_EMAIL = "YOUR_EMAIL";
+
+- demo: update README for PR test
