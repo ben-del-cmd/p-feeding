@@ -1,27 +1,28 @@
-<!-- deploy: 2025-10-05b -->
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pet A Plan · Feeding & Switch Helper (MVP v1.2.3 + H‑patch + custom/cups)</title>
-  <meta name="description" content="Scan → unify terms → feeding calc → 7‑day switch tips. Informational only; not medical advice." />
+  <title>Pet A Plan · Feeding & Switch Helper (MVP v1.2.3 + H-patch + custom/cups)</title>
+  <meta name="description" content="Scan → unify terms → feeding calc → 7-day switch tips. Informational only; not medical advice." />
   <meta name="referrer" content="strict-origin-when-cross-origin" />
   <meta name="theme-color" content="#0b1220" />
   <meta http-equiv="x-ua-compatible" content="IE=edge" />
   <link rel="icon" href="data:," />
   <style>
-    :root{--bg:#0b1220;--fg:#e8eefc;--muted:#9fb0d0;--card:#111a2e;--accent:#7aa7ff;--danger:#ffb3b3;--ok:#b7ffcf;--maxw:860px}
+    :root{--bg:#0b1220;--fg:#e8eefc;--muted:#9fb0d0;--card:#111a2e;--accent:#7aa7ff;--danger:#ffb3b3;--ok:#b7ffcf;--maxw:980px}
     html,body{margin:0;padding:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";background:var(--bg);color:var(--fg)}
     a{color:var(--accent)}
     .wrap{max-width:var(--maxw);margin:0 auto;padding:16px 20px 80px}
     header{position:sticky;top:0;background:linear-gradient(180deg,rgba(11,18,32,.95),rgba(11,18,32,.75));backdrop-filter:saturate(140%) blur(8px);z-index:10;border-bottom:1px solid #1f2b44}
     .bar{display:flex;gap:12px;align-items:center;justify-content:space-between;max-width:var(--maxw);margin:0 auto;padding:10px 16px}
-    .brand{display:flex;gap:10px;align-items:center}
+    .brand{display:flex;gap:10px;align-items:center;flex:1 1 auto;min-width:0}
     .brand .dot{width:10px;height:10px;border-radius:999px;background:var(--accent)}
-    nav{display:flex;gap:8px;flex-wrap:wrap}
-    nav a{padding:6px 10px;border-radius:10px;text-decoration:none;border:1px solid #24324f;color:var(--fg)}
+    nav{display:flex;gap:8px;flex:0 1 auto;flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;scrollbar-width:none}
+    nav::-webkit-scrollbar{display:none}
+    nav a{padding:6px 12px;border-radius:10px;text-decoration:none;border:1px solid #24324f;color:var(--fg)}
     nav a.active{background:#16213a}
+    .langwrap{flex:0 0 auto;display:flex;gap:8px;align-items:center}
     select, input, button{background:#0f1930;border:1px solid #24324f;color:var(--fg);border-radius:10px;padding:8px 10px}
     input[type=number]{width:100%}
     .grid{display:grid;grid-template-columns:1fr;gap:14px}
@@ -39,7 +40,9 @@
     hr{border:none;border-top:1px solid #1f2b44;margin:10px 0}
     .hint{font-size:.9em}
     .label-inline{display:flex;align-items:center;gap:8px}
-    @media (min-width:720px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media (max-width:640px){
+      nav{flex-wrap:wrap;overflow-x:visible;white-space:normal}
+    }
   </style>
 </head>
 <body>
@@ -48,15 +51,15 @@
       <div class="brand" aria-label="Pet A Plan">
         <div class="dot"></div>
         <strong>Pet A Plan</strong>
-        <span class="muted" id="version">v1.2.3 + H‑patch + custom/cups</span>
+        <span class="muted" id="version">v1.2.3 + H-patch + custom/cups</span>
       </div>
       <nav aria-label="Primary">
         <a href="#home" data-i18n="nav.home" class="active">Home</a>
         <a href="#calc" data-i18n="nav.calc">Calc</a>
-        <a href="#switch" data-i18n="nav.switch">7‑Day</a>
+        <a href="#switch" data-i18n="nav.switch">7-Day</a>
         <a href="#feedback" data-i18n="nav.feedback">Feedback</a>
       </nav>
-      <div class="row" style="flex:0 0 auto;gap:8px;align-items:center">
+      <div class="langwrap">
         <label class="muted" for="langSel" data-i18n="ui.lang">Language</label>
         <select id="langSel" aria-label="Language">
           <option value="en">English</option>
@@ -81,11 +84,11 @@
               <div class="mono">RER = 70 × kg^0.75</div>
             </div>
             <div class="box">
-              <div class="muted" data-i18n="home.i18n">Multi‑language</div>
+              <div class="muted" data-i18n="home.i18n">Multi-language</div>
               <div class="mono">en / zh / es / fr</div>
             </div>
             <div class="box">
-              <div class="muted" data-i18n="home.mode">Single‑file SPA</div>
+              <div class="muted" data-i18n="home.mode">Single-file SPA</div>
               <div class="mono">#home #calc #switch #feedback</div>
             </div>
           </div>
@@ -95,7 +98,7 @@
           <ol>
             <li data-i18n="home.q1">Go to Calc → enter weight (kg) → pick species & activity factor.</li>
             <li data-i18n="home.q2">Review kcal/day and grams/day. Cups/day requires density info from the bag.</li>
-            <li data-i18n="home.q3">See 7‑Day gradual switch plan. If stool soft or upset → hold or step back.</li>
+            <li data-i18n="home.q3">See 7-Day gradual switch plan. If stool soft or upset → hold or step back.</li>
           </ol>
         </div>
       </div>
@@ -123,7 +126,9 @@
           <legend data-i18n="calc.activity">Activity / life stage (MER factor)</legend>
           <div id="factors" class="row" role="radiogroup" aria-label="MER factor"></div>
           <p class="muted" data-i18n="calc.factorHint">Labels show the actual factor used.</p>
-          <p class="hint muted">Info (i): RER=70×kg^0.75; MER=RER×factor. Factors are a starting point—adjust by body condition & stool; special stages/diseases: follow your vet.｜提示（i）：RER=70×kg^0.75；MER=RER×系数。系数仅为起点，应结合体况/便便微调；特殊阶段/疾病遵从兽医。</p>
+          <p class="hint muted" data-i18n="calc.info">
+            Info (i): RER=70×kg^0.75; MER=RER×factor. Factors are a starting point—adjust by body condition & stool; special stages/diseases: follow your vet.
+          </p>
           <div class="row">
             <label class="label-inline"><input type="checkbox" id="useCustom"/> <span data-i18n="calc.customToggle">Use custom factor</span></label>
             <input id="customFactor" type="number" min="0.8" max="6" step="0.1" placeholder="1.6" disabled />
@@ -185,9 +190,9 @@
           <p><strong>RER</strong> = <code>70 × weight(kg)^0.75</code>; <strong>MER</strong> = <code>RER × factor</code>.</p>
           <ul>
             <li><strong>Dog</strong>: low activity/weight mgmt 1.2–1.4; <strong>neutered adult ~1.6 (default)</strong>; intact ~1.8; active/working 2.0–5.0; puppies/lactation higher.</li>
-            <li><strong>Cat</strong>: low activity/obesity‑prone 1.0–1.2; <strong>neutered adult ~1.2–1.4 (default 1.3)</strong>; intact ~1.4–1.6; kittens/lactation higher.</li>
+            <li><strong>Cat</strong>: low activity/obesity-prone 1.0–1.2; <strong>neutered adult ~1.2–1.4 (default 1.3)</strong>; intact ~1.4–1.6; kittens/lactation higher.</li>
           </ul>
-          <p><strong>7‑day gradual switch</strong>: 90/10 → 80/20 → … → 10/90. If stool is soft or pet seems unwell, <strong>hold that day or step back one day</strong> before continuing.</p>
+          <p><strong>7-day gradual switch</strong>: 90/10 → 80/20 → … → 10/90. If stool is soft or pet seems unwell, <strong>hold that day or step back one day</strong> before continuing.</p>
           <p class="muted">References: WSAVA Global Nutrition Toolkit; AAHA/AAFP Nutritional Assessment Guidelines; NRC (2006); FEDIAF; brand label kcal/100g or kcal/cup. Informational only — not medical advice.</p>
         </div>
       </details>
@@ -196,7 +201,7 @@
     <!-- 7-DAY SWITCH -->
     <section id="switch" class="route" hidden>
       <div class="card">
-        <h2 data-i18n="switch.title">7‑Day Gradual Switch</h2>
+        <h2 data-i18n="switch.title">7-Day Gradual Switch</h2>
         <div class="grid">
           <div class="card"><strong>Day 1</strong> — 90% current / 10% new</div>
           <div class="card"><strong>Day 2</strong> — 80% / 20%</div>
@@ -219,7 +224,7 @@
           <select id="fbCat">
             <option value="calc" data-i18n="fb.opt.calc">Calculator</option>
             <option value="copy" data-i18n="fb.opt.copy">Copy/Basis & Notes</option>
-            <option value="switch" data-i18n="fb.opt.switch">7‑Day Switch</option>
+            <option value="switch" data-i18n="fb.opt.switch">7-Day Switch</option>
             <option value="bug" data-i18n="fb.opt.bug">Bug</option>
             <option value="idea" data-i18n="fb.opt.idea">Idea</option>
           </select>
@@ -230,39 +235,39 @@
   </main>
 
   <script>
-  // ---------- i18n (minimal) ----------
+  // ---------- i18n ----------
   const I18N = {
     en: {
-      nav:{home:"Home",calc:"Calc",switch:"7‑Day",feedback:"Feedback"},
+      nav:{home:"Home",calc:"Calc",switch:"7-Day",feedback:"Feedback"},
       ui:{lang:"Language"},
-      home:{title:"Feeding & Switch Helper",pitch:"Informational tool for the U.S. market: turn pet food / grooming labels into actionable guidance. Not medical advice.",kcal:"RER/MER transparent",i18n:"Multi‑language",mode:"Single‑file SPA",quick:"Quick start",q1:"Go to Calc → enter weight (kg) → pick species & activity factor.",q2:"Review kcal/day and grams/day. Cups/day requires density info from the bag.",q3:"See 7‑Day gradual switch plan. If stool soft or upset → hold or step back."},
-      calc:{title:"Feeding Calculator",species:"Species",weight:"Weight (kg)",activity:"Activity / life stage (MER factor)",factorHint:"Labels show the actual factor used.",grams:"Grams/day",cups:"Cups/day",cupsNote:"Cups calculation needs the food energy density (kcal/100g or kcal/cup) and grams per cup (often on the bag). If unknown, rely on grams/day first.",density:"Optional: density for precise grams/cups",kcal100:"kcal / 100 g",kcalCup:"kcal / cup",gPerCup:"grams / cup",customToggle:"Use custom factor",customHint:"Only change if you know what you’re doing (懂则改，不懂别动)。",estNote:"Values marked (est.) are based on a typical density; use your bag’s numbers for precision."},
-      switch:{title:"7‑Day Gradual Switch",caution:"If stool is soft or pet seems unwell, hold that day or step back one day, then continue after recovery."},
-      fb:{title:"Feedback",note:"Choose a category and send us details. No personal health data, please.",send:"Send mail",opt:{calc:"Calculator",copy:"Copy/Basis & Notes",switch:"7‑Day Switch",bug:"Bug",idea:"Idea"}},
+      home:{title:"Feeding & Switch Helper",pitch:"Informational tool for the U.S. market: turn pet food / grooming labels into actionable guidance. Not medical advice.",kcal:"RER/MER transparent",i18n:"Multi-language",mode:"Single-file SPA",quick:"Quick start",q1:"Go to Calc → enter weight (kg) → pick species & activity factor.",q2:"Review kcal/day and grams/day. Cups/day requires density info from the bag.",q3:"See 7-Day gradual switch plan. If stool soft or upset → hold or step back."},
+      calc:{title:"Feeding Calculator",species:"Species",weight:"Weight (kg)",activity:"Activity / life stage (MER factor)",factorHint:"Labels show the actual factor used.",info:"Info (i): RER=70×kg^0.75; MER=RER×factor. Factors are a starting point—adjust by body condition & stool; special stages/diseases: follow your vet.",grams:"Grams/day",cups:"Cups/day",cupsNote:"Cups calculation needs the food energy density (kcal/100g or kcal/cup) and grams per cup (often on the bag). If unknown, rely on grams/day first.",density:"Optional: density for precise grams/cups",kcal100:"kcal / 100 g",kcalCup:"kcal / cup",gPerCup:"grams / cup",customToggle:"Use custom factor",customHint:"Only change if you know what you’re doing (懂则改，不懂别动)。",estNote:"Values marked (est.) are based on a typical density; use your bag’s numbers for precision."},
+      switch:{title:"7-Day Gradual Switch",caution:"If stool is soft or pet seems unwell, hold that day or step back one day, then continue after recovery."},
+      fb:{title:"Feedback",note:"Choose a category and send us details. No personal health data, please.",send:"Send mail",opt:{calc:"Calculator",copy:"Copy/Basis & Notes",switch:"7-Day Switch",bug:"Bug",idea:"Idea"}},
     },
     zh: {
       nav:{home:"首页",calc:"计算",switch:"7天换粮",feedback:"反馈"},
       ui:{lang:"语言"},
       home:{title:"喂养与换粮助手",pitch:"面向美国市场的信息性工具：把宠物食品/洗护标签转成可执行建议。非医疗建议。",kcal:"RER/MER 透明可解释",i18n:"多语言",mode:"单文件 SPA",quick:"快速开始",q1:"进入 计算 → 输入体重(kg) → 选择物种与活动系数。",q2:"查看 kcal/日 与 g/日。Cups/日 需要包装上的能量密度与每杯克数。",q3:"查看 7 天渐进换粮。如便便偏软或不适 → 保持当日或倒回一天。"},
-      calc:{title:"喂养计算器",species:"物种",weight:"体重(kg)",activity:"活动/阶段（MER 系数）",factorHint:"选项名称直接展示所用系数。",grams:"克/日",cups:"杯/日",cupsNote:"计算杯数需要食品能量密度（kcal/100g 或 kcal/cup）与每杯克数（常见在包装袋上）；若未知，请先以 g/日 为准。",density:"可选：用于精算克/杯的密度参数",kcal100:"kcal / 100 g",kcalCup:"kcal / 杯",gPerCup:"克 / 杯",customToggle:"自定义系数",customHint:"懂则改，不懂别动。",estNote:"标注 (估) 的数值基于典型密度；使用包装标注可获得更精确结果。"},
+      calc:{title:"喂养计算器",species:"物种",weight:"体重(kg)",activity:"活动/阶段（MER 系数）",factorHint:"选项名称直接展示所用系数。",info:"提示（i）：RER=70×kg^0.75；MER=RER×系数。系数仅为起点，应结合体况/便便微调；特殊阶段/疾病遵从兽医。",grams:"克/日",cups:"杯/日",cupsNote:"计算杯数需要食品能量密度（kcal/100g 或 kcal/cup）与每杯克数（常见在包装袋上）；若未知，请先以 g/日 为准。",density:"可选：用于精算克/杯的密度参数",kcal100:"kcal / 100 g",kcalCup:"kcal / 杯",gPerCup:"克 / 杯",customToggle:"自定义系数",customHint:"懂则改，不懂别动。",estNote:"标注 (估) 的数值基于典型密度；使用包装标注可获得更精确结果。"},
       switch:{title:"7天渐进换粮",caution:"若便便偏软或不适，请保持当日或倒回一天，恢复后再继续。"},
       fb:{title:"反馈",note:"请选择分类并通过邮件发送问题/建议。请勿提交个人健康信息。",send:"发送邮件",opt:{calc:"计算器",copy:"文案/依据与说明",switch:"7天换粮",bug:"缺陷",idea:"想法"}},
     },
     es: {
       nav:{home:"Inicio",calc:"Cálculo",switch:"7 días",feedback:"Feedback"},
       ui:{lang:"Idioma"},
-      home:{title:"Asistente de alimentación y cambio",pitch:"Herramienta informativa: convierte etiquetas en orientación accionable. No es consejo médico.",kcal:"RER/MER transparente",i18n:"Multi‑idioma",mode:"SPA de un solo archivo",quick:"Inicio rápido",q1:"Ir a Cálculo → peso (kg) → especie y factor.",q2:"Revisa kcal/día y g/día. Las tazas requieren la densidad del alimento.",q3:"Plan de cambio gradual de 7 días. Si hay heces blandas → mantener o retroceder."},
-      calc:{title:"Calculadora de alimentación",species:"Especie",weight:"Peso (kg)",activity:"Actividad / etapa (factor MER)",factorHint:"Las etiquetas muestran el factor usado.",grams:"Gramos/día",cups:"Tazas/día",cupsNote:"Las tazas requieren densidad energética (kcal/100g o kcal/taza) y gramos por taza. Si es desconocido, usa g/día.",density:"Opcional: densidad para precisión",kcal100:"kcal / 100 g",kcalCup:"kcal / taza",gPerCup:"gramos / taza",customToggle:"Factor personalizado",customHint:"Cámbialo sólo si sabes lo que haces.",estNote:"(est.) usa densidad típica; usa tu bolsa para precisión."},
+      home:{title:"Asistente de alimentación y cambio",pitch:"Herramienta informativa: convierte etiquetas en orientación accionable. No es consejo médico.",kcal:"RER/MER transparente",i18n:"Multi-idioma",mode:"SPA de un solo archivo",quick:"Inicio rápido",q1:"Ir a Cálculo → peso (kg) → especie y factor.",q2:"Revisa kcal/día y g/día. Las tazas requieren la densidad del alimento.",q3:"Plan de cambio gradual de 7 días. Si hay heces blandas → mantener o retroceder."},
+      calc:{title:"Calculadora de alimentación",species:"Especie",weight:"Peso (kg)",activity:"Actividad / etapa (factor MER)",factorHint:"Las etiquetas muestran el factor usado.",info:"Info (i): RER=70×kg^0.75; MER=RER×factor. Los factores son un punto de partida—ajusta por condición corporal y heces; etapas especiales/enfermedades: sigue a tu veterinario.",grams:"Gramos/día",cups:"Tazas/día",cupsNote:"Las tazas requieren densidad energética (kcal/100g o kcal/taza) y gramos por taza. Si es desconocido, usa g/día.",density:"Opcional: densidad para precisión",kcal100:"kcal / 100 g",kcalCup:"kcal / taza",gPerCup:"gramos / taza",customToggle:"Factor personalizado",customHint:"Cámbialo sólo si sabes lo que haces.",estNote:"(est.) usa densidad típica; usa tu bolsa para precisión."},
       switch:{title:"Cambio gradual 7 días",caution:"Si hay heces blandas o malestar, mantén el día o retrocede uno, y continúa tras mejorar."},
       fb:{title:"Comentarios",note:"Elige una categoría y envíanos detalles. Sin datos de salud personal, por favor.",send:"Enviar correo",opt:{calc:"Calculadora",copy:"Texto/Basis & Notes",switch:"Cambio 7 días",bug:"Error",idea:"Idea"}},
     },
     fr: {
       nav:{home:"Accueil",calc:"Calcul",switch:"7 jours",feedback:"Avis"},
       ui:{lang:"Langue"},
-      home:{title:"Assistant d'alimentation & transition",pitch:"Outil informatif : transformer les étiquettes en conseils actionnables. Pas un avis médical.",kcal:"RER/MER transparent",i18n:"Multilingue",mode:"SPA fichier unique",quick:"Démarrage rapide",q1:"Aller à Calcul → poids (kg) → espèce & facteur.",q2:"Vérifier kcal/jour et g/jour. Les tasses nécessitent la densité du sac.",q3:"Plan de transition sur 7 jours. Selles molles ? Maintenir ou revenir d'une étape."},
-      calc:{title:"Calculateur d'alimentation",species:"Espèce",weight:"Poids (kg)",activity:"Activité / stade (facteur MER)",factorHint:"Les étiquettes affichent le facteur utilisé.",grams:"Grammes/jour",cups:"Tasses/jour",cupsNote:"Le calcul des tasses nécessite la densité énergétique et les grammes par tasse. Sinon, fiez‑vous aux g/jour.",density:"Optionnel : densité pour précision",kcal100:"kcal / 100 g",kcalCup:"kcal / tasse",gPerCup:"grammes / tasse",customToggle:"Facteur personnalisé",customHint:"Ne changez que si nécessaire.",estNote:"(est.) basé sur densité typique ; utilisez les données du sac pour la précision."},
+      home:{title:"Assistant d'alimentation & transition",pitch:"Outil informatif : transformer les étiquettes en conseils actionnables. Pas un avis médical.",kcal:"RER/MER transparent",i18n:"Multilingue",mode:"SPA fichier unique",quick:"Démarrage rapide",q1:"Aller à Calcul → poids (kg) → espèce & facteur.",q2:"Vérifier kcal/jour et g/jour. Les tasses nécessitent la densité du sac.",q3:"Plan de transition sur 7 jours. Selles molles ? Maintenir ou revenir d'une étape."},
+      calc:{title:"Calculateur d'alimentation",species:"Espèce",weight:"Poids (kg)",activity:"Activité / stade (facteur MER)",factorHint:"Les étiquettes affichent le facteur utilisé.",info:"Info (i) : RER=70×kg^0,75 ; MER=RER×facteur. Les facteurs sont un point de départ—ajustez selon l'état corporel et les selles ; stades spéciaux/maladies : suivez votre vétérinaire.",grams:"Grammes/jour",cups:"Tasses/jour",cupsNote:"Le calcul des tasses nécessite la densité énergétique et les grammes par tasse. Sinon, fiez-vous aux g/jour.",density:"Optionnel : densité pour précision",kcal100:"kcal / 100 g",kcalCup:"kcal / tasse",gPerCup:"grammes / tasse",customToggle:"Facteur personnalisé",customHint:"Ne changez que si nécessaire.",estNote:"(est.) basé sur densité typique ; utilisez les données du sac pour la précision."},
       switch:{title:"Transition 7 jours",caution:"Si selles molles ou malaise, maintenir la journée ou revenir d'un jour, puis poursuivre."},
-      fb:{title:"Retour",note:"Choisissez une catégorie et envoyez‑nous les détails. Pas de données de santé personnelles.",send:"Envoyer un mail",opt:{calc:"Calculateur",copy:"Texte/Basis & Notes",switch:"Transition 7 jours",bug:"Anomalie",idea:"Idée"}},
+      fb:{title:"Retour",note:"Choisissez une catégorie et envoyez-nous les détails. Pas de données de santé personnelles.",send:"Envoyer un mail",opt:{calc:"Calculateur",copy:"Texte/Basis & Notes",switch:"Transition 7 jours",bug:"Anomalie",idea:"Idée"}},
     }
   };
 
@@ -334,7 +339,6 @@
 
   function pow075(x){ return Math.pow(x, 0.75); }
   function clamp(x,a,b){ return Math.min(b, Math.max(a,x)); }
-
   function isNum(n){ return typeof n==='number' && !Number.isNaN(n) && Number.isFinite(n); }
 
   function currentFactor(){
@@ -431,7 +435,7 @@ Details:
   <!--
   DOC_SYNC_INDEX.md (append)
 
-  - 2025-10-05 — H‑patch+custom/cups: add custom MER factor (guarded UI, "懂则改，不懂别动"); add optional density inputs (kcal/100g or kcal/cup + grams/cup); compute grams/day and cups/day precisely when provided; mark (est.) when using typical density.
+  - 2025-10-05 — H-patch+custom/cups: add custom MER factor (guarded UI, "懂则改，不懂别动"); add optional density inputs (kcal/100g or kcal/cup + grams/cup); compute grams/day and cups/day precisely when provided; mark (est.) when using typical density.
 
   .github/PULL_REQUEST_TEMPLATE.md (create)
 
@@ -441,13 +445,13 @@ Details:
   ## What
   - Calc: Dog/Cat defaults (Dog 1.6 / Cat 1.3), factor labels show values
   - Basis & Notes (EN/zh), disclaimers
-  - 7‑Day caution bolded
+  - 7-Day caution bolded
   - Copy: cups requirement note
   - **New:** custom MER factor (checkbox + number), with guard copy
   - **New:** optional density inputs (kcal/100g OR kcal/cup + g/cup) → precise grams/cups; show (est.) when using typical density
 
   ## Why
-  Improve trust & explainability; keep non‑medical boundary; enable precision without forcing inputs.
+  Improve trust & explainability; keep non-medical boundary; enable precision without forcing inputs.
 
   ## Checklist
   - [ ] Language switch OK (default en, ?lang, localStorage)
@@ -457,8 +461,8 @@ Details:
   - [ ] Custom factor guarded & clamped (0.8–6.0)
   - [ ] Cups logic only when grams/cup is known; otherwise '—'
   - [ ] (est.) shown when typical density used
-  - [ ] SSH‑signed commits (Verified); Squash merge
-  - [ ] 404 compatibility retained; single‑file SPA intact
+  - [ ] SSH-signed commits (Verified); Squash merge
+  - [ ] 404 compatibility retained; single-file SPA intact
 
   ## Screenshots
   (attach before/after)
