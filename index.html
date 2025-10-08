@@ -1,10 +1,10 @@
-<!-- deploy: 2025-10-05b -->
+<!-- deploy: 2025-10-08a -->
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pet A Plan · Feeding & Switch Helper (MVP v1.2.3 + H-patch + custom/cups)</title>
+  <title>Pet A Plan · Feeding & Switch Helper (MVP v1.2.3 + H-patch + custom/cups + life-stage)</title>
   <meta name="description" content="Scan → unify terms → feeding calc → 7-day switch tips. Informational only; not medical advice." />
   <meta name="referrer" content="strict-origin-when-cross-origin" />
   <meta name="theme-color" content="#0b1220" />
@@ -50,7 +50,7 @@
       <div class="brand" aria-label="Pet A Plan">
         <div class="dot"></div>
         <strong>Pet A Plan</strong>
-        <span class="muted" id="version">v1.2.3 + H-patch + custom/cups</span>
+        <span class="muted" id="version">v1.2.3 + H-patch + custom/cups + life-stage</span>
       </div>
       <nav aria-label="Primary">
         <a href="#home" data-i18n="nav.home" class="active">Home</a>
@@ -59,7 +59,6 @@
         <a href="#feedback" data-i18n="nav.feedback">Feedback</a>
       </nav>
       <div class="langbox" aria-label="Language">
-        <!-- 仅保留下拉，不显示“Language”文字，减少导航位移 -->
         <select id="langSel" aria-label="Language">
           <option value="en">English</option>
           <option value="zh">简体中文</option>
@@ -107,6 +106,7 @@
     <section id="calc" class="route" hidden>
       <div class="card">
         <h2 data-i18n="calc.title">Feeding Calculator</h2>
+
         <div class="row">
           <div>
             <label for="species" data-i18n="calc.species">Species</label>
@@ -120,12 +120,21 @@
             <input id="wkg" type="number" min="0" step="0.1" placeholder="10" />
           </div>
         </div>
+
+        <!-- Life stage row (new) -->
+        <div class="row" id="rowStage" style="margin-top:8px">
+          <div>
+            <label for="stage" data-i18n="calc.stage">Life stage</label>
+            <select id="stage" aria-label="Life stage"></select>
+          </div>
+          <div class="muted hint" id="stageHint" style="flex:2 1 240px"></div>
+        </div>
+
         <div style="height:8px"></div>
         <fieldset class="card" style="padding:12px">
           <legend data-i18n="calc.activity">Activity / life stage (MER factor)</legend>
           <div id="factors" class="row" role="radiogroup" aria-label="MER factor"></div>
           <p class="muted" data-i18n="calc.factorHint">Labels show the actual factor used.</p>
-          <!-- info 提示改为 i18n，英文只显示英文，中文只显示中文 -->
           <p class="hint muted" data-i18n="calc.infoTip">Info (i): RER=70×kg^0.75; MER=RER×factor. Factors are a starting point—adjust by body condition & stool; special stages/diseases: follow your vet.</p>
           <div class="row">
             <label class="label-inline"><input type="checkbox" id="useCustom"/> <span data-i18n="calc.customToggle">Use custom factor</span></label>
@@ -133,6 +142,7 @@
           </div>
           <p class="hint muted" data-i18n="calc.customHint">Only change if you know what you’re doing (懂则改，不懂别动)。</p>
         </fieldset>
+
         <div style="height:8px"></div>
         <fieldset class="card" style="padding:12px">
           <legend data-i18n="calc.density">Optional: density for precise grams/cups</legend>
@@ -152,6 +162,7 @@
           </div>
           <p class="hint muted" data-i18n="calc.cupsNote">Cups calculation needs the food energy density (kcal/100g or kcal/cup) and grams per cup (often on the bag). If unknown, rely on grams/day first.</p>
         </fieldset>
+
         <div style="height:8px"></div>
         <div class="grid">
           <div class="box card">
@@ -241,6 +252,9 @@
       home:{title:"Feeding & Switch Helper",pitch:"Informational tool for the U.S. market: turn pet food / grooming labels into actionable guidance. Not medical advice.",kcal:"RER/MER transparent",i18n:"Multi-language",mode:"Single-file SPA",quick:"Quick start",q1:"Go to Calc → enter weight (kg) → pick species & activity factor.",q2:"Review kcal/day and grams/day. Cups/day requires density info from the bag.",q3:"See 7-Day gradual switch plan. If stool soft or upset → hold or step back."},
       calc:{
         title:"Feeding Calculator",species:"Species",weight:"Weight (kg)",
+        stage:"Life stage",
+        stageWords:{ puppy:"Puppy", kitten:"Kitten", adult:"Adult", senior:"Senior" },
+        stageHint:"Normal uses {stage} ({factor})",
         activity:"Activity / life stage (MER factor)",
         factorHint:"Labels show the actual factor used.",
         infoTip:"Info (i): RER=70×kg^0.75; MER=RER×factor. Factors are a starting point—adjust by body condition & stool; special stages/diseases: follow your vet.",
@@ -261,6 +275,9 @@
       home:{title:"喂养与换粮助手",pitch:"面向美国市场的信息性工具：把宠物食品/洗护标签转成可执行建议。非医疗建议。",kcal:"RER/MER 透明可解释",i18n:"多语言",mode:"单文件 SPA",quick:"快速开始",q1:"进入 计算 → 输入体重(kg) → 选择物种与活动系数。",q2:"查看 kcal/日 与 g/日。Cups/日 需要包装上的能量密度与每杯克数。",q3:"查看 7 天渐进换粮。如便便偏软或不适 → 保持当日或倒回一天。"},
       calc:{
         title:"喂养计算器",species:"物种",weight:"体重(kg)",
+        stage:"生命阶段",
+        stageWords:{ puppy:"幼犬", kitten:"幼猫", adult:"成体", senior:"老年" },
+        stageHint:"“常规”将使用 {stage}（{factor}）",
         activity:"活动/阶段（MER 系数）",
         factorHint:"选项名称直接展示所用系数。",
         infoTip:"提示（i）：RER=70×kg^0.75；MER=RER×系数。系数仅为起点，应结合体况/便便微调；特殊阶段/疾病遵从兽医。",
@@ -281,6 +298,9 @@
       home:{title:"Asistente de alimentación y cambio",pitch:"Herramienta informativa: convierte etiquetas en orientación accionable. No es consejo médico.",kcal:"RER/MER transparente",i18n:"Multi-idioma",mode:"SPA de un solo archivo",quick:"Inicio rápido",q1:"Ir a Cálculo → peso (kg) → especie y factor.",q2:"Revisa kcal/día y g/día. Las tazas requieren la densidad del alimento.",q3:"Plan de cambio gradual de 7 días. Si hay heces blandas → mantener o retroceder."},
       calc:{
         title:"Calculadora de alimentación",species:"Especie",weight:"Peso (kg)",
+        stage:"Etapa de vida",
+        stageWords:{ puppy:"Cachorro", kitten:"Gatito", adult:"Adulto", senior:"Senior" },
+        stageHint:"Normal usa {stage} ({factor})",
         activity:"Actividad / etapa (factor MER)",
         factorHint:"Las etiquetas muestran el factor usado.",
         infoTip:"Info (i): RER=70×kg^0.75; MER=RER×factor. Punto de partida—ajustar por condición corporal y heces; etapas especiales/enfermedades: sigue a tu veterinario.",
@@ -301,6 +321,9 @@
       home:{title:"Assistant d'alimentation & transition",pitch:"Outil informatif : transformer les étiquettes en conseils actionnables. Pas un avis médical.",kcal:"RER/MER transparent",i18n:"Multilingue",mode:"SPA fichier unique",quick:"Démarrage rapide",q1:"Aller à Calcul → poids (kg) → espèce & facteur.",q2:"Vérifier kcal/jour et g/jour. Les tasses nécessitent la densité du sac.",q3:"Plan de transition sur 7 jours. Selles molles ? Maintenir ou revenir d'une étape."},
       calc:{
         title:"Calculateur d'alimentation",species:"Espèce",weight:"Poids (kg)",
+        stage:"Stade de vie",
+        stageWords:{ puppy:"Chiot", kitten:"Chaton", adult:"Adulte", senior:"Senior" },
+        stageHint:"Normal utilise {stage} ({factor})",
         activity:"Activité / stade (facteur MER)",
         factorHint:"Les étiquettes affichent le facteur utilisé.",
         infoTip:"Info (i) : RER=70×kg^0,75 ; MER=RER×facteur. Point de départ—ajuster selon l'état corporel & les selles ; stades spéciaux/maladies : suivre votre vétérinaire.",
@@ -322,8 +345,7 @@
 
   // ---------- Router ----------
   function route(){
-    const hash = (location.hash || '#home').split('&')[0];
-
+    const hash = (location.hash || '#home').split('&')[0]; // tolerate #...&v=...
     $$('#home, #calc, #switch, #feedback').forEach(sec=>sec.hidden=true);
     const el = $(hash);
     if(el) el.hidden = false;
@@ -334,26 +356,28 @@
   // ---------- Lang ----------
   function setLang(l){
     const lang = I18N[l] ? l : 'en';
-    localStorage.setItem('lang', lang);       // 仍记录用户选择
+    localStorage.setItem('lang', lang);
     document.documentElement.lang = lang;
-    // translate
     $$('[data-i18n]').forEach(node=>{
       const path = node.getAttribute('data-i18n').split('.');
       let cur = I18N[lang];
       for(const k of path){ cur = cur?.[k]; }
       if(typeof cur === 'string') node.textContent = cur;
     });
+    // re-render stage & factor labels on language change
+    const sp = $('#species')?.value || 'dog';
+    renderStage(sp);
+    const st = $('#stage')?.value || 'adult';
+    renderFactors(sp, st);
   }
 
   function initLang(){
     const params = new URLSearchParams(location.search);
     const ql = params.get('lang');
-    // 固定默认英文：没有 ?lang 时一律 'en'（不再读取 localStorage 旧值）
-    const lang = ql || 'en';
+    const lang = ql || 'en'; // default English
     $('#langSel').value = I18N[lang] ? lang : 'en';
     setLang($('#langSel').value);
   }
-
   $('#langSel')?.addEventListener('change', e=> setLang(e.target.value));
 
   // ---------- Calc ----------
@@ -362,31 +386,87 @@
 
   const SPECIES_FACTORS = {
     dog: [
-      {key:'rest', label:'Resting (1.0)', value:1.0},
-      {key:'normal', label:'Normal (1.6)', value:1.6}, // default for dogs
-      {key:'active', label:'Active (2.0)', value:2.0},
+      {key:'rest',   label:'Resting (1.0)', value:1.0},
+      {key:'normal', label:'Normal (1.6)',  value:1.6}, // default for dogs
+      {key:'active', label:'Active (2.0)',  value:2.0},
     ],
     cat: [
-      {key:'rest', label:'Resting (1.0)', value:1.0},
-      {key:'normal', label:'Normal (1.3)', value:1.3}, // default for cats
-      {key:'active', label:'Active (1.6)', value:1.6}, // conservative 1.6
+      {key:'rest',   label:'Resting (1.0)', value:1.0},
+      {key:'normal', label:'Normal (1.3)',  value:1.3}, // default for cats
+      {key:'active', label:'Active (1.6)',  value:1.6}, // conservative
     ],
   };
 
-  function renderFactors(species='dog'){
-    const box = $('#factors');
-    box.innerHTML = '';
-    SPECIES_FACTORS[species].forEach((f,i)=>{
+  // Life-stage default MER factors (experience-based)
+  const STAGE_FACTORS = {
+    dog: { puppy: 2.0, adult: 1.6, senior: 1.3 },
+    cat: { kitten: 2.5, adult: 1.3, senior: 1.1 },
+  };
+
+  function stageWord(species, stage, lang){
+    const pack = I18N[lang || document.documentElement.lang]?.calc?.stageWords || I18N.en.calc.stageWords;
+    if(species==='dog' && stage==='puppy') return pack.puppy;
+    if(species==='cat' && stage==='kitten') return pack.kitten;
+    if(stage==='adult')  return pack.adult;
+    if(stage==='senior') return pack.senior;
+    return stage;
+  }
+
+  function renderStage(species){
+    const lang = document.documentElement.lang || 'en';
+    const sel = $('#stage'); if(!sel) return;
+    const prev = localStorage.getItem('stage') || 'adult';
+    sel.innerHTML = '';
+    const keys = species==='dog' ? ['puppy','adult','senior'] : ['kitten','adult','senior'];
+    keys.forEach(k=>{
+      const opt = document.createElement('option');
+      const name = stageWord(species,k,lang);
+      const f = STAGE_FACTORS[species][k];
+      opt.value = k;
+      opt.textContent = `${name} (${f.toFixed(1)})`;
+      sel.appendChild(opt);
+    });
+    // restore with compatibility (dog doesn't have 'kitten')
+    const want = (species==='dog' && prev==='kitten') ? 'puppy' : prev;
+    sel.value = keys.includes(want) ? want : 'adult';
+    // update hint line now
+    const tpl = I18N[lang]?.calc?.stageHint || I18N.en.calc.stageHint;
+    const name = stageWord(species, sel.value, lang);
+    const fv = STAGE_FACTORS[species][sel.value];
+    const hint = $('#stageHint'); if(hint) hint.textContent = tpl.replace('{stage}', name).replace('{factor}', fv.toFixed(1));
+  }
+
+  function renderFactors(species='dog', stage='adult'){
+    const lang = document.documentElement.lang || 'en';
+    const box = $('#factors'); box.innerHTML = '';
+    const base = SPECIES_FACTORS[species].map(x=>({...x}));
+
+    // replace middle (Normal) by stage-specific when not adult
+    if(stage!=='adult'){
+      const name = stageWord(species, stage, lang);
+      const f = STAGE_FACTORS[species][stage];
+      base[1].label = `${name} (${f.toFixed(1)})`;
+      base[1].value = f;
+    }
+    base.forEach((f,i)=>{
       const w = document.createElement('label');
       w.className = 'label-inline';
       w.innerHTML = `<input type="radio" name="factor" value="${f.value}" ${i===1?'checked':''} aria-label="${f.label}"><span>${f.label}</span>`;
       box.appendChild(w);
     });
+
+    // refresh hint text
+    const hint = $('#stageHint');
+    if(hint){
+      const tpl = I18N[lang]?.calc?.stageHint || I18N.en.calc.stageHint;
+      const name = stageWord(species, stage, lang);
+      const fv = (stage==='adult') ? base[1].value : STAGE_FACTORS[species][stage];
+      hint.textContent = tpl.replace('{stage}', name).replace('{factor}', fv.toFixed(1));
+    }
   }
 
   function pow075(x){ return Math.pow(x, 0.75); }
   function clamp(x,a,b){ return Math.min(b, Math.max(a,x)); }
-
   function isNum(n){ return typeof n==='number' && !Number.isNaN(n) && Number.isFinite(n); }
 
   function currentFactor(){
@@ -402,51 +482,57 @@
   function calc(){
     const kg = parseFloat($('#wkg').value);
     const f = currentFactor();
-
-    if(!(kg>0) || !(f>0)) { $('#outRER').textContent='—'; $('#outMER').textContent='—'; $('#outG').textContent='—'; $('#outCups').textContent='—'; $('#estNote').hidden=true; return; }
-
+    if(!(kg>0) || !(f>0)) {
+      $('#outRER').textContent='—'; $('#outMER').textContent='—';
+      $('#outG').textContent='—';  $('#outCups').textContent='—';
+      $('#estNote').hidden=true; return;
+    }
     const RER = 70 * pow075(kg);
     const factor = clamp(f, SAFETY_MIN_FACTOR, SAFETY_MAX_FACTOR);
     const MER = RER * factor;
 
-    // density inputs
     const kcal100 = parseFloat($('#kcal100').value);
     const kcalCup = parseFloat($('#kcalCup').value);
     const gPerCup = parseFloat($('#gPerCup').value);
 
     let est = false;
     let kcalPerGram;
-
-    if(isNum(kcal100)){
-      kcalPerGram = kcal100/100;
-    } else if(isNum(kcalCup) && isNum(gPerCup)){
-      kcalPerGram = kcalCup / gPerCup;
-    } else {
-      kcalPerGram = KCAL_PER_100G_DEFAULT/100; // estimate
-      est = true;
-    }
+    if(isNum(kcal100))      kcalPerGram = kcal100/100;
+    else if(isNum(kcalCup) && isNum(gPerCup)) kcalPerGram = kcalCup / gPerCup;
+    else { kcalPerGram = KCAL_PER_100G_DEFAULT/100; est = true; }
 
     const gramsPerDay = MER / kcalPerGram;
 
-    // outputs
     $('#outRER').textContent = Math.round(RER).toLocaleString();
     $('#outMER').textContent = Math.round(MER).toLocaleString();
-
-    const gTxt = Math.round(gramsPerDay).toLocaleString() + (est?' (est.)':'');
-    $('#outG').textContent = gTxt;
-
+    $('#outG').textContent   = Math.round(gramsPerDay).toLocaleString() + (est?' (est.)':'');
     let cupsTxt = '—';
     if(isNum(gPerCup)){
       const cups = gramsPerDay / gPerCup;
       cupsTxt = (Math.round(cups*100)/100).toLocaleString() + (est?' (est.)':'');
     }
     $('#outCups').textContent = cupsTxt;
-
     $('#estNote').hidden = !est;
   }
 
   // events
-  $('#species')?.addEventListener('change', (e)=>{ renderFactors(e.target.value); calc(); });
+  $('#species')?.addEventListener('change', (e)=>{
+    const sp = e.target.value;
+    localStorage.setItem('species', sp);
+    renderStage(sp);
+    const st = $('#stage')?.value || 'adult';
+    renderFactors(sp, st);
+    calc();
+  });
+
+  $('#stage')?.addEventListener('change', (e)=>{
+    const sp = $('#species')?.value || 'dog';
+    const st = e.target.value || 'adult';
+    localStorage.setItem('stage', st);
+    renderFactors(sp, st);
+    calc();
+  });
+
   $('#wkg')?.addEventListener('input', calc);
   document.addEventListener('change', (e)=>{ if(e.target.name==='factor') calc(); });
   ['kcal100','kcalCup','gPerCup','customFactor'].forEach(id=> $('#'+id)?.addEventListener('input', calc));
@@ -475,45 +561,58 @@ Details:
     if(!location.hash) location.hash = '#home';
     route();
     initLang();
-    renderFactors($('#species').value);
+
+    const spSaved = localStorage.getItem('species');
+    const sp = spSaved || $('#species').value || 'dog';
+    $('#species').value = sp;
+
+    renderStage(sp);
+
+    const stSaved = localStorage.getItem('stage');
+    const st = (sp==='cat')
+      ? (['kitten','adult','senior'].includes(stSaved) ? stSaved : 'adult')
+      : (['puppy','adult','senior'].includes(stSaved)  ? stSaved : 'adult');
+    $('#stage').value = st;
+
+    renderFactors(sp, st);
     calc();
   })();
   </script>
 
   <!--
   DOC_SYNC_INDEX.md (append)
-
-  - 2025-10-05 — H-patch+custom/cups: add custom MER factor (guarded UI, "懂则改，不懂别动"); add optional density inputs (kcal/100g or kcal/cup + grams/cup); compute grams/day and cups/day precisely when provided; mark (est.) when using typical density.
+  - 2025-10-05 — H-patch+custom/cups: add custom MER factor ("懂则改，不懂别动"); optional density (kcal/100g or kcal/cup + grams/cup); precise grams/cups; show (est.) when using typical density.
+  - 2025-10-08 — life-stage: add Puppy/Kitten/Adult/Senior presets; map to mid radio option; i18n text & localStorage memory; router tolerates hash &v.
 
   .github/PULL_REQUEST_TEMPLATE.md (create)
-
   # PR Title
-  feat: feeding calc UX — Dog/Cat defaults + basis notes + custom factor & cups precision
+  feat: feeding calc UX — Dog/Cat defaults + basis notes + custom factor & cups precision + life-stage presets
 
   ## What
   - Calc: Dog/Cat defaults (Dog 1.6 / Cat 1.3), factor labels show values
-  - Basis & Notes (EN/zh), disclaimers
-  - 7-Day caution bolded
+  - Basis & Notes (EN/zh), disclaimers; 7-Day caution bolded
   - Copy: cups requirement note
-  - **New:** custom MER factor (checkbox + number), with guard copy
-  - **New:** optional density inputs (kcal/100g OR kcal/cup + g/cup) → precise grams/cups; show (est.) when using typical density
+  - Custom MER factor (guarded 0.8–6.0)
+  - Optional density inputs (kcal/100g OR kcal/cup + g/cup) → precise grams/cups; (est.) when typical density
+  - **New:** Life-stage presets (Puppy/Kitten/Adult/Senior) bound to mid option; i18n; localStorage
 
   ## Why
-  Improve trust & explainability; keep non-medical boundary; enable precision without forcing inputs.
+  Improve trust & explainability; enable precision; keep informational boundary.
 
   ## Checklist
-  - [ ] Language default is English (unless ?lang present)
-  - [ ] Routing OK (#home/#calc/#switch/#feedback)
+  - [ ] Default lang EN (unless ?lang)
+  - [ ] Routes OK (#home/#calc/#switch/#feedback)
   - [ ] Calc OK (RER=70×kg^0.75; MER=RER×factor)
   - [ ] Defaults OK (Dog 1.6 / Cat 1.3)
-  - [ ] Custom factor guarded & clamped (0.8–6.0)
-  - [ ] Cups logic only when grams/cup is known; otherwise '—'
+  - [ ] Life-stage presets map to mid option; labels show numeric factors
+  - [ ] Custom factor clamped 0.8–6.0
+  - [ ] Cups logic only with grams/cup; otherwise '—'
   - [ ] (est.) shown when typical density used
-  - [ ] SSH-signed commits (Verified); Squash merge
+  - [ ] SSH-signed commits; Squash merge
   - [ ] 404 compatibility retained; single-file SPA intact
 
   ## Screenshots
   (attach before/after)
   -->
 </body>
-</html> 
+</html>
