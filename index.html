@@ -25,9 +25,8 @@
     .langbox{flex:0 0 auto;display:flex;align-items:center;gap:8px}
     .langbox select{background:#0f1930;border:1px solid #24324f;color:var(--fg);border-radius:10px;padding:8px 10px;min-width:160px}
 
-    select,input,button{background:#0f1930;border:1px solid #24324f;color:var(--fg);border-radius:10px;padding:8px 10px}
+    select, input, button{background:#0f1930;border:1px solid #24324f;color:var(--fg);border-radius:10px;padding:8px 10px}
     input[type=number]{width:100%}
-
     .grid{display:grid;grid-template-columns:1fr;gap:14px}
     .card{background:var(--card);border:1px solid #1c2740;border-radius:16px;padding:16px}
     .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
@@ -42,19 +41,18 @@
     .footer{opacity:.9;font-size:.9em}
     hr{border:none;border-top:1px solid #1f2b44;margin:10px 0}
     .hint{font-size:.9em}
-    .label-inline{display:flex;align-items:center;gap:6px} /* 收紧单选圆点与文字间距 */
+    .label-inline{display:flex;align-items:flex-start;gap:10px}
+    .label-inline span{display:flex;flex-direction:column}
+    .factor-title{font-weight:700;font-size:1.15em}
+    .factor-sub{color:var(--muted);line-height:1.25em}
 
-    /* ===== 顶部三栏专用：统一宽高、齐头、等间距 ===== */
-    .topgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:end}
-    .form-field label{display:block;margin:0 0 6px 0;font-weight:600}
-    .form-field select,.form-field input{width:100%}
+    /* ====== 统一首行与密度三栏：等宽三列 + 固定间距（只作用在加了 .grid3 的行） ====== */
+    .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+    .grid3 > div{min-width:0}
+    .grid3 select,.grid3 input{width:100%}
+    @media (max-width:720px){.grid3{grid-template-columns:1fr}} /* 小屏单列 */
 
-    /* 只对 7-day 改为单列，保留卡片外观 */
-    #switch .grid{grid-template-columns:1fr}
-
-    @media (min-width:720px){
-      .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-    }
+    @media (min-width:720px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
   </style>
 </head>
 <body>
@@ -104,7 +102,6 @@
             </div>
           </div>
         </div>
-
         <div class="card">
           <h3 data-i18n="home.quick">Quick start</h3>
           <ol>
@@ -121,39 +118,35 @@
       <div class="card">
         <h2 data-i18n="calc.title">Feeding Calculator</h2>
 
-        <!-- 顶部三栏：统一尺寸/对齐 -->
-        <div class="topgrid" style="margin-top:6px">
-          <div class="form-field">
+        <!-- 顶部三控件：统一放进 grid3，三列等宽并留固定间距 -->
+        <div class="row grid3" style="margin-top:8px">
+          <div>
             <label for="species" data-i18n="calc.species">Species</label>
             <select id="species" aria-label="Species">
               <option value="dog">Dog</option>
               <option value="cat">Cat</option>
             </select>
           </div>
-
-          <div class="form-field">
+          <div>
             <label for="wkg" data-i18n="calc.weight">Weight (kg)</label>
             <input id="wkg" type="number" min="0" step="0.1" placeholder="10" />
           </div>
-
-          <div class="form-field">
-            <label for="lifeStage" data-i18n="calc.lifestage">Life stage</label>
-            <select id="lifeStage" aria-label="Life stage">
-              <option value="young">Puppy / Kitten</option>
-              <option value="adult">Adult</option>
-              <option value="senior">Senior</option>
+          <div>
+            <label for="life" data-i18n="calc.life">Life stage</label>
+            <select id="life" aria-label="Life stage">
+              <option value="puppy" data-i18n="calc.lifeP">Puppy / Kitten</option>
+              <option value="adult" data-i18n="calc.lifeA">Adult</option>
+              <option value="senior" data-i18n="calc.lifeS">Senior</option>
             </select>
           </div>
         </div>
 
         <div style="height:8px"></div>
-
         <fieldset class="card" style="padding:12px">
           <legend data-i18n="calc.activity">Activity / life stage (MER factor)</legend>
-          <div id="factors" class="row" role="radiogroup" aria-label="MER factor"></div>
+          <div id="factors" role="radiogroup" aria-label="MER factor" style="display:grid;gap:14px"></div>
           <p class="muted" data-i18n="calc.factorHint">Labels show the actual factor used.</p>
           <p class="hint muted" data-i18n="calc.infoTip">Info (i): RER=70×kg^0.75; MER=RER×factor. Factors are a starting point—adjust by body condition & stool; special stages/diseases: follow your vet.</p>
-
           <div class="row">
             <label class="label-inline"><input type="checkbox" id="useCustom"/> <span data-i18n="calc.customToggle">Use custom factor</span></label>
             <input id="customFactor" type="number" min="0.8" max="6" step="0.1" placeholder="1.6" disabled />
@@ -162,10 +155,11 @@
         </fieldset>
 
         <div style="height:8px"></div>
-
         <fieldset class="card" style="padding:12px">
           <legend data-i18n="calc.density">Optional: density for precise grams/cups</legend>
-          <div class="row">
+
+          <!-- 密度三控件：统一放进 grid3，三列等宽并留固定间距 -->
+          <div class="row grid3">
             <div>
               <label for="kcal100" data-i18n="calc.kcal100">kcal / 100 g</label>
               <input id="kcal100" type="number" min="1" step="1" placeholder="350" />
@@ -183,7 +177,6 @@
         </fieldset>
 
         <div style="height:8px"></div>
-
         <div class="grid">
           <div class="box card">
             <div class="muted">RER</div>
@@ -202,7 +195,6 @@
             <div class="mono" id="outCups" data-est="no">—</div>
           </div>
         </div>
-
         <p class="muted hint" id="estNote" hidden data-i18n="calc.estNote">Values marked (est.) are based on a typical density; use your bag’s numbers for precision.</p>
       </div>
 
@@ -228,7 +220,7 @@
       </details>
     </section>
 
-    <!-- 7-DAY SWITCH -->
+    <!-- 7-DAY SWITCH：保持原卡片风格；两列在大屏更紧凑，小屏自动单列 -->
     <section id="switch" class="route" hidden>
       <div class="card">
         <h2 data-i18n="switch.title">7-Day Gradual Switch</h2>
@@ -239,7 +231,7 @@
           <div class="card"><strong>Day 4</strong> — 60% / 40%</div>
           <div class="card"><strong>Day 5</strong> — 50% / 50%</div>
           <div class="card"><strong>Day 6</strong> — 30% / 70%</div>
-          <div class="card"><strong>Day 7</strong> — 10% / 90%</div>
+          <div class="card" style="grid-column:1/-1"><strong>Day 7</strong> — 10% / 90%</div>
         </div>
         <p class="warning"><strong data-i18n="switch.caution">If stool is soft or pet seems unwell, <u>hold that day or step back one day</u>, then continue after recovery.</strong></p>
       </div>
@@ -267,62 +259,90 @@
   <script>
   // ---------- i18n ----------
   const I18N = {
-    en:{nav:{home:"Home",calc:"Calc",switch:"7-Day",feedback:"Feedback"},
-        ui:{lang:"Language"},
-        home:{title:"Feeding & Switch Helper",pitch:"Informational tool for the U.S. market: turn pet food / grooming labels into actionable guidance. Not medical advice.",kcal:"RER/MER transparent",i18n:"Multi-language",mode:"Single-file SPA",quick:"Quick start",q1:"Go to Calc → enter weight (kg) → pick species & activity factor.",q2:"Review kcal/day and grams/day. Cups/day requires density info from the bag.",q3:"See 7-Day gradual switch plan. If stool soft or upset → hold or step back."},
-        calc:{title:"Feeding Calculator",species:"Species",weight:"Weight (kg)",lifestage:"Life stage",
-              activity:"Activity / life stage (MER factor)",factorHint:"Labels show the actual factor used.",
-              infoTip:"Info (i): RER=70×kg^0.75; MER=RER×factor. Factors are a starting point—adjust by body condition & stool; special stages/diseases: follow your vet.",
-              grams:"Grams/day",cups:"Cups/day",
-              cupsNote:"Cups calculation needs the food energy density (kcal/100g or kcal/cup) and grams per cup (often on the bag). If unknown, rely on grams/day first.",
-              density:"Optional: density for precise grams/cups",
-              kcal100:"kcal / 100 g",kcalCup:"kcal / cup",gPerCup:"grams / cup",
-              customToggle:"Use custom factor",customHint:"Only change if you know what you’re doing (懂则改，不懂别动)。",
-              estNote:"Values marked (est.) are based on a typical density; use your bag’s numbers for precision."},
-        switch:{title:"7-Day Gradual Switch",caution:"If stool is soft or pet seems unwell, hold that day or step back one day, then continue after recovery."},
-        fb:{title:"Feedback",note:"Choose a category and send us details. No personal health data, please.",send:"Send mail",opt:{calc:"Calculator",copy:"Copy/Basis & Notes",switch:"7-Day Switch",bug:"Bug",idea:"Idea"}}},
-    zh:{nav:{home:"首页",calc:"计算",switch:"7天换粮",feedback:"反馈"},
-        ui:{lang:"语言"},
-        home:{title:"喂养与换粮助手",pitch:"面向美国市场的信息性工具：把宠物食品/洗护标签转成可执行建议。非医疗建议。",kcal:"RER/MER 透明可解释",i18n:"多语言",mode:"单文件 SPA",quick:"快速开始",q1:"进入 计算 → 输入体重(kg) → 选择物种与活动系数。",q2:"查看 kcal/日 与 g/日。Cups/日 需要包装上的能量密度与每杯克数。",q3:"查看 7 天渐进换粮。如便便偏软或不适 → 保持当日或倒回一天。"},
-        calc:{title:"喂养计算器",species:"物种",weight:"体重(kg)",lifestage:"生命周期",
-              activity:"活动/阶段（MER 系数）",factorHint:"选项名称直接展示所用系数。",
-              infoTip:"提示（i）：RER=70×kg^0.75；MER=RER×系数。系数仅为起点，应结合体况/便便微调；特殊阶段/疾病遵从兽医。",
-              grams:"克/日",cups:"杯/日",
-              cupsNote:"计算杯数需要食品能量密度（kcal/100g 或 kcal/cup）与每杯克数（常见在包装袋上）；若未知，请先以 g/日 为准。",
-              density:"可选：用于精算克/杯的密度参数",
-              kcal100:"kcal / 100 g",kcalCup:"kcal / 杯",gPerCup:"克 / 杯",
-              customToggle:"自定义系数",customHint:"懂则改，不懂别动。",
-              estNote:"标注 (估) 的数值基于典型密度；使用包装标注可获得更精确结果。"},
-        switch:{title:"7天渐进换粮",caution:"若便便偏软或不适，请保持当日或倒回一天，恢复后再继续。"},
-        fb:{title:"反馈",note:"请选择分类并通过邮件发送问题/建议。请勿提交个人健康信息。",send:"发送邮件",opt:{calc:"计算器",copy:"文案/依据与说明",switch:"7天换粮",bug:"缺陷",idea:"想法"}}},
-    es:{nav:{home:"Inicio",calc:"Cálculo",switch:"7 días",feedback:"Feedback"},
-        ui:{lang:"Idioma"},
-        home:{title:"Asistente de alimentación y cambio",pitch:"Herramienta informativa: convierte etiquetas en orientación accionable. No es consejo médico.",kcal:"RER/MER transparente",i18n:"Multi-idioma",mode:"SPA de un solo archivo",quick:"Inicio rápido",q1:"Ir a Cálculo → peso (kg) → especie y factor.",q2:"Revisa kcal/día y g/día. Las tazas requieren la densidad del alimento.",q3:"Plan de cambio gradual de 7 días. Si hay heces blandas → mantener o retroceder."},
-        calc:{title:"Calculadora de alimentación",species:"Especie",weight:"Peso (kg)",lifestage:"Etapa de vida",
-              activity:"Actividad / etapa (factor MER)",factorHint:"Las etiquetas muestran el factor usado.",
-              infoTip:"Info (i): RER=70×kg^0.75; MER=RER×factor. Punto de partida—ajustar por condición corporal y heces; etapas especiales/enfermedades: sigue a tu veterinario.",
-              grams:"Gramos/día",cups:"Tazas/día",
-              cupsNote:"Las tazas requieren densidad energética y gramos por taza. Si es desconocido, usa g/día.",
-              density:"Opcional: densidad para precisión",
-              kcal100:"kcal / 100 g",kcalCup:"kcal / taza",gPerCup:"gramos / taza",
-              customToggle:"Factor personalizado",customHint:"Cámbialo sólo si sabes lo que haces.",
-              estNote:"(est.) usa densidad típica; usa tu bolsa para precisión."},
-        switch:{title:"Cambio gradual 7 días",caution:"Si hay heces blandas o malestar, mantén el día o retrocede uno, y continúa tras mejorar."},
-        fb:{title:"Comentarios",note:"Elige una categoría y envíanos detalles. Sin datos de salud personal, por favor.",send:"Enviar correo",opt:{calc:"Calculadora",copy:"Texto/Basis & Notes",switch:"Cambio 7 días",bug:"Error",idea:"Idea"}}},
-    fr:{nav:{home:"Accueil",calc:"Calcul",switch:"7 jours",feedback:"Avis"},
-        ui:{lang:"Langue"},
-        home:{title:"Assistant d'alimentation & transition",pitch:"Outil informatif : transformer les étiquettes en conseils actionnables. Pas un avis médical.",kcal:"RER/MER transparent",i18n:"Multilingue",mode:"SPA fichier unique",quick:"Démarrage rapide",q1:"Aller à Calcul → poids (kg) → espèce & facteur.",q2:"Vérifier kcal/jour et g/jour. Les tasses nécessitent la densité du sac.",q3:"Plan de transition sur 7 jours. Selles molles ? Maintenir ou revenir d'une étape."},
-        calc:{title:"Calculateur d'alimentation",species:"Espèce",weight:"Poids (kg)",lifestage:"Stade de vie",
-              activity:"Activité / stade (facteur MER)",factorHint:"Les étiquettes affichent le facteur utilisé.",
-              infoTip:"Info (i) : RER=70×kg^0,75 ; MER=RER×facteur. Point de départ—ajuster selon l'état corporel & les selles ; stades spéciaux/maladies : suivre votre vétérinaire.",
-              grams:"Grammes/jour",cups:"Tasses/jour",
-              cupsNote:"Le calcul des tasses nécessite la densité énergétique et les grammes par tasse. Sinon, fiez-vous aux g/jour.",
-              density:"Optionnel : densité pour précision",
-              kcal100:"kcal / 100 g",kcalCup:"kcal / tasse",gPerCup:"grammes / tasse",
-              customToggle:"Facteur personnalisé",customHint:"Ne changez que si nécessaire.",
-              estNote:"(est.) basé sur densité typique ; utilisez les données du sac pour la précision."},
-        switch:{title:"Transition 7 jours",caution:"Si selles molles ou malaise, maintenir la journée ou revenir d'un jour, puis poursuivre."},
-        fb:{title:"Retour",note:"Choisissez une catégorie et envoyez-nous les détails. Pas de données de santé personnelles.",send:"Envoyer un mail",opt:{calc:"Calculateur",copy:"Texte/Basis & Notes",switch:"Transition 7 jours",bug:"Anomalie",idea:"Idée"}}}
+    en: {
+      nav:{home:"Home",calc:"Calc",switch:"7-Day",feedback:"Feedback"},
+      ui:{lang:"Language"},
+      home:{title:"Feeding & Switch Helper",pitch:"Informational tool for the U.S. market: turn pet food / grooming labels into actionable guidance. Not medical advice.",kcal:"RER/MER transparent",i18n:"Multi-language",mode:"Single-file SPA",quick:"Quick start",q1:"Go to Calc → enter weight (kg) → pick species & activity factor.",q2:"Review kcal/day and grams/day. Cups/day requires density info from the bag.",q3:"See 7-Day gradual switch plan. If stool soft or upset → hold or step back."},
+      calc:{
+        title:"Feeding Calculator",species:"Species",weight:"Weight (kg)",life:"Life stage",
+        lifeP:"Puppy / Kitten",lifeA:"Adult",lifeS:"Senior",
+        activity:"Activity / life stage (MER factor)",
+        factorHint:"Labels show the actual factor used.",
+        infoTip:"Info (i): RER=70×kg^0.75; MER=RER×factor. Factors are a starting point—adjust by body condition & stool; special stages/diseases: follow your vet.",
+        grams:"Grams/day",cups:"Cups/day",
+        cupsNote:"Cups calculation needs the food energy density (kcal/100g or kcal/cup) and grams per cup (often on the bag). If unknown, rely on grams/day first.",
+        density:"Optional: density for precise grams/cups",
+        kcal100:"kcal / 100 g",kcalCup:"kcal / cup",gPerCup:"grams / cup",
+        customToggle:"Use custom factor",
+        customHint:"Only change if you know what you’re doing (懂则改，不懂别动)。",
+        estNote:"Values marked (est.) are based on a typical density; use your bag’s numbers for precision."
+      },
+      switch:{title:"7-Day Gradual Switch",caution:"If stool is soft or pet seems unwell, hold that day or step back one day, then continue after recovery."},
+      fb:{title:"Feedback",note:"Choose a category and send us details. No personal health data, please.",send:"Send mail",opt:{calc:"Calculator",copy:"Copy/Basis & Notes",switch:"7-Day Switch",bug:"Bug",idea:"Idea"}},
+    },
+    zh: {
+      nav:{home:"首页",calc:"计算",switch:"7天换粮",feedback:"反馈"},
+      ui:{lang:"语言"},
+      home:{title:"喂养与换粮助手",pitch:"面向美国市场的信息性工具：把宠物食品/洗护标签转成可执行建议。非医疗建议。",kcal:"RER/MER 透明可解释",i18n:"多语言",mode:"单文件 SPA",quick:"快速开始",q1:"进入 计算 → 输入体重(kg) → 选择物种与活动系数。",q2:"查看 kcal/日 与 g/日。Cups/日 需要包装上的能量密度与每杯克数。",q3:"查看 7 天渐进换粮。如便便偏软或不适 → 保持当日或倒回一天。"},
+      calc:{
+        title:"喂养计算器",species:"物种",weight:"体重(kg)",life:"生命周期",
+        lifeP:"幼年",lifeA:"成年",lifeS:"老年",
+        activity:"活动/阶段（MER 系数）",
+        factorHint:"选项名称直接展示所用系数。",
+        infoTip:"提示（i）：RER=70×kg^0.75；MER=RER×系数。系数仅为起点，应结合体况/便便微调；特殊阶段/疾病遵从兽医。",
+        grams:"克/日",cups:"杯/日",
+        cupsNote:"计算杯数需要食品能量密度（kcal/100g 或 kcal/cup）与每杯克数（常见在包装袋上）；若未知，请先以 g/日 为准。",
+        density:"可选：用于精算克/杯的密度参数",
+        kcal100:"kcal / 100 g",kcalCup:"kcal / 杯",gPerCup:"克 / 杯",
+        customToggle:"自定义系数",
+        customHint:"懂则改，不懂别动。",
+        estNote:"标注 (估) 的数值基于典型密度；使用包装标注可获得更精确结果。"
+      },
+      switch:{title:"7天渐进换粮",caution:"若便便偏软或不适，请保持当日或倒回一天，恢复后再继续。"},
+      fb:{title:"反馈",note:"请选择分类并通过邮件发送问题/建议。请勿提交个人健康信息。",send:"发送邮件",opt:{calc:"计算器",copy:"文案/依据与说明",switch:"7天换粮",bug:"缺陷",idea:"想法"}},
+    },
+    es: {
+      nav:{home:"Inicio",calc:"Cálculo",switch:"7 días",feedback:"Feedback"},
+      ui:{lang:"Idioma"},
+      home:{title:"Asistente de alimentación y cambio",pitch:"Herramienta informativa: convierte etiquetas en orientación accionable. No es consejo médico.",kcal:"RER/MER transparente",i18n:"Multi-idioma",mode:"SPA de un solo archivo",quick:"Inicio rápido",q1:"Ir a Cálculo → peso (kg) → especie y factor.",q2:"Revisa kcal/día y g/día. Las tazas requieren la densidad del alimento.",q3:"Plan de cambio gradual de 7 días. Si hay heces blandas → mantener o retroceder."},
+      calc:{
+        title:"Calculadora de alimentación",species:"Especie",weight:"Peso (kg)",life:"Etapa de vida",
+        lifeP:"Cachorro / Gatito",lifeA:"Adulto",lifeS:"Senior",
+        activity:"Actividad / etapa (factor MER)",
+        factorHint:"Las etiquetas muestran el factor usado.",
+        infoTip:"Info (i): RER=70×kg^0.75; MER=RER×factor. Punto de partida—ajustar por condición corporal y heces; etapas especiales/enfermedades: sigue a tu veterinario.",
+        grams:"Gramos/día",cups:"Tazas/día",
+        cupsNote:"Las tazas requieren densidad energética (kcal/100g o kcal/taza) y gramos por taza. Si es desconocido, usa g/día.",
+        density:"Opcional: densidad para precisión",
+        kcal100:"kcal / 100 g",kcalCup:"kcal / taza",gPerCup:"gramos / taza",
+        customToggle:"Factor personalizado",
+        customHint:"Cámbialo sólo si sabes lo que haces.",
+        estNote:"(est.) usa densidad típica; usa tu bolsa para precisión."
+      },
+      switch:{title:"Cambio gradual 7 días",caution:"Si hay heces blandas o malestar, mantén el día o retrocede uno, y continúa tras mejorar."},
+      fb:{title:"Comentarios",note:"Elige una categoría y envíanos detalles. Sin datos de salud personal, por favor.",send:"Enviar correo",opt:{calc:"Calculadora",copy:"Texto/Basis & Notes",switch:"Cambio 7 días",bug:"Error",idea:"Idea"}},
+    },
+    fr: {
+      nav:{home:"Accueil",calc:"Calcul",switch:"7 jours",feedback:"Avis"},
+      ui:{lang:"Langue"},
+      home:{title:"Assistant d'alimentation & transition",pitch:"Outil informatif : transformer les étiquettes en conseils actionnables. Pas un avis médical.",kcal:"RER/MER transparent",i18n:"Multilingue",mode:"SPA fichier unique",quick:"Démarrage rapide",q1:"Aller à Calcul → poids (kg) → espèce & facteur.",q2:"Vérifier kcal/jour et g/jour. Les tasses nécessitent la densité du sac.",q3:"Plan de transition sur 7 jours. Selles molles ? Maintenir ou revenir d'une étape."},
+      calc:{
+        title:"Calculateur d'alimentation",species:"Espèce",weight:"Poids (kg)",life:"Stade de vie",
+        lifeP:"Chiot / Chaton",lifeA:"Adulte",lifeS:"Senior",
+        activity:"Activité / stade (facteur MER)",
+        factorHint:"Les étiquettes affichent le facteur utilisé.",
+        infoTip:"Info (i) : RER=70×kg^0,75 ; MER=RER×facteur. Point de départ—ajuster selon l'état corporel & les selles ; stades spéciaux/maladies : suivre votre vétérinaire.",
+        grams:"Grammes/jour",cups:"Tasses/jour",
+        cupsNote:"Le calcul des tasses nécessite la densité énergétique et les grammes par tasse. Sinon, fiez-vous aux g/jour.",
+        density:"Optionnel : densité pour précision",
+        kcal100:"kcal / 100 g",kcalCup:"kcal / tasse",gPerCup:"grammes / tasse",
+        customToggle:"Facteur personnalisé",
+        customHint:"Ne changez que si nécessaire.",
+        estNote:"(est.) basé sur densité typique ; utilisez les données du sac pour la précision."
+      },
+      switch:{title:"Transition 7 jours",caution:"Si selles molles ou malaise, maintenir la journée ou revenir d'un jour, puis poursuivre."},
+      fb:{title:"Retour",note:"Choisissez une catégorie et envoyez-nous les détails. Pas de données de santé personnelles.",send:"Envoyer un mail",opt:{calc:"Calculateur",copy:"Texte/Basis & Notes",switch:"Transition 7 jours",bug:"Anomalie",idea:"Idée"}},
+    }
   };
 
   const $ = (s, r=document) => r.querySelector(s);
@@ -331,9 +351,9 @@
   // ---------- Router ----------
   function route(){
     const hash = (location.hash || '#home').split('&')[0];
-    $$('#home,#calc,#switch,#feedback').forEach(sec=>sec.hidden=true);
+    $$('#home, #calc, #switch, #feedback').forEach(sec=>sec.hidden=true);
     const el = $(hash);
-    if(el) el.hidden=false;
+    if(el) el.hidden = false;
     $$('nav a').forEach(a=>a.classList.toggle('active', a.getAttribute('href')===hash));
   }
   window.addEventListener('hashchange', route);
@@ -343,80 +363,112 @@
     const lang = I18N[l] ? l : 'en';
     localStorage.setItem('lang', lang);
     document.documentElement.lang = lang;
+    // translate
     $$('[data-i18n]').forEach(node=>{
       const path = node.getAttribute('data-i18n').split('.');
       let cur = I18N[lang];
       for(const k of path){ cur = cur?.[k]; }
       if(typeof cur === 'string') node.textContent = cur;
     });
-    // 生命阶段下拉的 3 个文案
-    const stageSel = $('#lifeStage');
-    const map = {
-      en:['Puppy / Kitten','Adult','Senior'],
-      zh:['幼年','成年','老年'],
-      es:['Cachorro / Gatito','Adulto','Senior'],
-      fr:['Chiot / Chaton','Adulte','Sénior']
-    };
-    const arr = map[lang]||map.en;
-    stageSel.options[0].textContent = arr[0];
-    stageSel.options[1].textContent = arr[1];
-    stageSel.options[2].textContent = arr[2];
-    renderFactors($('#species').value, $('#lifeStage').value); // 让年龄提示随语言刷新
+    // 重新渲染因子（要带多语言副标题）
+    renderFactors($('#species').value, $('#life').value, lang);
   }
+
   function initLang(){
-    const ql = new URLSearchParams(location.search).get('lang');
+    const params = new URLSearchParams(location.search);
+    const ql = params.get('lang');
     const lang = ql || 'en';
     $('#langSel').value = I18N[lang] ? lang : 'en';
     setLang($('#langSel').value);
   }
+
   $('#langSel')?.addEventListener('change', e=> setLang(e.target.value));
 
   // ---------- Calc ----------
   const KCAL_PER_100G_DEFAULT = 350;
   const SAFETY_MIN_FACTOR = 0.8, SAFETY_MAX_FACTOR = 6.0;
 
-  // 年龄提示（仅展示）
-  function ageHint(species, stage){
-    if(stage==='young') return '~0–12 mo';
-    if(stage==='senior') return species==='cat' ? '≥11 y' : '≥7–8 y (size dependent)';
-    return '~1–7 y (size dependent)';
-  }
-
-  const SPECIES_FACTORS = {
-    dog: [
-      {key:'rest',   label:'Resting (1.2)', value:1.2},
-      {key:'normal', label:'Normal (2.5)',  value:2.5},
-      {key:'active', label:'Active (3)',    value:3.0},
-    ],
-    cat: [
-      {key:'rest',   label:'Resting (1.0)', value:1.0},
-      {key:'normal', label:'Normal (1.3)',  value:1.3},
-      {key:'active', label:'Active (1.6)',  value:1.6},
-    ],
+  // 年龄提示（仅副标题用）
+  const AGE_HINTS = {
+    dog:{
+      puppy:{en:"~0–12 mo (sm/med), 0–18 mo (lg/giant)", zh:"~0–12 月（小/中），0–18 月（大/巨）", es:"~0–12 m (peq/med), 0–18 m (grande/gigante)", fr:"~0–12 mois (pet/moy), 0–18 mois (gr/géant)"},
+      adult:{en:"~1–7 y (size dependent)", zh:"~1–7 岁（随体型）", es:"~1–7 años (según talla)", fr:"~1–7 ans (selon taille)"},
+      senior:{en:"~≥7–8 y (size dependent)", zh:"~≥7–8 岁（随体型）", es:"~≥7–8 años (según talla)", fr:"~≥7–8 ans (selon taille)"},
+    },
+    cat:{
+      puppy:{en:"~0–12 mo", zh:"~0–12 月", es:"~0–12 m", fr:"~0–12 mois"},
+      adult:{en:"~1–7 y", zh:"~1–7 岁", es:"~1–7 años", fr:"~1–7 ans"},
+      senior:{en:"~≥11 y", zh:"~≥11 岁", es:"~≥11 años", fr:"~≥11 ans"},
+    }
   };
 
-  function renderFactors(species='dog', stage='adult'){
+  // 因子表（不同物种+阶段）
+  function factorsFor(species, stage){
+    if(species==='dog'){
+      if(stage==='puppy'){
+        return [
+          {k:'rest',v:1.2,t:'Resting (1.2)'},
+          {k:'norm',v:2.5,t:'Normal (2.5)'},
+          {k:'act', v:3.0,t:'Active (3)'},
+        ];
+      }else if(stage==='senior'){
+        return [
+          {k:'rest',v:1.0,t:'Resting (1.0)'},
+          {k:'norm',v:1.3,t:'Normal (1.3)'},
+          {k:'act', v:1.5,t:'Active (1.5)'},
+        ];
+      }
+      // adult
+      return [
+        {k:'rest',v:1.2,t:'Resting (1.2)'},
+        {k:'norm',v:1.6,t:'Normal (1.6)'},
+        {k:'act', v:2.0,t:'Active (2.0)'},
+      ];
+    }else{ // cat
+      if(stage==='puppy'){
+        return [
+          {k:'rest',v:1.0,t:'Resting (1.0)'},
+          {k:'norm',v:1.3,t:'Normal (1.3)'},
+          {k:'act', v:1.6,t:'Active (1.6)'},
+        ];
+      }else if(stage==='senior'){
+        return [
+          {k:'rest',v:1.0,t:'Resting (1.0)'},
+          {k:'norm',v:1.2,t:'Normal (1.2)'},
+          {k:'act', v:1.4,t:'Active (1.4)'},
+        ];
+      }
+      // adult
+      return [
+        {k:'rest',v:1.0,t:'Resting (1.0)'},
+        {k:'norm',v:1.3,t:'Normal (1.3)'},
+        {k:'act', v:1.6,t:'Active (1.6)'},
+      ];
+    }
+  }
+
+  function renderFactors(species='dog', stage='adult', lang=document.documentElement.lang||'en'){
     const box = $('#factors');
     box.innerHTML = '';
-    const hint = ageHint(species, stage);
-    SPECIES_FACTORS[species].forEach((f,i)=>{
-      const w = document.createElement('label');
-      w.className = 'label-inline';
-      w.style.alignItems='flex-start';
-      w.style.flex='1 1 260px';
-      w.innerHTML = `
-        <input type="radio" name="factor" value="${f.value}" ${i===1?'checked':''} aria-label="${f.label}">
-        <div>
-          <div style="font-weight:700">${f.label}</div>
-          <div class="muted" style="margin-top:2px">${hint}</div>
-        </div>`;
-      box.appendChild(w);
+    const fs = factorsFor(species, stage);
+    const sub = AGE_HINTS[species][stage][lang] || '';
+    fs.forEach((f,i)=>{
+      const lab = document.createElement('label');
+      lab.className = 'label-inline';
+      lab.innerHTML = `
+        <input type="radio" name="factor" value="${f.value||f.v}" ${i===1?'checked':''} aria-label="${f.t}">
+        <span>
+          <span class="factor-title">${f.t}</span>
+          <span class="factor-sub">${sub}</span>
+        </span>
+      `;
+      box.appendChild(lab);
     });
   }
 
-  const pow075 = x => Math.pow(x,0.75);
-  const clamp = (x,a,b) => Math.min(b,Math.max(a,x));
-  const isNum = n => typeof n==='number' && !Number.isNaN(n) && Number.isFinite(n);
+  function pow075(x){ return Math.pow(x, 0.75); }
+  function clamp(x,a,b){ return Math.min(b, Math.max(a,x)); }
+  function isNum(n){ return typeof n==='number' && !Number.isNaN(n) && Number.isFinite(n); }
 
   function currentFactor(){
     const useCustom = $('#useCustom').checked;
@@ -430,12 +482,14 @@
 
   function calc(){
     const kg = parseFloat($('#wkg').value);
-    const f  = currentFactor();
+    const f = currentFactor();
+
     if(!(kg>0) || !(f>0)) {
       $('#outRER').textContent='—'; $('#outMER').textContent='—';
       $('#outG').textContent='—'; $('#outCups').textContent='—';
       $('#estNote').hidden=true; return;
     }
+
     const RER = 70 * pow075(kg);
     const factor = clamp(f, SAFETY_MIN_FACTOR, SAFETY_MAX_FACTOR);
     const MER = RER * factor;
@@ -444,15 +498,22 @@
     const kcalCup = parseFloat($('#kcalCup').value);
     const gPerCup = parseFloat($('#gPerCup').value);
 
-    let est=false, kcalPerGram;
-    if(isNum(kcal100))       kcalPerGram = kcal100/100;
-    else if(isNum(kcalCup) && isNum(gPerCup)) kcalPerGram = kcalCup/gPerCup;
-    else { kcalPerGram = KCAL_PER_100G_DEFAULT/100; est=true; }
+    let est = false;
+    let kcalPerGram;
+
+    if(isNum(kcal100)){
+      kcalPerGram = kcal100/100;
+    } else if(isNum(kcalCup) && isNum(gPerCup)){
+      kcalPerGram = kcalCup / gPerCup;
+    } else {
+      kcalPerGram = KCAL_PER_100G_DEFAULT/100;
+      est = true;
+    }
 
     const gramsPerDay = MER / kcalPerGram;
 
     $('#outRER').textContent = Math.round(RER).toLocaleString();
-    '#outMER'; $('#outMER').textContent = Math.round(MER).toLocaleString();
+    $('#outMER').textContent = Math.round(MER).toLocaleString();
 
     const gTxt = Math.round(gramsPerDay).toLocaleString() + (est?' (est.)':'');
     $('#outG').textContent = gTxt;
@@ -463,16 +524,17 @@
       cupsTxt = (Math.round(cups*100)/100).toLocaleString() + (est?' (est.)':'');
     }
     $('#outCups').textContent = cupsTxt;
+
     $('#estNote').hidden = !est;
   }
 
   // events
-  $('#species')?.addEventListener('change', e=>{ renderFactors(e.target.value, $('#lifeStage').value); calc(); });
-  $('#lifeStage')?.addEventListener('change', ()=>{ renderFactors($('#species').value, $('#lifeStage').value); });
+  $('#species')?.addEventListener('change', (e)=>{ renderFactors(e.target.value, $('#life').value); calc(); });
+  $('#life')?.addEventListener('change', ()=>{ renderFactors($('#species').value, $('#life').value); calc(); });
   $('#wkg')?.addEventListener('input', calc);
-  document.addEventListener('change', e=>{ if(e.target.name==='factor') calc(); });
+  document.addEventListener('change', (e)=>{ if(e.target.name==='factor') calc(); });
   ['kcal100','kcalCup','gPerCup','customFactor'].forEach(id=> $('#'+id)?.addEventListener('input', calc));
-  $('#useCustom')?.addEventListener('change', e=>{
+  $('#useCustom')?.addEventListener('change', (e)=>{
     const on = e.target.checked;
     $('#customFactor').disabled = !on;
     if(on){ $$('input[name="factor"]').forEach(r=> r.checked=false); }
@@ -497,7 +559,7 @@ Details:
     if(!location.hash) location.hash = '#home';
     route();
     initLang();
-    renderFactors($('#species').value, $('#lifeStage').value);
+    renderFactors($('#species').value, $('#life').value);
     calc();
   })();
   </script>
