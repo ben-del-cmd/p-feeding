@@ -1,4 +1,4 @@
-<!-- deploy: 2025-10-06 · hotfix-20251006c -->
+<!-- deploy: 2025-10-06 · hotfix-20251006d (forms spacing & width) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -41,31 +41,41 @@
     hr{border:none;border-top:1px solid #1f2b44;margin:10px 0}
     .hint{font-size:.9em}
     .label-inline{display:flex;align-items:center;gap:8px}
-    /* ===== hotfix: 固定三栏宽度与间距（顶部 + 密度 + 因子） ===== */
-    #calc .top-row{
+    /* ===== v1.2.3 forms hotfix: compact grid & max widths (scoped to #calc) ===== */
+    #calc .form-grid{
       display:grid;
-      grid-template-columns: repeat(3, minmax(220px, 1fr));
-      grid-column-gap:16px;
-      grid-row-gap:8px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap:14px 16px;           /* row-gap / col-gap */
       align-items:end;
     }
-    #calc .top-row > *{display:flex;flex-direction:column;}
-    #calc .density-row{
-      display:grid;
-      grid-template-columns: repeat(3, minmax(220px, 1fr));
-      grid-column-gap:16px;
-      grid-row-gap:8px;
-      align-items:end;
+    #calc .form-grid > *{      /* label+input 垂直字段组 */
+      display:flex;
+      flex-direction:column;
+      gap:6px;                 /* 标签与输入之间的间距 */
+      min-width:0;
     }
-    #calc .density-row > *{display:flex;flex-direction:column;}
+    #calc input, #calc select, #calc textarea{
+      width:100%;
+      max-width:420px;         /* 防止通栏过宽 */
+    }
+    /* 因子选择区：卡片化、自动换行 */
     #calc .factor-row{
       display:grid;
-      grid-template-columns: repeat(3, minmax(220px, 1fr));
-      grid-column-gap:16px;
-      grid-row-gap:16px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap:12px 14px;
+      align-items:stretch;
     }
-    #calc .factor-row .label-inline{align-items:flex-start;gap:8px}
-    /* 7-Day 单列显示 */
+    #calc .factor-row .label-inline{
+      align-items:flex-start;
+      gap:10px;
+      padding:10px;
+      border:1px solid #24324f;
+      border-radius:10px;
+      background:#0f1930;
+    }
+    /* 卡片之间增加呼吸 */
+    #calc .card + .card{ margin-top:16px; }
+    /* 7-Day 单列显示（保持原有设定） */
     #switch .grid{grid-template-columns:1fr}
     @media (min-width:720px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
   </style>
@@ -133,8 +143,8 @@
       <div class="card">
         <h2 data-i18n="calc.title">Feeding Calculator</h2>
 
-        <!-- 顶部三栏：加入 top-row 固定等宽&间距 -->
-        <div class="top-row">
+        <!-- 顶部字段区：自适应 1–3 列 -->
+        <div class="form-grid top-row">
           <div>
             <label for="species" data-i18n="calc.species">Species</label>
             <select id="species" aria-label="Species">
@@ -161,7 +171,7 @@
         <fieldset class="card" style="padding:12px">
           <legend data-i18n="calc.activity">Activity / life stage (MER factor)</legend>
 
-          <!-- 因子三列：加入 factor-row -->
+          <!-- 因子区：卡片化标签，自适应列数 -->
           <div id="factors" class="factor-row" role="radiogroup" aria-label="MER factor"></div>
 
           <p class="muted" data-i18n="calc.factorHint">Labels show the actual factor used.</p>
@@ -179,8 +189,8 @@
         <fieldset class="card" style="padding:12px">
           <legend data-i18n="calc.density">Optional: density for precise grams/cups</legend>
 
-          <!-- 密度三栏：加入 density-row -->
-          <div class="density-row">
+          <!-- 密度区：自适应 1–3 列 -->
+          <div class="form-grid density-row">
             <div>
               <label for="kcal100" data-i18n="calc.kcal100">kcal / 100 g</label>
               <input id="kcal100" type="number" min="1" step="1" placeholder="350" />
@@ -527,7 +537,7 @@ Details:
 
   <!--
   DOC_SYNC_INDEX.md (append)
-  - 2025-10-06 — hotfix-20251006c: add CSS grids (.top-row/.density-row/.factor-row) to fix spacing & equal widths; keep layout stable; 7-Day single column.
+  - 2025-10-06 — hotfix-20251006d: Add #calc-scoped auto-fit grids (.form-grid / .factor-row), field gap, and control max-width to fix long/spacing issues; no structural/JS changes; 7-Day stays single column.
   -->
 </body>
 </html>
