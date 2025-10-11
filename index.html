@@ -1,4 +1,4 @@
-<!-- deploy: 2025-10-06 · hotfix-20251006i (remember last selections; add reset button; no logic change) -->
+<!-- deploy: 2025-10-06 · hotfix-20251006i (custom-factor default + light persistence) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -61,24 +61,23 @@ hr{border:none;border-top:1px solid #1f2b44;margin:10px 0}
   align-items:flex-start;gap:10px;padding:12px;background:#0f1930;border:1px solid #24324f;border-radius:12px;
 }
 
-/* hotfix-20251006f：让圆点更贴近文字、更靠左、更紧凑（仅视觉微调） */
+/* --- hotfix-20251006f：让圆点更贴近文字、更靠左、更紧凑（仅视觉微调） --- */
 #calc .factor-row .label-inline{
-  display:grid;                 /* 覆盖为两列网格：圆点 + 文本 */
+  display:grid;                 /* 圆点 + 文本 两列网格 */
   grid-template-columns:auto 1fr;
   align-items:center;
-  gap:8px;                      /* 圆点与文字间距（原 10px） */
-  padding:10px 12px;            /* 稍微收紧内边距（原 12px） */
+  gap:8px;
+  padding:10px 12px;
 }
-#calc .factor-row input[type="radio"]{ margin:0; transform:translateY(-1px); }
+#calc .factor-row input[type="radio"]{margin:0;transform:translateY(-1px)}
 #calc .factor-row .label-inline > span{line-height:1.15}
-
-/* Reset link */
-.btn-link{appearance:none;border:none;background:none;color:var(--muted);text-decoration:underline;cursor:pointer;font-size:.85em;padding:2px 4px}
-.btn-link:hover{opacity:.9}
 
 /* 7-Day 单列 */
 #switch .grid{grid-template-columns:1fr}
 @media (min-width:720px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* 顶部右侧操作区 */
+.card .top-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:-6px;margin-bottom:6px}
+.card .top-actions a{font-size:.9em;text-decoration:underline;cursor:pointer}
 </style>
 </head>
 <body>
@@ -142,12 +141,12 @@ hr{border:none;border-top:1px solid #1f2b44;margin:10px 0}
   <!-- CALC -->
   <section id="calc" class="route" hidden>
     <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
-        <h2 data-i18n="calc.title" style="margin:0">Feeding Calculator</h2>
-        <button id="resetPrefs" class="btn-link" title="Clear saved values">Reset saved</button>
+      <div class="top-actions">
+        <a id="resetSaved" title="Clear saved values">Reset saved</a>
       </div>
+      <h2 data-i18n="calc.title">Feeding Calculator</h2>
 
-      <div class="form-grid" style="margin-top:12px">
+      <div class="form-grid">
         <div>
           <label for="species" data-i18n="calc.species">Species</label>
           <select id="species" aria-label="Species">
@@ -181,7 +180,8 @@ hr{border:none;border-top:1px solid #1f2b44;margin:10px 0}
 
         <div class="row">
           <label class="label-inline"><input type="checkbox" id="useCustom"/> <span data-i18n="calc.customToggle">Use custom factor</span></label>
-          <input id="customFactor" type="number" min="0.8" max="6" step="0.1" placeholder="1.6" disabled />
+          <!-- 关键修复：使用真实初值 value="1.6" 而不是 placeholder -->
+          <input id="customFactor" type="number" min="0.8" max="6" step="0.1" value="1.6" disabled />
         </div>
         <p class="hint muted" data-i18n="calc.customHint">Only change if you know what you’re doing (懂则改，不懂别动)。</p>
       </fieldset>
@@ -286,7 +286,7 @@ const I18N={en:{nav:{home:"Home",calc:"Calc",switch:"7-Day",feedback:"Feedback"}
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
 
-// ---------- router ----------
+// router
 function route(){
   const hash=(location.hash||'#home').split('&')[0];
   $$('#home,#calc,#switch,#feedback').forEach(sec=>sec.hidden=true);
@@ -295,7 +295,7 @@ function route(){
 }
 window.addEventListener('hashchange',route);
 
-// ---------- language ----------
+// lang
 function setLang(l){
   const lang=I18N[l]?l:'en';
   localStorage.setItem('lang',lang);
@@ -308,15 +308,14 @@ function setLang(l){
 }
 function initLang(){
   const params=new URLSearchParams(location.search);
-  const ql=params.get('lang');
-  const saved=localStorage.getItem('lang');
-  const lang=ql || saved || 'en';
+  const ql=params.get('lang')||localStorage.getItem('lang');
+  const lang=ql||'en';
   $('#langSel').value=I18N[lang]?lang:'en';
   setLang($('#langSel').value);
 }
-$('#langSel')?.addEventListener('change',e=>{ setLang(e.target.value); saveState(); });
+$('#langSel')?.addEventListener('change',e=>setLang(e.target.value));
 
-// ---------- factors & calc ----------
+// factors (life stage restored)
 const SAFETY_MIN_FACTOR=0.8, SAFETY_MAX_FACTOR=6.0;
 const KCAL_PER_100G_DEFAULT=350;
 
@@ -357,6 +356,13 @@ const STAGE_FACTORS={
   }
 };
 
+function getDefaultFactor(){
+  const species=$('#species').value||'dog';
+  const stage=$('#lifeStageLbl').value||'adult';
+  const defs=STAGE_FACTORS[species]?.[stage]||STAGE_FACTORS.dog.adult;
+  return defs[1]?.value ?? 1.6; // 中间项默认
+}
+
 function renderFactors(){
   const species=$('#species').value||'dog';
   const stage=$('#lifeStageLbl').value||'adult';
@@ -370,6 +376,8 @@ function renderFactors(){
       <span><strong>${f.label}</strong><br/><span class="muted">${f.hint}</span></span>`;
     box.appendChild(w);
   });
+  // 如果当前是自定义模式，取消单选选中
+  if($('#useCustom').checked){ $$('input[name="factor"]').forEach(r=>r.checked=false); }
 }
 
 const pow075=x=>Math.pow(x,0.75);
@@ -379,8 +387,9 @@ const isNum=n=>typeof n==='number'&&!Number.isNaN(n)&&Number.isFinite(n);
 function currentFactor(){
   const useCustom=$('#useCustom').checked;
   if(useCustom){
-    const cf=parseFloat($('#customFactor').value);
-    return clamp(isNum(cf)?cf:NaN,SAFETY_MIN_FACTOR,SAFETY_MAX_FACTOR);
+    let cf=parseFloat($('#customFactor').value);
+    if(!isNum(cf)){ cf=getDefaultFactor(); $('#customFactor').value=cf; }
+    return clamp(cf,SAFETY_MIN_FACTOR,SAFETY_MAX_FACTOR);
   }
   const checked=document.querySelector('input[name="factor"]:checked');
   return parseFloat(checked?.value||'');
@@ -418,98 +427,86 @@ function calc(){
   }
   $('#outCups').textContent=cupsTxt;
   $('#estNote').hidden=!est;
+
+  persist(); // 计算时顺手保存
 }
 
-// ---------- persistence (remember last selections) ----------
-const STORAGE_KEY='pap_v123_prefs';
+// --- 轻量持久化（记住上次选择） ---
+const STORAGE_KEY='pfeeding:v1';
 
-function saveState(){
-  const lang=$('#langSel')?.value;
-  const species=$('#species')?.value;
-  const wkg=$('#wkg')?.value;
-  const stage=$('#lifeStageLbl')?.value;
-  const useCustom=$('#useCustom')?.checked;
-  const customFactor=$('#customFactor')?.value;
-  const kcal100=$('#kcal100')?.value;
-  const kcalCup=$('#kcalCup')?.value;
-  const gPerCup=$('#gPerCup')?.value;
-  const factorRadio=document.querySelector('input[name="factor"]:checked');
-  const factorSelected=factorRadio? factorRadio.value : '';
-
-  const payload={
-    lang, species, wkg, stage,
-    useCustom, customFactor,
-    kcal100, kcalCup, gPerCup,
-    factorSelected,
-    v:'1' // for future migrations
+function persist(){
+  const useCustom=$('#useCustom').checked;
+  const state={
+    species: $('#species').value,
+    wkg: $('#wkg').value,
+    lifeStage: $('#lifeStageLbl').value,
+    useCustom,
+    customFactor: $('#customFactor').value,
+    radioFactor: (useCustom? null : (document.querySelector('input[name="factor"]:checked')?.value||null)),
+    kcal100: $('#kcal100').value,
+    kcalCup: $('#kcalCup').value,
+    gPerCup: $('#gPerCup').value
   };
-  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(payload)); }catch(_){}
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch{}
 }
 
-function loadState(){
-  let data=null;
-  try{ data=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null'); }catch(_){}
-  if(!data || data.v!=='1') return;
+function restore(){
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    const s=JSON.parse(raw);
+    if(s.species) $('#species').value=s.species;
+    if(s.wkg) $('#wkg').value=s.wkg;
+    if(s.lifeStage) $('#lifeStageLbl').value=s.lifeStage;
 
-  // language: only apply if URL 未显式指定 ?lang
-  const hasLangParam=new URLSearchParams(location.search).has('lang');
-  if(data.lang && !hasLangParam && I18N[data.lang]){
-    $('#langSel').value=data.lang;
-    setLang(data.lang);
-  }
+    renderFactors();
 
-  if(data.species){ $('#species').value=data.species; }
-  if(data.stage){ $('#lifeStageLbl').value=data.stage; }
-
-  // render factors after species/stage restored
-  renderFactors();
-
-  if(data.useCustom){
-    $('#useCustom').checked=true;
-    $('#customFactor').disabled=false;
-    if(data.customFactor) $('#customFactor').value=data.customFactor;
-  }else{
-    // select saved radio
-    if(data.factorSelected){
-      const target=[...document.querySelectorAll('input[name="factor"]')]
-        .find(r=>r.value===String(data.factorSelected));
-      if(target) target.checked=true;
+    if(s.useCustom){
+      $('#useCustom').checked=true;
+      $('#customFactor').disabled=false;
+      if(s.customFactor) $('#customFactor').value=s.customFactor;
+      $$('input[name="factor"]').forEach(r=>r.checked=false);
+    }else{
+      $('#useCustom').checked=false;
+      $('#customFactor').disabled=true;
+      if(s.radioFactor){
+        const r=[...document.querySelectorAll('input[name="factor"]')].find(n=>n.value==s.radioFactor);
+        if(r) r.checked=true;
+      }
     }
+
+    if(s.kcal100) $('#kcal100').value=s.kcal100;
+    if(s.kcalCup) $('#kcalCup').value=s.kcalCup;
+    if(s.gPerCup) $('#gPerCup').value=s.gPerCup;
+  }catch{}
+}
+
+$('#resetSaved')?.addEventListener('click', ()=>{
+  localStorage.removeItem(STORAGE_KEY);
+  // 还原到当前生命周期默认单选
+  $('#useCustom').checked=false;
+  $('#customFactor').disabled=true;
+  renderFactors();
+  calc();
+});
+
+// wiring
+$('#species')?.addEventListener('change',()=>{ renderFactors(); calc(); });
+$('#lifeStageLbl')?.addEventListener('change',()=>{ renderFactors(); calc(); });
+$('#wkg')?.addEventListener('input',calc);
+document.addEventListener('change',e=>{ if(e.target.name==='factor'){ calc(); } });
+['kcal100','kcalCup','gPerCup','customFactor'].forEach(id=>$('#'+id)?.addEventListener('input',calc));
+$('#useCustom')?.addEventListener('change',e=>{
+  const on=e.target.checked;
+  $('#customFactor').disabled=!on;
+  if(on){
+    if(!$('#customFactor').value){ $('#customFactor').value=getDefaultFactor(); }
+    $$('input[name="factor"]').forEach(r=>r.checked=false);
   }
+  calc();
+});
 
-  if(data.wkg) $('#wkg').value=data.wkg;
-  if(data.kcal100) $('#kcal100').value=data.kcal100;
-  if(data.kcalCup) $('#kcalCup').value=data.kcalCup;
-  if(data.gPerCup) $('#gPerCup').value=data.gPerCup;
-}
-
-function clearState(){
-  try{ localStorage.removeItem(STORAGE_KEY); }catch(_){}
-}
-
-// persist on changes
-function wirePersistence(){
-  ['change','input'].forEach(evt=>{
-    $('#species')?.addEventListener(evt,saveState);
-    $('#lifeStageLbl')?.addEventListener(evt,saveState);
-    $('#wkg')?.addEventListener(evt,saveState);
-    $('#kcal100')?.addEventListener(evt,saveState);
-    $('#kcalCup')?.addEventListener(evt,saveState);
-    $('#gPerCup')?.addEventListener(evt,saveState);
-    $('#customFactor')?.addEventListener(evt,saveState);
-  });
-  $('#useCustom')?.addEventListener('change',()=>{ saveState(); });
-  document.addEventListener('change',e=>{
-    if(e.target && e.target.name==='factor'){ saveState(); }
-  });
-  $('#resetPrefs')?.addEventListener('click',()=>{
-    clearState();
-    // 不动语言；仅清空计算器相关，刷新回到默认
-    location.reload();
-  });
-}
-
-// ---------- feedback ----------
+// feedback
 $('#fbSend')?.addEventListener('click',()=>{
   const cat=$('#fbCat').value;
   const sub=encodeURIComponent(`[Pet A Plan] Feedback: ${cat}`);
@@ -522,22 +519,16 @@ Details:
   location.href=`mailto:hello@example.com?subject=${sub}&body=${body}`;
 });
 
-// ---------- boot ----------
+// boot
 (function boot(){
   if(!location.hash) location.hash='#home';
-  route();            // 路由先初始化
-  initLang();         // 语言初始化（支持 ?lang）
-  loadState();        // 载入上次选择（可能会覆盖语言为上次的）
-  // 载入后需重新渲染一次（以确保因子和计算跟随最新状态）
-  renderFactors();
-  calc();
-  wirePersistence();  // 绑定保存/重置
+  route(); initLang(); restore(); renderFactors(); calc();
 })();
 </script>
 
 <!--
 DOC_SYNC_INDEX.md (append)
-- 2025-10-06 — hotfix-20251006i: remember last selections via localStorage; add "Reset saved" button; no logic changes to RER/MER.
+- 2025-10-06 — hotfix-20251006i: custom-factor uses real default value; add light persistence & reset; no behavior change to formulas.
 -->
 </body>
 </html>
