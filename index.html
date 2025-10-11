@@ -1,4 +1,4 @@
-<!-- deploy: 2025-10-11 · hotfix-20251011a (Copy link + input/a11y tweaks; no logic change) -->
+<!-- deploy: 2025-10-11 · hotfix-20251011b (Restore "Reset saved" + Copy link; no logic change) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -51,17 +51,14 @@ hr{border:none;border-top:1px solid #1f2b44;margin:10px 0}
 }
 #calc .form-grid > *{display:flex;flex-direction:column;gap:6px;min-width:0}
 #calc input,#calc select,#calc textarea{width:min(100%, 360px)}
-
-/* 因子卡片网格 */
 #calc .factor-row{
   display:grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap:12px 14px;
 }
-/* 视觉卡片 */
 #calc .factor-row .label-inline{
   display:grid;
-  grid-template-columns:auto 1fr; /* 圆点 + 文本 */
+  grid-template-columns:auto 1fr;
   align-items:center;
   gap:8px;
   padding:10px 12px;
@@ -70,22 +67,21 @@ hr{border:none;border-top:1px solid #1f2b44;margin:10px 0}
 #calc .factor-row input[type="radio"]{margin:0;transform:translateY(-1px)}
 #calc .factor-row .label-inline > span{line-height:1.15}
 
-/* Weight 输入右侧单位（如存在时） */
-#calc .wgroup{display:flex;gap:8px;align-items:end}
-#calc .wgroup input{flex:1 1 auto}
-#calc .wgroup select{flex:0 0 84px}
-
 /* 7-Day 单列 */
 #switch .grid{grid-template-columns:1fr}
 @media (min-width:720px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
-/* P0: 复制链接按钮 + toast + a11y 焦点可见 */
+/* 工具条：复制链接 + 重置 */
+.toolbar{display:flex;gap:8px;align-items:center;margin-left:auto}
 .ghost-btn{
   background:#0f1930;border:1px solid #24324f;color:#dbe7ff;
   padding:6px 10px;border-radius:10px;cursor:pointer
 }
 .ghost-btn:hover{background:#121f38}
-.toolbar{display:flex;gap:8px;align-items:center;margin-left:auto}
+.link-btn{background:none;border:none;color:var(--accent);cursor:pointer;padding:0 4px}
+.link-btn:hover{text-decoration:underline}
+
+/* Toast */
 .toast{
   position:fixed;left:50%;bottom:24px;transform:translateX(-50%);
   background:#0f1930;border:1px solid #24324f;color:#e8eefc;
@@ -93,7 +89,6 @@ hr{border:none;border-top:1px solid #1f2b44;margin:10px 0}
   font-size:.95rem;z-index:9999;opacity:0;transition:opacity .15s ease;
 }
 .toast.show{opacity:1}
-/* a11y: 焦点可见 */
 :focus-visible{outline:2px solid #6ea1ff; outline-offset:2px; border-radius:10px}
 </style>
 </head>
@@ -162,7 +157,7 @@ hr{border:none;border-top:1px solid #1f2b44;margin:10px 0}
         <h2 data-i18n="calc.title" style="margin:0">Feeding Calculator</h2>
         <div class="toolbar">
           <button id="copyLinkBtn" class="ghost-btn" type="button" aria-label="Copy share link">Copy link</button>
-          <!-- 如果你已有 Reset saved 按钮，也可以放在这里；此处仅新增 Copy link -->
+          <button id="resetBtn" class="link-btn" type="button" aria-label="Reset saved">Reset saved</button>
         </div>
       </div>
 
@@ -176,7 +171,6 @@ hr{border:none;border-top:1px solid #1f2b44;margin:10px 0}
         </div>
         <div>
           <label for="wkg" data-i18n="calc.weight">Weight (kg)</label>
-          <!-- 如你已有单位切换，下方结构可替换为 .wgroup（此版本保留单一输入，逻辑不变） -->
           <input id="wkg" type="number" min="0" step="0.1" placeholder="10" />
         </div>
         <div>
@@ -318,7 +312,7 @@ window.addEventListener('hashchange',route);
 // lang
 function setLang(l){
   const lang=I18N[l]?l:'en';
-  localStorage.setItem('lang',lang);
+  localStorage.setItem('pap.lang',lang);
   document.documentElement.lang=lang;
   $$('[data-i18n]').forEach(node=>{
     const path=node.getAttribute('data-i18n').split('.');
@@ -329,13 +323,14 @@ function setLang(l){
 function initLang(){
   const params=new URLSearchParams(location.search);
   const ql=params.get('lang');
-  const lang=ql||'en';
+  const saved=localStorage.getItem('pap.lang');
+  const lang=ql||saved||'en';
   $('#langSel').value=I18N[lang]?lang:'en';
   setLang($('#langSel').value);
 }
-$('#langSel')?.addEventListener('change',e=>setLang(e.target.value));
+$('#langSel')?.addEventListener('change',e=>{ setLang(e.target.value); saveState(); });
 
-// factors (life stage restored)
+// factors
 const SAFETY_MIN_FACTOR=0.8, SAFETY_MAX_FACTOR=6.0;
 const KCAL_PER_100G_DEFAULT=350;
 
@@ -438,46 +433,96 @@ function calc(){
   $('#outCups').textContent=cupsTxt;
   $('#estNote').hidden=!est;
 
-  // —— 如果你已有 URL 同步逻辑，这里不覆盖；此版本仅负责计算，不改变你的同步策略。
+  saveState(); // 计算时顺便保存
 }
 
-/* ===== P0: Copy link + 输入体验/a11y（不改逻辑） ===== */
+/* ===== Copy link + State save/restore + Reset ===== */
 function toast(msg){
   const t=document.createElement('div');
   t.className='toast'; t.textContent=msg; document.body.appendChild(t);
   void t.offsetWidth; t.classList.add('show');
   setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(),200); }, 2000);
 }
-
-function buildShareURL(){
-  // 直接使用当前地址（你现有的 URL 同步参数会保留）
-  // 如需精简参数，可在下一步加入“默认值省略策略”
-  return new URL(location.href).toString();
-}
-
+function buildShareURL(){ return new URL(location.href).toString(); }
 $('#copyLinkBtn')?.addEventListener('click', async ()=>{
   const link=buildShareURL();
-  try{
-    await navigator.clipboard.writeText(link);
-    toast('Link copied');
-  }catch{
+  try{ await navigator.clipboard.writeText(link); toast('Link copied'); }
+  catch{
     const ta=document.createElement('textarea');
     ta.value=link; document.body.appendChild(ta); ta.select();
-    document.execCommand('copy'); ta.remove();
-    toast('Link copied');
+    document.execCommand('copy'); ta.remove(); toast('Link copied');
   }
+});
+
+// 保存/恢复状态
+const LS_KEY='pap.v1.state';
+function getState(){
+  const usec=$('#useCustom').checked?1:0;
+  const f=usec?parseFloat($('#customFactor').value):currentFactor();
+  return {
+    sp: $('#species').value,
+    w: $('#wkg').value,
+    stage: $('#lifeStageLbl').value,
+    usec, f,
+    kcal100: $('#kcal100').value,
+    kcalCup: $('#kcalCup').value,
+    gPerCup: $('#gPerCup').value,
+    lang: document.documentElement.lang || 'en'
+  };
+}
+function saveState(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(getState())); }catch{} }
+function restoreState(){
+  try{
+    const raw=localStorage.getItem(LS_KEY); if(!raw) return;
+    const s=JSON.parse(raw||'{}');
+    if(s.lang && I18N[s.lang]){ $('#langSel').value=s.lang; setLang(s.lang); }
+    if(s.sp) $('#species').value=s.sp;
+    if(s.stage) $('#lifeStageLbl').value=s.stage;
+    renderFactors(); // 渲染因子后再恢复具体选中
+    if(s.usec){ $('#useCustom').checked=true; $('#customFactor').disabled=false; if(s.f) $('#customFactor').value=s.f; }
+    else{
+      $('#useCustom').checked=false; $('#customFactor').disabled=true;
+      if(s.f){
+        const r=[...document.querySelectorAll('input[name="factor"]')].find(x=>parseFloat(x.value)===parseFloat(s.f));
+        if(r) r.checked=true;
+      }
+    }
+    if(s.w!=null) $('#wkg').value=s.w;
+    if(s.kcal100!=null) $('#kcal100').value=s.kcal100;
+    if(s.kcalCup!=null) $('#kcalCup').value=s.kcalCup;
+    if(s.gPerCup!=null) $('#gPerCup').value=s.gPerCup;
+  }catch{}
+}
+
+$('#resetBtn')?.addEventListener('click', ()=>{
+  try{ localStorage.removeItem(LS_KEY); }catch{}
+  // 回到默认
+  $('#langSel').value='en'; setLang('en');
+  $('#species').value='dog';
+  $('#lifeStageLbl').value='adult';
+  renderFactors();
+  // 默认选中「Normal」(中间那项)
+  const radios=[...document.querySelectorAll('input[name="factor"]')];
+  if(radios[1]) radios[1].checked=true;
+  $('#useCustom').checked=false; $('#customFactor').disabled=true; $('#customFactor').value='';
+  $('#wkg').value='';
+  $('#kcal100').value='350';
+  $('#kcalCup').value='';
+  $('#gPerCup').value='';
+  $('#outRER').textContent='—'; $('#outMER').textContent='—';
+  $('#outG').textContent='—'; $('#outCups').textContent='—';
+  $('#estNote').hidden=true;
+  toast('Saved state cleared');
 });
 
 // 轻量防抖 + Enter 快捷触发 + 输入清理
 function debounce(fn, wait=150){ let t=null; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args),wait); }; }
 const debouncedCalc = debounce(calc,150);
-
 ['wkg','kcal100','kcalCup','gPerCup','customFactor'].forEach(id=>{
   const el=document.getElementById(id);
   if(!el) return;
   el.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); calc(); }});
   el.addEventListener('input', e=>{
-    // 清理：全角逗号/空格→移除；中文句点→.
     e.target.value = e.target.value.replace(/[，\s]/g,'').replace('。','.');
     debouncedCalc();
   });
@@ -510,13 +555,13 @@ Details:
 // boot
 (function boot(){
   if(!location.hash) location.hash='#home';
-  route(); initLang(); renderFactors(); calc();
+  route(); initLang(); renderFactors(); restoreState(); calc();
 })();
 </script>
 
 <!--
 DOC_SYNC_INDEX.md (append)
-- 2025-10-11 — hotfix-20251011a: add "Copy link" + input/a11y tweaks; no logic change. Route/lang/print/local storage/URL sync unaffected.
+- 2025-10-11 — hotfix-20251011b: Restore "Reset saved" button; keep Copy link; persist state to localStorage; no calculation logic changes.
 -->
 </body>
 </html>
