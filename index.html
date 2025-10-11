@@ -1,4 +1,4 @@
-<!-- deploy: 2025-10-06 · hotfix-20251006f (factor card radio tightened) -->
+<!-- deploy: 2025-10-06 · hotfix-20251006i (remember last selections; add reset button; no logic change) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -61,7 +61,7 @@ hr{border:none;border-top:1px solid #1f2b44;margin:10px 0}
   align-items:flex-start;gap:10px;padding:12px;background:#0f1930;border:1px solid #24324f;border-radius:12px;
 }
 
-/* --- hotfix-20251006f：让圆点更贴近文字、更靠左、更紧凑（仅视觉微调） --- */
+/* hotfix-20251006f：让圆点更贴近文字、更靠左、更紧凑（仅视觉微调） */
 #calc .factor-row .label-inline{
   display:grid;                 /* 覆盖为两列网格：圆点 + 文本 */
   grid-template-columns:auto 1fr;
@@ -69,11 +69,12 @@ hr{border:none;border-top:1px solid #1f2b44;margin:10px 0}
   gap:8px;                      /* 圆点与文字间距（原 10px） */
   padding:10px 12px;            /* 稍微收紧内边距（原 12px） */
 }
-#calc .factor-row input[type="radio"]{
-  margin:0;                     /* 去掉默认外边距 */
-  transform:translateY(-1px);   /* 微对齐，视觉更居中 */
-}
+#calc .factor-row input[type="radio"]{ margin:0; transform:translateY(-1px); }
 #calc .factor-row .label-inline > span{line-height:1.15}
+
+/* Reset link */
+.btn-link{appearance:none;border:none;background:none;color:var(--muted);text-decoration:underline;cursor:pointer;font-size:.85em;padding:2px 4px}
+.btn-link:hover{opacity:.9}
 
 /* 7-Day 单列 */
 #switch .grid{grid-template-columns:1fr}
@@ -141,9 +142,12 @@ hr{border:none;border-top:1px solid #1f2b44;margin:10px 0}
   <!-- CALC -->
   <section id="calc" class="route" hidden>
     <div class="card">
-      <h2 data-i18n="calc.title">Feeding Calculator</h2>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <h2 data-i18n="calc.title" style="margin:0">Feeding Calculator</h2>
+        <button id="resetPrefs" class="btn-link" title="Clear saved values">Reset saved</button>
+      </div>
 
-      <div class="form-grid">
+      <div class="form-grid" style="margin-top:12px">
         <div>
           <label for="species" data-i18n="calc.species">Species</label>
           <select id="species" aria-label="Species">
@@ -282,7 +286,7 @@ const I18N={en:{nav:{home:"Home",calc:"Calc",switch:"7-Day",feedback:"Feedback"}
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
 
-// router
+// ---------- router ----------
 function route(){
   const hash=(location.hash||'#home').split('&')[0];
   $$('#home,#calc,#switch,#feedback').forEach(sec=>sec.hidden=true);
@@ -291,7 +295,7 @@ function route(){
 }
 window.addEventListener('hashchange',route);
 
-// lang
+// ---------- language ----------
 function setLang(l){
   const lang=I18N[l]?l:'en';
   localStorage.setItem('lang',lang);
@@ -305,13 +309,14 @@ function setLang(l){
 function initLang(){
   const params=new URLSearchParams(location.search);
   const ql=params.get('lang');
-  const lang=ql||'en';
+  const saved=localStorage.getItem('lang');
+  const lang=ql || saved || 'en';
   $('#langSel').value=I18N[lang]?lang:'en';
   setLang($('#langSel').value);
 }
-$('#langSel')?.addEventListener('change',e=>setLang(e.target.value));
+$('#langSel')?.addEventListener('change',e=>{ setLang(e.target.value); saveState(); });
 
-// factors (life stage restored)
+// ---------- factors & calc ----------
 const SAFETY_MIN_FACTOR=0.8, SAFETY_MAX_FACTOR=6.0;
 const KCAL_PER_100G_DEFAULT=350;
 
@@ -415,20 +420,96 @@ function calc(){
   $('#estNote').hidden=!est;
 }
 
-// wiring
-$('#species')?.addEventListener('change',()=>{ renderFactors(); calc(); });
-$('#lifeStageLbl')?.addEventListener('change',()=>{ renderFactors(); calc(); });
-$('#wkg')?.addEventListener('input',calc);
-document.addEventListener('change',e=>{ if(e.target.name==='factor') calc(); });
-['kcal100','kcalCup','gPerCup','customFactor'].forEach(id=>$('#'+id)?.addEventListener('input',calc));
-$('#useCustom')?.addEventListener('change',e=>{
-  const on=e.target.checked;
-  $('#customFactor').disabled=!on;
-  if(on){ $$('input[name="factor"]').forEach(r=>r.checked=false); }
-  calc();
-});
+// ---------- persistence (remember last selections) ----------
+const STORAGE_KEY='pap_v123_prefs';
 
-// feedback
+function saveState(){
+  const lang=$('#langSel')?.value;
+  const species=$('#species')?.value;
+  const wkg=$('#wkg')?.value;
+  const stage=$('#lifeStageLbl')?.value;
+  const useCustom=$('#useCustom')?.checked;
+  const customFactor=$('#customFactor')?.value;
+  const kcal100=$('#kcal100')?.value;
+  const kcalCup=$('#kcalCup')?.value;
+  const gPerCup=$('#gPerCup')?.value;
+  const factorRadio=document.querySelector('input[name="factor"]:checked');
+  const factorSelected=factorRadio? factorRadio.value : '';
+
+  const payload={
+    lang, species, wkg, stage,
+    useCustom, customFactor,
+    kcal100, kcalCup, gPerCup,
+    factorSelected,
+    v:'1' // for future migrations
+  };
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(payload)); }catch(_){}
+}
+
+function loadState(){
+  let data=null;
+  try{ data=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null'); }catch(_){}
+  if(!data || data.v!=='1') return;
+
+  // language: only apply if URL 未显式指定 ?lang
+  const hasLangParam=new URLSearchParams(location.search).has('lang');
+  if(data.lang && !hasLangParam && I18N[data.lang]){
+    $('#langSel').value=data.lang;
+    setLang(data.lang);
+  }
+
+  if(data.species){ $('#species').value=data.species; }
+  if(data.stage){ $('#lifeStageLbl').value=data.stage; }
+
+  // render factors after species/stage restored
+  renderFactors();
+
+  if(data.useCustom){
+    $('#useCustom').checked=true;
+    $('#customFactor').disabled=false;
+    if(data.customFactor) $('#customFactor').value=data.customFactor;
+  }else{
+    // select saved radio
+    if(data.factorSelected){
+      const target=[...document.querySelectorAll('input[name="factor"]')]
+        .find(r=>r.value===String(data.factorSelected));
+      if(target) target.checked=true;
+    }
+  }
+
+  if(data.wkg) $('#wkg').value=data.wkg;
+  if(data.kcal100) $('#kcal100').value=data.kcal100;
+  if(data.kcalCup) $('#kcalCup').value=data.kcalCup;
+  if(data.gPerCup) $('#gPerCup').value=data.gPerCup;
+}
+
+function clearState(){
+  try{ localStorage.removeItem(STORAGE_KEY); }catch(_){}
+}
+
+// persist on changes
+function wirePersistence(){
+  ['change','input'].forEach(evt=>{
+    $('#species')?.addEventListener(evt,saveState);
+    $('#lifeStageLbl')?.addEventListener(evt,saveState);
+    $('#wkg')?.addEventListener(evt,saveState);
+    $('#kcal100')?.addEventListener(evt,saveState);
+    $('#kcalCup')?.addEventListener(evt,saveState);
+    $('#gPerCup')?.addEventListener(evt,saveState);
+    $('#customFactor')?.addEventListener(evt,saveState);
+  });
+  $('#useCustom')?.addEventListener('change',()=>{ saveState(); });
+  document.addEventListener('change',e=>{
+    if(e.target && e.target.name==='factor'){ saveState(); }
+  });
+  $('#resetPrefs')?.addEventListener('click',()=>{
+    clearState();
+    // 不动语言；仅清空计算器相关，刷新回到默认
+    location.reload();
+  });
+}
+
+// ---------- feedback ----------
 $('#fbSend')?.addEventListener('click',()=>{
   const cat=$('#fbCat').value;
   const sub=encodeURIComponent(`[Pet A Plan] Feedback: ${cat}`);
@@ -441,16 +522,22 @@ Details:
   location.href=`mailto:hello@example.com?subject=${sub}&body=${body}`;
 });
 
-// boot
+// ---------- boot ----------
 (function boot(){
   if(!location.hash) location.hash='#home';
-  route(); initLang(); renderFactors(); calc();
+  route();            // 路由先初始化
+  initLang();         // 语言初始化（支持 ?lang）
+  loadState();        // 载入上次选择（可能会覆盖语言为上次的）
+  // 载入后需重新渲染一次（以确保因子和计算跟随最新状态）
+  renderFactors();
+  calc();
+  wirePersistence();  // 绑定保存/重置
 })();
 </script>
 
 <!--
 DOC_SYNC_INDEX.md (append)
-- 2025-10-06 — hotfix-20251006f: tighten factor card radio (closer to text; compact padding); no behavior change.
+- 2025-10-06 — hotfix-20251006i: remember last selections via localStorage; add "Reset saved" button; no logic changes to RER/MER.
 -->
 </body>
 </html>
