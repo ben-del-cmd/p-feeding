@@ -1,9 +1,9 @@
 <!doctype html>
 <!-- Pet A Plan · single-file SPA
-     TAG: v1.2.3+stable-kg-lb-urlprint-20251011b
-     ChangeLog:
-     - Scope fix: kg/lb UI isolated; real-time URL sync; deep-link restore
-     - Router + i18n + copy/reset + print
+     TAG: v1.2.3+stable-kg-lb-urlprint-20251011c
+     ChangeLog (c):
+     - Cups/day usability: show hint when density params missing; est note unchanged
+     - Keep kg/lb scoped to #calc; URL sync; i18n; copy/reset; 7-Day print
      - Stabilization Overlay + Smoke test
 -->
 <html lang="en">
@@ -30,16 +30,19 @@ nav a{border:1px solid #24324f;border-radius:10px;padding:6px 10px;color:var(--f
 nav a.active{background:#16213a}
 .langbox{display:flex;gap:8px}
 .langbox select{background:#0f1930;border:1px solid #24324f;border-radius:10px;color:var(--fg);padding:8px 10px;min-width:160px}
+
 .card{background:var(--card);border:1px solid #1c2740;border-radius:16px;padding:16px}
 .grid{display:grid;gap:14px}
 @media(min-width:720px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .kpi{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 .kpi .box{background:#0f1930;border:1px solid #22304a;border-radius:14px;padding:12px}
+
 .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
 .muted{color:var(--muted)}
 hr{border:none;border-top:1px solid var(--line);margin:10px 0}
 .hint{font-size:.9em}
+
 button,select,input{background:#0f1930;border:1px solid #24324f;border-radius:10px;color:var(--fg);padding:8px 10px}
 input[type=number]{width:100%}
 
@@ -64,6 +67,7 @@ input[type=number]{width:100%}
 @media(min-width:880px){.res3{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .box.out{background:#0f1930;border:1px solid #22304a;border-radius:14px;padding:14px}
 
+/* print */
 @media print{
   header,.langbox,nav,.actions-right{display:none!important}
   body{background:white;color:black}
@@ -198,6 +202,8 @@ input[type=number]{width:100%}
       </div>
 
       <p class="muted hint" id="estNote" hidden data-i18n="calc.estNote">Values marked (est.) are based on a typical density; use your bag’s numbers for precision.</p>
+      <!-- NEW: Cups missing hint -->
+      <p class="muted hint" id="cupsHint" hidden data-i18n="calc.cupsNeed">To calculate cups/day, provide both kcal/cup and grams/cup from the bag.</p>
     </div>
 
     <details class="footer">
@@ -263,12 +269,12 @@ input[type=number]{width:100%}
 /* ===== i18n ===== */
 const I18N={en:{nav:{home:"Home",calc:"Calc",switch:"7-Day",feedback:"Feedback"},
 home:{title:"Feeding & Switch Helper",pitch:"Informational tool for the U.S. market: turn pet food / grooming labels into actionable guidance. Not medical advice.",kcal:"RER/MER transparent",i18n:"Multi-language",mode:"Single-file SPA",quick:"Quick start",q1:"Go to Calc → enter weight (kg) → pick species & activity factor.",q2:"Review kcal/day and grams/day. Cups/day requires density info from the bag.",q3:"See 7-Day gradual switch plan. If stool soft or upset → hold or step back."},
-calc:{title:"Feeding Calculator",species:"Species",weight:"Weight (kg)",lifeStage:"Life stage",activity:"Activity / life stage (MER factor)",factorHint:"Labels show the actual factor used.",infoTip:"Info (i): RER=70×kg^0.75; MER=RER×factor. Factors are a starting point—adjust by body condition & stool; special stages/diseases: follow your vet.",grams:"Grams/day",cups:"Cups/day",cupsNote:"Cups calculation needs the food energy density (kcal/100g or kcal/cup) and grams per cup (often on the bag). If unknown, rely on grams/day first.",density:"Optional: density for precise grams/cups",kcal100:"kcal / 100 g",kcalCup:"kcal / cup",gPerCup:"grams / cup",customToggle:"Use custom factor",customHint:"Only change if you know what you’re doing (懂则改，不懂别动)。",estNote:"Values marked (est.) are based on a typical density; use your bag’s numbers for precision."},
+calc:{title:"Feeding Calculator",species:"Species",weight:"Weight (kg)",lifeStage:"Life stage",activity:"Activity / life stage (MER factor)",factorHint:"Labels show the actual factor used.",infoTip:"Info (i): RER=70×kg^0.75; MER=RER×factor. Factors are a starting point—adjust by body condition & stool; special stages/diseases: follow your vet.",grams:"Grams/day",cups:"Cups/day",cupsNote:"Cups calculation needs the food energy density (kcal/100g or kcal/cup) and grams per cup (often on the bag). If unknown, rely on grams/day first.",density:"Optional: density for precise grams/cups",kcal100:"kcal / 100 g",kcalCup:"kcal / cup",gPerCup:"grams / cup",customToggle:"Use custom factor",customHint:"Only change if you know what you’re doing (懂则改，不懂别动)。",estNote:"Values marked (est.) are based on a typical density; use your bag’s numbers for precision.",cupsNeed:"To calculate cups/day, provide both kcal/cup and grams/cup from the bag."},
 switch:{title:"7-Day Gradual Switch",caution:"If stool is soft or pet seems unwell, hold that day or step back one day, then continue after recovery."},
 fb:{title:"Feedback",note:"Choose a category and send us details. No personal health data, please.",send:"Send mail",opt:{calc:"Calculator",copy:"Copy/Basis & Notes",switch:"7-Day Switch",bug:"Bug",idea:"Idea"}}},
 zh:{nav:{home:"首页",calc:"计算",switch:"7天换粮",feedback:"反馈"},
 home:{title:"喂养与换粮助手",pitch:"面向美国市场的信息性工具：把宠物食品/洗护标签转成可执行建议。非医疗建议。",kcal:"RER/MER 透明可解释",i18n:"多语言",mode:"单文件 SPA",quick:"快速开始",q1:"进入 计算 → 输入体重(kg) → 选择物种与活动系数。",q2:"查看 kcal/日 与 g/日。Cups/日 需要包装上的能量密度与每杯克数。",q3:"查看 7 天渐进换粮。如便便偏软或不适 → 保持当日或倒回一天。"},
-calc:{title:"喂养计算器",species:"物种",weight:"体重(kg)",lifeStage:"生命周期",activity:"活动/阶段（MER 系数）",factorHint:"选项名称直接展示所用系数。",infoTip:"提示（i）：RER=70×kg^0.75；MER=RER×系数。系数仅为起点，应结合体况/便便微调；特殊阶段/疾病遵从兽医。",grams:"克/日",cups:"杯/日",cupsNote:"计算杯数需要食品能量密度（kcal/100g 或 kcal/cup）与每杯克数；若未知，请先以 g/日 为准。",density:"可选：用于精算克/杯的密度参数",kcal100:"kcal / 100 g",kcalCup:"kcal / 杯",gPerCup:"克 / 杯",customToggle:"自定义系数",customHint:"懂则改，不懂别动。",estNote:"标注 (估) 的数值基于典型密度；使用包装标注可获得更精确结果。"},
+calc:{title:"喂养计算器",species:"物种",weight:"体重(kg)",lifeStage:"生命周期",activity:"活动/阶段（MER 系数）",factorHint:"选项名称直接展示所用系数。",infoTip:"提示（i）：RER=70×kg^0.75；MER=RER×系数。系数仅为起点，应结合体况/便便微调；特殊阶段/疾病遵从兽医。",grams:"克/日",cups:"杯/日",cupsNote:"计算杯数需要食品能量密度（kcal/100g 或 kcal/cup）与每杯克数；若未知，请先以 g/日 为准。",density:"可选：用于精算克/杯的密度参数",kcal100:"kcal / 100 g",kcalCup:"kcal / 杯",gPerCup:"克 / 杯",customToggle:"自定义系数",customHint:"懂则改，不懂别动。",estNote:"标注 (估) 的数值基于典型密度；使用包装标注可获得更精确结果。",cupsNeed:"要计算“杯/日”，请提供包装上的 kcal/杯 与 克/杯。"},
 switch:{title:"7天渐进换粮",caution:"若便便偏软或不适，请保持当日或倒回一天，恢复后再继续。"},
 fb:{title:"反馈",note:"请选择分类并通过邮件发送问题/建议。请勿提交个人健康信息。",send:"发送邮件",opt:{calc:"计算器",copy:"文案/依据与说明",switch:"7天换粮",bug:"缺陷",idea:"想法"}}}};
 
@@ -361,7 +367,7 @@ function calc(){
   if(!(kg>0)||!(f>0)){
     $('#outRER').textContent='—';$('#outMER').textContent='—';
     $('#outG').textContent='—';$('#outCups').textContent='—';
-    $('#estNote').hidden=true; return;
+    $('#estNote').hidden=true; $('#cupsHint').hidden=true; return;
   }
   const RER=70*pow075(kg);
   const factor=clamp(f,SAFETY_MIN_FACTOR,SAFETY_MAX_FACTOR);
@@ -381,11 +387,18 @@ function calc(){
   $('#outMER').textContent=Math.round(MER).toLocaleString();
   $('#outG').textContent=Math.round(gramsPerDay).toLocaleString()+(est?' (est.)':'');
   let cupsTxt='—';
+  let cupsComputed=false;
   if(isNum(gPerCup)){
     const cups=gramsPerDay/gPerCup;
     cupsTxt=(Math.round(cups*100)/100).toLocaleString()+(est?' (est.)':'');
+    cupsComputed=true;
   }
   $('#outCups').textContent=cupsTxt;
+
+  // 提示逻辑：无法计算杯/日时显示引导文案
+  const needCupsHint = !cupsComputed; // 缺 gPerCup 或 kcal/cup 组合
+  $('#cupsHint').hidden = !needCupsHint;
+
   $('#estNote').hidden=!est;
 
   // URL 同步
@@ -415,7 +428,9 @@ function copyLink(){
 }
 function resetSaved(){
   localStorage.removeItem('lang'); localStorage.removeItem('unit');
-  ['w','kg','sp','stage','usec','f'].forEach(k=>{const p=new URLSearchParams(location.search);p.delete(k);history.replaceState(null,'',location.pathname+'?'+p.toString()+location.hash);});
+  const p=new URLSearchParams(location.search);
+  ['w','kg','sp','stage','usec','f'].forEach(k=>p.delete(k));
+  history.replaceState(null,'',location.pathname+'?'+p.toString()+location.hash);
   location.reload();
 }
 $$('[data-hook="copy-link"]').forEach(b=>b.addEventListener('click',copyLink));
@@ -511,7 +526,7 @@ $('#fbSend')?.addEventListener('click',()=>{
     ui.style.cssText='position:fixed;right:12px;bottom:12px;z-index:9999;font:12px/1.2 ui-sans-serif;background:#0b1220cc;color:#e8eefc;border:1px solid #1f2b44;border-radius:999px;padding:8px 10px;cursor:pointer;';
     ui.title='Smoke: '+tests.map(t=>`${t.pass?'✅':'❌'} ${t.name}`).join('\n');
     ui.textContent=allPass?'✅':'❌';
-    ui.addEventListener('click',()=>{alert('Smoke Test\\n\\n'+tests.map(t=>`${t.pass?'✅':'❌'} ${t.name}`).join('\\n'));});
+    ui.addEventListener('click',()=>{alert('Smoke Test\n\n'+tests.map(t=>`${t.pass?'✅':'❌'} ${t.name}`).join('\n'));});
     document.body.appendChild(ui);
   })();
 })();
