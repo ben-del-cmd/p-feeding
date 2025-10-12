@@ -1,12 +1,10 @@
 <!doctype html>
 <!-- Pet A Plan · single-file SPA
-     TAG: v1.2.3+stable-kg-lb-urlprint-20251011a
+     TAG: v1.2.3+stable-kg-lb-urlprint-20251011b
      ChangeLog:
-     - Scope fix: weight kg/lb UI isolated to #calc .weight-group (no global side effects)
-     - Router, i18n, copy-link/reset-saved ok
-     - URL real-time sync & deep-link
-     - 7-Day export/print styles
-     - Local memory + smoke test
+     - Scope fix: kg/lb UI isolated; real-time URL sync; deep-link restore
+     - Router + i18n + copy/reset + print
+     - Stabilization Overlay + Smoke test
 -->
 <html lang="en">
 <head>
@@ -32,44 +30,40 @@ nav a{border:1px solid #24324f;border-radius:10px;padding:6px 10px;color:var(--f
 nav a.active{background:#16213a}
 .langbox{display:flex;gap:8px}
 .langbox select{background:#0f1930;border:1px solid #24324f;border-radius:10px;color:var(--fg);padding:8px 10px;min-width:160px}
-
 .card{background:var(--card);border:1px solid #1c2740;border-radius:16px;padding:16px}
 .grid{display:grid;gap:14px}
 @media(min-width:720px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .kpi{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 .kpi .box{background:#0f1930;border:1px solid #22304a;border-radius:14px;padding:12px}
-
 .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
 .muted{color:var(--muted)}
 hr{border:none;border-top:1px solid var(--line);margin:10px 0}
 .hint{font-size:.9em}
-
 button,select,input{background:#0f1930;border:1px solid #24324f;border-radius:10px;color:var(--fg);padding:8px 10px}
 input[type=number]{width:100%}
 
+/* form layout */
 .form-grid{display:grid;grid-template-columns:repeat(3,minmax(220px,1fr));gap:14px 16px;align-items:end}
 .form-grid > *{display:flex;flex-direction:column;gap:6px;min-width:0}
 .factor-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px 14px}
 .label-inline{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:8px;padding:10px 12px;background:#0f1930;border:1px solid #24324f;border-radius:12px}
 .label-inline input[type=radio]{margin:0;transform:translateY(-1px)}
 .label-inline > span{line-height:1.15}
-
 .actions-right{display:flex;gap:8px;justify-content:flex-end}
 .badge{border:1px solid #24324f;border-radius:10px;padding:6px 10px;background:#0f1930;color:var(--fg)}
 
-/* ===== Scoped: weight unit UI (only inside #calc) ===== */
+/* Weight unit UI scoped */
 #calc .weight-group{display:flex;gap:8px;align-items:center}
 #calc .weight-group .w-input{flex:1 1 auto}
-#calc .weight-group .unit-select{flex:0 0 120px}
+#calc .weight-group .unit-select{flex:0 0 116px}
 #calc .weight-group .unit-select select{width:100%}
 
-/* results grid */
+/* results */
 .res3{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 @media(min-width:880px){.res3{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .box.out{background:#0f1930;border:1px solid #22304a;border-radius:14px;padding:14px}
 
-/* print */
 @media print{
   header,.langbox,nav,.actions-right{display:none!important}
   body{background:white;color:black}
@@ -77,137 +71,9 @@ input[type=number]{width:100%}
   .card{border:1px solid #bbb;background:white;color:black}
   .label-inline,.box{border-color:#bbb}
 }
-
-/* footer note */
 .footer{opacity:.9;font-size:.9em}
 </style>
 </head>
-     <!-- ===== Stabilization Overlay v20251006i (append-only; safe) ===== -->
-<style id="stabilize-20251006i">
-  /* 仅作用于 #calc，避免外溢 */
-  #calc .weight-wrap{ display:grid; grid-template-columns: 1fr 116px; gap:10px; align-items:center; }
-  #calc input[type=number]#wkg{ width:100%; }
-  #calc select#unitSel{ width:116px; }
-  /* Copy / Reset 工具条靠右（如果页面里已有，就只做对齐，不改尺寸） */
-  .tools-right{ display:flex; gap:10px; justify-content:flex-end; align-items:center; }
-  /* 保险：避免通用 .row/.grid 之类的规则影响 #calc 内表单 */
-  #calc .row, #calc .form-grid, #calc .factor-row{ contain: layout paint; }
-</style>
-
-<script id="stabilize-20251006i">
-(function(){
-  /* ---------- 1) kg/lb 单位切换（稳定且不影响其它路由） ---------- */
-  const q = sel => document.querySelector(sel);
-  const wInput = q('#wkg');
-  if (wInput) {
-    // 若没有单位选择器，则创建一个，并与 wkg 放在同一行
-    let unitSel = q('#unitSel');
-    if (!unitSel) {
-      const wrap = wInput.parentElement;
-      if (wrap) {
-        wrap.classList.add('weight-wrap');
-        unitSel = document.createElement('select');
-        unitSel.id = 'unitSel';
-        unitSel.innerHTML = '<option value="kg">kg</option><option value="lb">lb</option>';
-        // 回填上次选择 / URL
-        const params = new URLSearchParams(location.search);
-        unitSel.value = params.get('u') || localStorage.getItem('unit') || 'kg';
-        wrap.appendChild(unitSel);
-      }
-    }
-
-    // 以 kg 为“真值”，渲染/输入时做换算，防止累计误差
-    const KG_PER_LB = 0.45359237;
-    const getKg = () => {
-      const raw = parseFloat(wInput.value);
-      if (!isFinite(raw)) return NaN;
-      return (q('#unitSel')?.value === 'lb') ? raw * KG_PER_LB : raw;
-    };
-    const setFromKg = (kgVal) => {
-      const u = q('#unitSel')?.value || 'kg';
-      if (!isFinite(kgVal)) { wInput.value = ''; return; }
-      wInput.value = u === 'lb' ? (kgVal / KG_PER_LB).toFixed(2).replace(/\.00$/,'') : (kgVal.toString());
-    };
-
-    // 当用户修改重量或单位时，重新计算 & 写入 URL
-    const safeCalc = () => { try { window.calc && window.calc(); } catch(e){} };
-    const syncURL = () => {
-      try {
-        const p = new URLSearchParams(location.search);
-        const u = q('#unitSel')?.value || 'kg';
-        const kg = getKg();
-        // w 用当前输入值（用户视角）；另写入真实 kg 值做恢复（gpc = grams per cup? → 保留原参数不变）
-        p.set('u', u);
-        if (isFinite(kg)) { p.set('w', (u==='lb' ? wInput.value : wInput.value)); p.set('kg', kg.toFixed(3)); }
-        // 读取现有上下文参数，最大限度保留你的原逻辑
-        const hash = location.hash || '#calc';
-        const next = location.pathname + '?' + p.toString() + hash;
-        history.replaceState(null, '', next);
-      } catch(e){}
-    };
-
-    // 初始化：若 URL 带 kg= 则用它恢复，保证切换无损
-    (function initFromURL(){
-      const p = new URLSearchParams(location.search);
-      const kg = parseFloat(p.get('kg'));
-      if (isFinite(kg)) setFromKg(kg);
-    })();
-
-    wInput.addEventListener('input', () => { safeCalc(); syncURL(); });
-    q('#unitSel')?.addEventListener('change', () => {
-      // 单位切换时基于当前“真实 kg”回填输入框，不丢精度
-      const kg = getKg();
-      setFromKg(kg);
-      localStorage.setItem('unit', q('#unitSel').value);
-      safeCalc(); syncURL();
-    });
-
-    // 页面初次进入也计算一次
-    safeCalc(); syncURL();
-  }
-
-  /* ---------- 2) 导航 & 语言切换：兜底监听（不覆盖你原逻辑） ---------- */
-  // Router 兜底：如果没有触发 route()，我们手动尝试一次
-  setTimeout(() => { try { window.route && window.route(); } catch(e){} }, 0);
-  window.addEventListener('hashchange', () => { try { window.route && window.route(); } catch(e){} });
-
-  // 语言兜底：发现 <select id="langSel"> 变化后调用 setLang
-  const langSel = document.getElementById('langSel');
-  if (langSel && !langSel._stabilized) {
-    langSel.addEventListener('change', e => {
-      try { window.setLang && window.setLang(e.target.value); } catch(e){}
-      // URL 同步
-      const p = new URLSearchParams(location.search);
-      p.set('lang', e.target.value);
-      history.replaceState(null, '', location.pathname + '?' + p.toString() + (location.hash||'#home'));
-    });
-    langSel._stabilized = true;
-  }
-
-  /* ---------- 3) 极简冒烟测试（右下角小圆点；点击可展开详情） ---------- */
-  (function smoke(){
-    const tests = [];
-    const push = (name, fn) => { try { tests.push({name, pass: !!fn()}); } catch(e){ tests.push({name, pass:false}); } };
-    push('Router mounts', () => document.querySelector('section.route'));
-    push('i18n select', () => document.getElementById('langSel'));
-    push('Copy link button', () => /copy/i.test((document.body.textContent||'')));
-    push('Reset saved', () => /Reset saved|重置已保存/.test((document.body.textContent||'')));
-    push('Unit selector', () => document.getElementById('unitSel'));
-    push('calc() exists', () => typeof window.calc === 'function');
-
-    const allPass = tests.every(t=>t.pass);
-    const ui = document.createElement('div');
-    ui.style.cssText = 'position:fixed;right:12px;bottom:12px;z-index:9999;font:12px/1.2 ui-sans-serif;background:#0b1220cc;color:#e8eefc;border:1px solid #1f2b44;border-radius:999px; padding:8px 10px;cursor:pointer;';
-    ui.title = 'Smoke: ' + tests.map(t=>`${t.pass?'✅':'❌'} ${t.name}`).join('\n');
-    ui.textContent = allPass ? '✅' : '❌';
-    ui.addEventListener('click', ()=>{
-      alert('Smoke Test\n\n' + tests.map(t=>`${t.pass?'✅':'❌'} ${t.name}`).join('\n'));
-    });
-    document.body.appendChild(ui);
-  })();
-})();
-</script>
-<!-- ===== /Stabilization Overlay ===== -->
 <body>
 <header>
   <div class="bar">
@@ -235,24 +101,15 @@ input[type=number]{width:100%}
     <div class="grid">
       <div class="card">
         <div class="actions-right" style="margin-bottom:8px">
-          <button class="badge" id="copyLinkBtn">Copy link</button>
-          <button class="badge" id="resetBtn">Reset saved</button>
+          <button class="badge" data-hook="copy-link">Copy link</button>
+          <button class="badge" data-hook="reset-saved">Reset saved</button>
         </div>
         <h2 data-i18n="home.title">Feeding & Switch Helper</h2>
         <p class="muted" data-i18n="home.pitch">Informational tool for the U.S. market: turn pet food / grooming labels into actionable guidance. Not medical advice.</p>
         <div class="kpi">
-          <div class="box">
-            <div class="muted" data-i18n="home.kcal">RER/MER transparent</div>
-            <div class="mono">RER = 70 × kg^0.75</div>
-          </div>
-          <div class="box">
-            <div class="muted" data-i18n="home.i18n">Multi-language</div>
-            <div class="mono">en / zh / es / fr</div>
-          </div>
-          <div class="box">
-            <div class="muted" data-i18n="home.mode">Single-file SPA</div>
-            <div class="mono">#home #calc #switch #feedback</div>
-          </div>
+          <div class="box"><div class="muted" data-i18n="home.kcal">RER/MER transparent</div><div class="mono">RER = 70 × kg^0.75</div></div>
+          <div class="box"><div class="muted" data-i18n="home.i18n">Multi-language</div><div class="mono">en / zh / es / fr</div></div>
+          <div class="box"><div class="muted" data-i18n="home.mode">Single-file SPA</div><div class="mono">#home #calc #switch #feedback</div></div>
         </div>
       </div>
       <div class="card">
@@ -270,8 +127,8 @@ input[type=number]{width:100%}
   <section id="calc" class="route" hidden>
     <div class="card">
       <div class="actions-right" style="margin-bottom:8px">
-        <button class="badge" id="copyLinkBtn2">Copy link</button>
-        <button class="badge" id="resetBtn2">Reset saved</button>
+        <button class="badge" data-hook="copy-link">Copy link</button>
+        <button class="badge" data-hook="reset-saved">Reset saved</button>
       </div>
       <h2 data-i18n="calc.title">Feeding Calculator</h2>
 
@@ -289,8 +146,7 @@ input[type=number]{width:100%}
           <div class="weight-group">
             <input id="wkg" class="w-input" type="number" min="0" step="0.01" placeholder="10"/>
             <div class="unit-select"><select id="unitSel">
-              <option value="kg">kg</option>
-              <option value="lb">lb</option>
+              <option value="kg">kg</option><option value="lb">lb</option>
             </select></div>
           </div>
         </div>
@@ -324,22 +180,11 @@ input[type=number]{width:100%}
 
       <fieldset class="card" style="padding:12px">
         <legend data-i18n="calc.density">Optional: density for precise grams/cups</legend>
-
         <div class="form-grid">
-          <div>
-            <label for="kcal100" data-i18n="calc.kcal100">kcal / 100 g</label>
-            <input id="kcal100" type="number" min="1" step="1" placeholder="350"/>
-          </div>
-          <div>
-            <label for="kcalCup" data-i18n="calc.kcalCup">kcal / cup</label>
-            <input id="kcalCup" type="number" min="1" step="1" placeholder="—"/>
-          </div>
-          <div>
-            <label for="gPerCup" data-i18n="calc.gPerCup">grams / cup</label>
-            <input id="gPerCup" type="number" min="1" step="1" placeholder="—"/>
-          </div>
+          <div><label for="kcal100" data-i18n="calc.kcal100">kcal / 100 g</label><input id="kcal100" type="number" min="1" step="1" placeholder="350"/></div>
+          <div><label for="kcalCup" data-i18n="calc.kcalCup">kcal / cup</label><input id="kcalCup" type="number" min="1" step="1" placeholder="—"/></div>
+          <div><label for="gPerCup" data-i18n="calc.gPerCup">grams / cup</label><input id="gPerCup" type="number" min="1" step="1" placeholder="—"/></div>
         </div>
-
         <p class="hint muted" data-i18n="calc.cupsNote">Cups calculation needs the food energy density (kcal/100g or kcal/cup) and grams per cup (often on the bag). If unknown, rely on grams/day first.</p>
       </fieldset>
 
@@ -405,4 +250,273 @@ input[type=number]{width:100%}
           <option value="calc" data-i18n="fb.opt.calc">Calculator</option>
           <option value="copy" data-i18n="fb.opt.copy">Copy/Basis & Notes</option>
           <option value="switch" data-i18n="fb.opt.switch">7-Day Switch</option>
-          <option value="bug" data-i18n="fb.opt.bug">
+          <option value="bug" data-i18n="fb.opt.bug">Bug</option>
+          <option value="idea" data-i18n="fb.opt.idea">Idea</option>
+        </select>
+        <button id="fbSend" class="badge" data-i18n="fb.send">Send mail</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+/* ===== i18n ===== */
+const I18N={en:{nav:{home:"Home",calc:"Calc",switch:"7-Day",feedback:"Feedback"},
+home:{title:"Feeding & Switch Helper",pitch:"Informational tool for the U.S. market: turn pet food / grooming labels into actionable guidance. Not medical advice.",kcal:"RER/MER transparent",i18n:"Multi-language",mode:"Single-file SPA",quick:"Quick start",q1:"Go to Calc → enter weight (kg) → pick species & activity factor.",q2:"Review kcal/day and grams/day. Cups/day requires density info from the bag.",q3:"See 7-Day gradual switch plan. If stool soft or upset → hold or step back."},
+calc:{title:"Feeding Calculator",species:"Species",weight:"Weight (kg)",lifeStage:"Life stage",activity:"Activity / life stage (MER factor)",factorHint:"Labels show the actual factor used.",infoTip:"Info (i): RER=70×kg^0.75; MER=RER×factor. Factors are a starting point—adjust by body condition & stool; special stages/diseases: follow your vet.",grams:"Grams/day",cups:"Cups/day",cupsNote:"Cups calculation needs the food energy density (kcal/100g or kcal/cup) and grams per cup (often on the bag). If unknown, rely on grams/day first.",density:"Optional: density for precise grams/cups",kcal100:"kcal / 100 g",kcalCup:"kcal / cup",gPerCup:"grams / cup",customToggle:"Use custom factor",customHint:"Only change if you know what you’re doing (懂则改，不懂别动)。",estNote:"Values marked (est.) are based on a typical density; use your bag’s numbers for precision."},
+switch:{title:"7-Day Gradual Switch",caution:"If stool is soft or pet seems unwell, hold that day or step back one day, then continue after recovery."},
+fb:{title:"Feedback",note:"Choose a category and send us details. No personal health data, please.",send:"Send mail",opt:{calc:"Calculator",copy:"Copy/Basis & Notes",switch:"7-Day Switch",bug:"Bug",idea:"Idea"}}},
+zh:{nav:{home:"首页",calc:"计算",switch:"7天换粮",feedback:"反馈"},
+home:{title:"喂养与换粮助手",pitch:"面向美国市场的信息性工具：把宠物食品/洗护标签转成可执行建议。非医疗建议。",kcal:"RER/MER 透明可解释",i18n:"多语言",mode:"单文件 SPA",quick:"快速开始",q1:"进入 计算 → 输入体重(kg) → 选择物种与活动系数。",q2:"查看 kcal/日 与 g/日。Cups/日 需要包装上的能量密度与每杯克数。",q3:"查看 7 天渐进换粮。如便便偏软或不适 → 保持当日或倒回一天。"},
+calc:{title:"喂养计算器",species:"物种",weight:"体重(kg)",lifeStage:"生命周期",activity:"活动/阶段（MER 系数）",factorHint:"选项名称直接展示所用系数。",infoTip:"提示（i）：RER=70×kg^0.75；MER=RER×系数。系数仅为起点，应结合体况/便便微调；特殊阶段/疾病遵从兽医。",grams:"克/日",cups:"杯/日",cupsNote:"计算杯数需要食品能量密度（kcal/100g 或 kcal/cup）与每杯克数；若未知，请先以 g/日 为准。",density:"可选：用于精算克/杯的密度参数",kcal100:"kcal / 100 g",kcalCup:"kcal / 杯",gPerCup:"克 / 杯",customToggle:"自定义系数",customHint:"懂则改，不懂别动。",estNote:"标注 (估) 的数值基于典型密度；使用包装标注可获得更精确结果。"},
+switch:{title:"7天渐进换粮",caution:"若便便偏软或不适，请保持当日或倒回一天，恢复后再继续。"},
+fb:{title:"反馈",note:"请选择分类并通过邮件发送问题/建议。请勿提交个人健康信息。",send:"发送邮件",opt:{calc:"计算器",copy:"文案/依据与说明",switch:"7天换粮",bug:"缺陷",idea:"想法"}}}};
+
+/* ===== helpers ===== */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+
+/* ===== router ===== */
+function route(){
+  const hash=(location.hash||'#home').split('&')[0];
+  $$('#home,#calc,#switch,#feedback').forEach(sec=>sec.hidden=true);
+  const el=$(hash); if(el) el.hidden=false;
+  $$('nav a').forEach(a=>a.classList.toggle('active',a.getAttribute('href')===hash));
+}
+window.addEventListener('hashchange',route);
+
+/* ===== i18n ===== */
+function setLang(l){
+  const lang=I18N[l]?l:'en';
+  localStorage.setItem('lang',lang);
+  document.documentElement.lang=lang;
+  $$('[data-i18n]').forEach(node=>{
+    const path=node.getAttribute('data-i18n').split('.');
+    let cur=I18N[lang]; for(const k of path){cur=cur?.[k];}
+    if(typeof cur==='string') node.textContent=cur;
+  });
+}
+function initLang(){
+  const params=new URLSearchParams(location.search);
+  const ql=params.get('lang');
+  const lang=ql||localStorage.getItem('lang')||'en';
+  $('#langSel').value=I18N[lang]?lang:'en';
+  setLang($('#langSel').value);
+}
+$('#langSel')?.addEventListener('change',e=>{
+  setLang(e.target.value);
+  const p=new URLSearchParams(location.search); p.set('lang',e.target.value);
+  history.replaceState(null,'',location.pathname+'?'+p.toString()+(location.hash||'#home'));
+});
+
+/* ===== calc factors ===== */
+const SAFETY_MIN_FACTOR=0.8, SAFETY_MAX_FACTOR=6.0;
+const KCAL_PER_100G_DEFAULT=350;
+const STAGE_FACTORS={
+  dog:{adult:[{label:'Resting (1.3)',value:1.3,hint:'low activity / weight mgmt'},{label:'Normal (1.6)',value:1.6,hint:'neutered adult (default)'},{label:'Active (2.0)',value:2.0,hint:'active / working higher'}],
+       puppy:[{label:'Resting (1.6)',value:1.6,hint:'young baseline'},{label:'Normal (2.5)',value:2.5,hint:'typical growth'},{label:'Active (3.0)',value:3.0,hint:'very active / growth'}],
+       senior:[{label:'Resting (1.2)',value:1.2,hint:'lower activity'},{label:'Normal (1.4)',value:1.4,hint:'senior typical'},{label:'Active (1.6)',value:1.6,hint:'active senior'}]},
+  cat:{adult:[{label:'Resting (1.1)',value:1.1,hint:'low activity'},{label:'Normal (1.3)',value:1.3,hint:'neutered adult (default)'},{label:'Active (1.6)',value:1.6,hint:'active / intact higher'}],
+       puppy:[{label:'Resting (1.2)',value:1.2,hint:'~0–12 mo'},{label:'Normal (1.3)',value:1.3,hint:'~0–12 mo'},{label:'Active (1.6)',value:1.6,hint:'~0–12 mo'}],
+       senior:[{label:'Resting (1.1)',value:1.1,hint:'lower activity'},{label:'Normal (1.2)',value:1.2,hint:'senior typical'},{label:'Active (1.3)',value:1.3,hint:'active senior'}]}
+};
+function renderFactors(){
+  const species=$('#species').value||'dog';
+  const stage=$('#lifeStageLbl').value||'adult';
+  const defs=STAGE_FACTORS[species]?.[stage]||STAGE_FACTORS.dog.adult;
+  const box=$('#factors'); box.innerHTML='';
+  defs.forEach((f,i)=>{
+    const w=document.createElement('label');
+    w.className='label-inline';
+    w.innerHTML=`<input type="radio" name="factor" value="${f.value}" ${i===1?'checked':''} aria-label="${f.label}"><span><strong>${f.label}</strong><br/><span class="muted">${f.hint}</span></span>`;
+    box.appendChild(w);
+  });
+}
+
+/* ===== calc ===== */
+const pow075=x=>Math.pow(x,0.75);
+const clamp=(x,a,b)=>Math.min(b,Math.max(a,x));
+const isNum=n=>typeof n==='number'&&!Number.isNaN(n)&&Number.isFinite(n);
+
+// 单位换算：以 kg 为真值，URL 同步（u/w/kg）
+function currentKg(){
+  const u=$('#unitSel')?.value||'kg';
+  const v=parseFloat($('#wkg').value);
+  if(!(v>0)) return NaN;
+  return u==='lb' ? v*0.45359237 : v;
+}
+
+function currentFactor(){
+  if($('#useCustom').checked){
+    const cf=parseFloat($('#customFactor').value);
+    return clamp(isNum(cf)?cf:NaN,SAFETY_MIN_FACTOR,SAFETY_MAX_FACTOR);
+  }
+  const checked=document.querySelector('input[name="factor"]:checked');
+  return parseFloat(checked?.value||'');
+}
+
+function calc(){
+  const kg=currentKg();
+  const f=currentFactor();
+  if(!(kg>0)||!(f>0)){
+    $('#outRER').textContent='—';$('#outMER').textContent='—';
+    $('#outG').textContent='—';$('#outCups').textContent='—';
+    $('#estNote').hidden=true; return;
+  }
+  const RER=70*pow075(kg);
+  const factor=clamp(f,SAFETY_MIN_FACTOR,SAFETY_MAX_FACTOR);
+  const MER=RER*factor;
+
+  const kcal100=parseFloat($('#kcal100').value);
+  const kcalCup=parseFloat($('#kcalCup').value);
+  const gPerCup=parseFloat($('#gPerCup').value);
+
+  let est=false; let kcalPerGram;
+  if(isNum(kcal100)){ kcalPerGram=kcal100/100; }
+  else if(isNum(kcalCup)&&isNum(gPerCup)){ kcalPerGram=kcalCup/gPerCup; }
+  else { kcalPerGram=KCAL_PER_100G_DEFAULT/100; est=true; }
+
+  const gramsPerDay=MER/kcalPerGram;
+  $('#outRER').textContent=Math.round(RER).toLocaleString();
+  $('#outMER').textContent=Math.round(MER).toLocaleString();
+  $('#outG').textContent=Math.round(gramsPerDay).toLocaleString()+(est?' (est.)':'');
+  let cupsTxt='—';
+  if(isNum(gPerCup)){
+    const cups=gramsPerDay/gPerCup;
+    cupsTxt=(Math.round(cups*100)/100).toLocaleString()+(est?' (est.)':'');
+  }
+  $('#outCups').textContent=cupsTxt;
+  $('#estNote').hidden=!est;
+
+  // URL 同步
+  const p=new URLSearchParams(location.search);
+  const u=$('#unitSel')?.value||'kg';
+  p.set('u',u); p.set('w',$('#wkg').value);
+  p.set('kg',kg.toFixed(3));
+  history.replaceState(null,'',location.pathname+'?'+p.toString()+(location.hash||'#calc'));
+}
+
+/* wiring */
+$('#species')?.addEventListener('change',()=>{ renderFactors(); calc(); });
+$('#lifeStageLbl')?.addEventListener('change',()=>{ renderFactors(); calc(); });
+$('#wkg')?.addEventListener('input',calc);
+document.addEventListener('change',e=>{ if(e.target.name==='factor') calc(); });
+['kcal100','kcalCup','gPerCup','customFactor'].forEach(id=>$('#'+id)?.addEventListener('input',calc));
+$('#useCustom')?.addEventListener('change',e=>{
+  const on=e.target.checked;
+  $('#customFactor').disabled=!on;
+  if(on){ $$('input[name="factor"]').forEach(r=>r.checked=false); }
+  calc();
+});
+
+/* copy / reset */
+function copyLink(){
+  navigator.clipboard?.writeText(location.href).then(()=>alert('Link copied')).catch(()=>{});
+}
+function resetSaved(){
+  localStorage.removeItem('lang'); localStorage.removeItem('unit');
+  ['w','kg','sp','stage','usec','f'].forEach(k=>{const p=new URLSearchParams(location.search);p.delete(k);history.replaceState(null,'',location.pathname+'?'+p.toString()+location.hash);});
+  location.reload();
+}
+$$('[data-hook="copy-link"]').forEach(b=>b.addEventListener('click',copyLink));
+$$('[data-hook="reset-saved"]').forEach(b=>b.addEventListener('click',resetSaved));
+
+/* print */
+$('#printBtn')?.addEventListener('click',()=>window.print());
+
+/* feedback */
+$('#fbSend')?.addEventListener('click',()=>{
+  const cat=$('#fbCat').value;
+  const sub=encodeURIComponent(`[Pet A Plan] Feedback: ${cat}`);
+  const body=encodeURIComponent(`Context:\n- URL: ${location.href}\n- Version: ${$('#version').textContent}\n\nDetails:\n`);
+  location.href=`mailto:hello@example.com?subject=${sub}&body=${body}`;
+});
+
+/* boot */
+(function boot(){
+  if(!location.hash) location.hash='#home';
+  // 深链恢复：若 URL 自带 kg，优先填充
+  const p=new URLSearchParams(location.search);
+  const kg=parseFloat(p.get('kg'));
+  const u=p.get('u')||localStorage.getItem('unit')||'kg';
+  if($('#unitSel')) $('#unitSel').value=u;
+  if(isFinite(kg)){
+    const val = u==='lb' ? (kg/0.45359237).toFixed(2).replace(/\.00$/,'') : kg.toString();
+    $('#wkg').value=val;
+  }
+  // 语言
+  initLang();
+  // 因为 unitSel 监听还未挂，手动算一次
+  renderFactors(); calc(); route();
+})();
+</script>
+
+<!-- ===== Stabilization Overlay v20251006i (append-only; safe) ===== -->
+<style id="stabilize-20251006i">
+  #calc .weight-wrap{ display:grid; grid-template-columns: 1fr 116px; gap:10px; align-items:center; }
+  #calc input[type=number]#wkg{ width:100%; }
+  #calc select#unitSel{ width:116px; }
+  .tools-right{ display:flex; gap:10px; justify-content:flex-end; align-items:center; }
+  #calc .row, #calc .form-grid, #calc .factor-row{ contain: layout paint; }
+</style>
+<script id="stabilize-20251006i">
+(function(){
+  const q=s=>document.querySelector(s);
+  const wInput=q('#wkg');
+  if(wInput){
+    let unitSel=q('#unitSel');
+    if(!unitSel){
+      const wrap=wInput.parentElement;
+      if(wrap){
+        wrap.classList.add('weight-wrap');
+        unitSel=document.createElement('select');
+        unitSel.id='unitSel';
+        unitSel.innerHTML='<option value="kg">kg</option><option value="lb">lb</option>';
+        const params=new URLSearchParams(location.search);
+        unitSel.value=params.get('u')||localStorage.getItem('unit')||'kg';
+        wrap.appendChild(unitSel);
+      }
+    }
+    const KG_PER_LB=0.45359237;
+    const getKg=()=>{const raw=parseFloat(wInput.value); if(!isFinite(raw)) return NaN; return (q('#unitSel')?.value==='lb')? raw*KG_PER_LB:raw;};
+    const setFromKg=(kgVal)=>{ const u=q('#unitSel')?.value||'kg'; if(!isFinite(kgVal)){wInput.value='';return;} wInput.value= u==='lb' ? (kgVal/KG_PER_LB).toFixed(2).replace(/\.00$/,'') : (kgVal.toString()); };
+    const safeCalc=()=>{ try{ window.calc&&window.calc(); }catch(e){} };
+    const syncURL=()=>{ try{ const p=new URLSearchParams(location.search); const u=q('#unitSel')?.value||'kg'; const kg=getKg(); p.set('u',u); if(isFinite(kg)){ p.set('w',wInput.value); p.set('kg',kg.toFixed(3)); } const hash=location.hash||'#calc'; history.replaceState(null,'',location.pathname+'?'+p.toString()+hash);}catch(e){} };
+    (function initFromURL(){ const p=new URLSearchParams(location.search); const kg=parseFloat(p.get('kg')); if(isFinite(kg)) setFromKg(kg); })();
+    wInput.addEventListener('input',()=>{ safeCalc(); syncURL(); });
+    q('#unitSel')?.addEventListener('change',()=>{ const kg=getKg(); setFromKg(kg); localStorage.setItem('unit',q('#unitSel').value); safeCalc(); syncURL(); });
+    safeCalc(); syncURL();
+  }
+  setTimeout(()=>{ try{ window.route&&window.route(); }catch(e){} },0);
+  window.addEventListener('hashchange',()=>{ try{ window.route&&window.route(); }catch(e){} });
+  const langSel=document.getElementById('langSel');
+  if(langSel && !langSel._stabilized){
+    langSel.addEventListener('change',e=>{
+      try{ window.setLang&&window.setLang(e.target.value);}catch(e){}
+      const p=new URLSearchParams(location.search); p.set('lang',e.target.value);
+      history.replaceState(null,'',location.pathname+'?'+p.toString()+(location.hash||'#home'));
+    });
+    langSel._stabilized=true;
+  }
+  (function smoke(){
+    const tests=[],push=(n,f)=>{try{tests.push({name:n,pass:!!f()});}catch(e){tests.push({name:n,pass:false});}};
+    push('Router mounts',()=>document.querySelector('section.route'));
+    push('i18n select',()=>document.getElementById('langSel'));
+    push('Copy link button',()=>document.querySelector('[data-hook="copy-link"]'));
+    push('Reset saved',()=>document.querySelector('[data-hook="reset-saved"]'));
+    push('Unit selector',()=>document.getElementById('unitSel'));
+    push('calc() exists',()=>typeof window.calc==='function');
+    const allPass=tests.every(t=>t.pass);
+    const ui=document.createElement('div');
+    ui.style.cssText='position:fixed;right:12px;bottom:12px;z-index:9999;font:12px/1.2 ui-sans-serif;background:#0b1220cc;color:#e8eefc;border:1px solid #1f2b44;border-radius:999px;padding:8px 10px;cursor:pointer;';
+    ui.title='Smoke: '+tests.map(t=>`${t.pass?'✅':'❌'} ${t.name}`).join('\n');
+    ui.textContent=allPass?'✅':'❌';
+    ui.addEventListener('click',()=>{alert('Smoke Test\\n\\n'+tests.map(t=>`${t.pass?'✅':'❌'} ${t.name}`).join('\\n'));});
+    document.body.appendChild(ui);
+  })();
+})();
+</script>
+<!-- ===== /Overlay ===== -->
+
+</body>
+</html>
