@@ -82,6 +82,132 @@ input[type=number]{width:100%}
 .footer{opacity:.9;font-size:.9em}
 </style>
 </head>
+     <!-- ===== Stabilization Overlay v20251006i (append-only; safe) ===== -->
+<style id="stabilize-20251006i">
+  /* 仅作用于 #calc，避免外溢 */
+  #calc .weight-wrap{ display:grid; grid-template-columns: 1fr 116px; gap:10px; align-items:center; }
+  #calc input[type=number]#wkg{ width:100%; }
+  #calc select#unitSel{ width:116px; }
+  /* Copy / Reset 工具条靠右（如果页面里已有，就只做对齐，不改尺寸） */
+  .tools-right{ display:flex; gap:10px; justify-content:flex-end; align-items:center; }
+  /* 保险：避免通用 .row/.grid 之类的规则影响 #calc 内表单 */
+  #calc .row, #calc .form-grid, #calc .factor-row{ contain: layout paint; }
+</style>
+
+<script id="stabilize-20251006i">
+(function(){
+  /* ---------- 1) kg/lb 单位切换（稳定且不影响其它路由） ---------- */
+  const q = sel => document.querySelector(sel);
+  const wInput = q('#wkg');
+  if (wInput) {
+    // 若没有单位选择器，则创建一个，并与 wkg 放在同一行
+    let unitSel = q('#unitSel');
+    if (!unitSel) {
+      const wrap = wInput.parentElement;
+      if (wrap) {
+        wrap.classList.add('weight-wrap');
+        unitSel = document.createElement('select');
+        unitSel.id = 'unitSel';
+        unitSel.innerHTML = '<option value="kg">kg</option><option value="lb">lb</option>';
+        // 回填上次选择 / URL
+        const params = new URLSearchParams(location.search);
+        unitSel.value = params.get('u') || localStorage.getItem('unit') || 'kg';
+        wrap.appendChild(unitSel);
+      }
+    }
+
+    // 以 kg 为“真值”，渲染/输入时做换算，防止累计误差
+    const KG_PER_LB = 0.45359237;
+    const getKg = () => {
+      const raw = parseFloat(wInput.value);
+      if (!isFinite(raw)) return NaN;
+      return (q('#unitSel')?.value === 'lb') ? raw * KG_PER_LB : raw;
+    };
+    const setFromKg = (kgVal) => {
+      const u = q('#unitSel')?.value || 'kg';
+      if (!isFinite(kgVal)) { wInput.value = ''; return; }
+      wInput.value = u === 'lb' ? (kgVal / KG_PER_LB).toFixed(2).replace(/\.00$/,'') : (kgVal.toString());
+    };
+
+    // 当用户修改重量或单位时，重新计算 & 写入 URL
+    const safeCalc = () => { try { window.calc && window.calc(); } catch(e){} };
+    const syncURL = () => {
+      try {
+        const p = new URLSearchParams(location.search);
+        const u = q('#unitSel')?.value || 'kg';
+        const kg = getKg();
+        // w 用当前输入值（用户视角）；另写入真实 kg 值做恢复（gpc = grams per cup? → 保留原参数不变）
+        p.set('u', u);
+        if (isFinite(kg)) { p.set('w', (u==='lb' ? wInput.value : wInput.value)); p.set('kg', kg.toFixed(3)); }
+        // 读取现有上下文参数，最大限度保留你的原逻辑
+        const hash = location.hash || '#calc';
+        const next = location.pathname + '?' + p.toString() + hash;
+        history.replaceState(null, '', next);
+      } catch(e){}
+    };
+
+    // 初始化：若 URL 带 kg= 则用它恢复，保证切换无损
+    (function initFromURL(){
+      const p = new URLSearchParams(location.search);
+      const kg = parseFloat(p.get('kg'));
+      if (isFinite(kg)) setFromKg(kg);
+    })();
+
+    wInput.addEventListener('input', () => { safeCalc(); syncURL(); });
+    q('#unitSel')?.addEventListener('change', () => {
+      // 单位切换时基于当前“真实 kg”回填输入框，不丢精度
+      const kg = getKg();
+      setFromKg(kg);
+      localStorage.setItem('unit', q('#unitSel').value);
+      safeCalc(); syncURL();
+    });
+
+    // 页面初次进入也计算一次
+    safeCalc(); syncURL();
+  }
+
+  /* ---------- 2) 导航 & 语言切换：兜底监听（不覆盖你原逻辑） ---------- */
+  // Router 兜底：如果没有触发 route()，我们手动尝试一次
+  setTimeout(() => { try { window.route && window.route(); } catch(e){} }, 0);
+  window.addEventListener('hashchange', () => { try { window.route && window.route(); } catch(e){} });
+
+  // 语言兜底：发现 <select id="langSel"> 变化后调用 setLang
+  const langSel = document.getElementById('langSel');
+  if (langSel && !langSel._stabilized) {
+    langSel.addEventListener('change', e => {
+      try { window.setLang && window.setLang(e.target.value); } catch(e){}
+      // URL 同步
+      const p = new URLSearchParams(location.search);
+      p.set('lang', e.target.value);
+      history.replaceState(null, '', location.pathname + '?' + p.toString() + (location.hash||'#home'));
+    });
+    langSel._stabilized = true;
+  }
+
+  /* ---------- 3) 极简冒烟测试（右下角小圆点；点击可展开详情） ---------- */
+  (function smoke(){
+    const tests = [];
+    const push = (name, fn) => { try { tests.push({name, pass: !!fn()}); } catch(e){ tests.push({name, pass:false}); } };
+    push('Router mounts', () => document.querySelector('section.route'));
+    push('i18n select', () => document.getElementById('langSel'));
+    push('Copy link button', () => /copy/i.test((document.body.textContent||'')));
+    push('Reset saved', () => /Reset saved|重置已保存/.test((document.body.textContent||'')));
+    push('Unit selector', () => document.getElementById('unitSel'));
+    push('calc() exists', () => typeof window.calc === 'function');
+
+    const allPass = tests.every(t=>t.pass);
+    const ui = document.createElement('div');
+    ui.style.cssText = 'position:fixed;right:12px;bottom:12px;z-index:9999;font:12px/1.2 ui-sans-serif;background:#0b1220cc;color:#e8eefc;border:1px solid #1f2b44;border-radius:999px; padding:8px 10px;cursor:pointer;';
+    ui.title = 'Smoke: ' + tests.map(t=>`${t.pass?'✅':'❌'} ${t.name}`).join('\n');
+    ui.textContent = allPass ? '✅' : '❌';
+    ui.addEventListener('click', ()=>{
+      alert('Smoke Test\n\n' + tests.map(t=>`${t.pass?'✅':'❌'} ${t.name}`).join('\n'));
+    });
+    document.body.appendChild(ui);
+  })();
+})();
+</script>
+<!-- ===== /Stabilization Overlay ===== -->
 <body>
 <header>
   <div class="bar">
