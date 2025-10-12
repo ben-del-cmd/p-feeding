@@ -1,26 +1,30 @@
 <!doctype html>
 <!-- Pet A Plan · single-file SPA
-     TAG: v1.2.3+stable-kg-lb-urlprint-20251011c
-     Fixed:
-     - kg/lb unit switch keeps previous unit context; value converts correctly
-     - URL deep-link & real-time sync (u/w/kg/lang)
-     - Router + i18n + copy/reset + 7-Day print
+     TAG: v1.2.3+stable-20251011-finalB
+     Guarantees:
+     - Hash router (#home/#calc/#switch/#feedback)
+     - i18n stable with URL param `lang`
+     - kg↔lb stable (kg as single source of truth) with URL sync (u/w/kg)
+     - Copy link / Reset saved / Print
+     - No global CSS/JS side-effects outside #calc
 -->
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Pet A Plan · Feeding & Switch Helper (v1.2.3 hotfix)</title>
+<meta name="description" content="Scan → unify terms → feeding calc → 7-day switch tips. Informational only; not medical advice."/>
 <meta name="referrer" content="strict-origin-when-cross-origin"/>
 <meta name="theme-color" content="#0b1220"/>
 <link rel="icon" href="data:,"/>
 <style>
-:root{--bg:#0b1220;--fg:#e8eefc;--muted:#9fb0d0;--card:#111a2e;--line:#1f2b44;--accent:#7aa7ff;--maxw:980px}
-*{box-sizing:border-box}
-html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji"}
+:root{--bg:#0b1220;--fg:#e8eefc;--muted:#9fb0d0;--card:#111a2e;--line:#1f2b44;--accent:#7aa7ff;--maxw:1100px}
+*{box-sizing:border-box} html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);
+  font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji"}
 a{color:var(--accent);text-decoration:none}
 .wrap{max-width:var(--maxw);margin:0 auto;padding:16px 20px 80px}
-header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,rgba(11,18,32,.95),rgba(11,18,32,.75));backdrop-filter:saturate(140%) blur(8px);border-bottom:1px solid var(--line)}
+header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,rgba(11,18,32,.95),rgba(11,18,32,.75));
+  backdrop-filter:saturate(140%) blur(8px);border-bottom:1px solid var(--line)}
 .bar{max-width:var(--maxw);margin:0 auto;display:flex;gap:12px;align-items:center;justify-content:space-between;padding:10px 16px}
 .brand{display:flex;gap:10px;align-items:center;white-space:nowrap}
 .brand .dot{width:10px;height:10px;border-radius:999px;background:var(--accent)}
@@ -31,38 +35,35 @@ nav a.active{background:#16213a}
 .langbox select{background:#0f1930;border:1px solid #24324f;border-radius:10px;color:var(--fg);padding:8px 10px;min-width:160px}
 .card{background:var(--card);border:1px solid #1c2740;border-radius:16px;padding:16px}
 .grid{display:grid;gap:14px}
-@media(min-width:720px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(min-width:760px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .kpi{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 .kpi .box{background:#0f1930;border:1px solid #22304a;border-radius:14px;padding:12px}
 .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
-.muted{color:var(--muted)}
-hr{border:none;border-top:1px solid var(--line);margin:10px 0}
-.hint{font-size:.9em}
+.muted{color:var(--muted)} .hint{font-size:.9em} hr{border:none;border-top:1px solid var(--line);margin:10px 0}
 button,select,input{background:#0f1930;border:1px solid #24324f;border-radius:10px;color:var(--fg);padding:8px 10px}
 input[type=number]{width:100%}
+.actions-right{display:flex;gap:8px;justify-content:flex-end}
+.badge{border:1px solid #24324f;border-radius:10px;padding:6px 10px;background:#0f1930;color:var(--fg)}
 
 /* form layout */
 .form-grid{display:grid;grid-template-columns:repeat(3,minmax(220px,1fr));gap:14px 16px;align-items:end}
 .form-grid > *{display:flex;flex-direction:column;gap:6px;min-width:0}
-.factor-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px 14px}
+.factor-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px 14px}
 .label-inline{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:8px;padding:10px 12px;background:#0f1930;border:1px solid #24324f;border-radius:12px}
 .label-inline input[type=radio]{margin:0;transform:translateY(-1px)}
 .label-inline > span{line-height:1.15}
-.actions-right{display:flex;gap:8px;justify-content:flex-end}
-.badge{border:1px solid #24324f;border-radius:10px;padding:6px 10px;background:#0f1930;color:var(--fg)}
 
-/* Weight unit UI scoped */
-#calc .weight-group{display:flex;gap:8px;align-items:center}
-#calc .weight-group .w-input{flex:1 1 auto}
-#calc .weight-group .unit-select{flex:0 0 116px}
+/* Weight unit UI ONLY inside #calc */
+#calc .weight-group{display:grid;grid-template-columns:1fr 120px;gap:10px;align-items:center}
 #calc .weight-group .unit-select select{width:100%}
 
 /* results */
 .res3{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-@media(min-width:880px){.res3{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(min-width:900px){.res3{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .box.out{background:#0f1930;border:1px solid #22304a;border-radius:14px;padding:14px}
 
+/* print */
 @media print{
   header,.langbox,nav,.actions-right{display:none!important}
   body{background:white;color:black}
@@ -78,9 +79,9 @@ input[type=number]{width:100%}
   <div class="bar">
     <div class="brand"><span class="dot"></span><strong>Pet A Plan</strong><span class="muted" id="version">v1.2.3 hotfix</span></div>
     <nav aria-label="Primary">
-      <a href="#home"   data-i18n="nav.home" class="active">Home</a>
-      <a href="#calc"   data-i18n="nav.calc">Calc</a>
-      <a href="#switch" data-i18n="nav.switch">7-Day</a>
+      <a href="#home"     data-i18n="nav.home"     class="active">Home</a>
+      <a href="#calc"     data-i18n="nav.calc">Calc</a>
+      <a href="#switch"   data-i18n="nav.switch">7-Day</a>
       <a href="#feedback" data-i18n="nav.feedback">Feedback</a>
     </nav>
     <div class="langbox">
@@ -143,7 +144,7 @@ input[type=number]{width:100%}
         <div>
           <label for="wkg" data-i18n="calc.weight">Weight (kg)</label>
           <div class="weight-group">
-            <input id="wkg" class="w-input" type="number" min="0" step="0.01" placeholder="10"/>
+            <input id="wkg" type="number" min="0" step="0.01" placeholder="10"/>
             <div class="unit-select"><select id="unitSel">
               <option value="kg">kg</option><option value="lb">lb</option>
             </select></div>
@@ -181,8 +182,8 @@ input[type=number]{width:100%}
         <legend data-i18n="calc.density">Optional: density for precise grams/cups</legend>
         <div class="form-grid">
           <div><label for="kcal100" data-i18n="calc.kcal100">kcal / 100 g</label><input id="kcal100" type="number" min="1" step="1" placeholder="350"/></div>
-          <div><label for="kcalCup" data-i18n="calc.kcalCup">kcal / cup</label><input id="kcalCup" type="number" min="1" step="1" placeholder="—"/></div>
-          <div><label for="gPerCup" data-i18n="calc.gPerCup">grams / cup</label><input id="gPerCup" type="number" min="1" step="1" placeholder="—"/></div>
+          <div><label for="kcalCup"  data-i18n="calc.kcalCup">kcal / cup</label><input id="kcalCup" type="number" min="1" step="1" placeholder="—"/></div>
+          <div><label for="gPerCup"  data-i18n="calc.gPerCup">grams / cup</label><input id="gPerCup" type="number" min="1" step="1" placeholder="—"/></div>
         </div>
         <p class="hint muted" data-i18n="calc.cupsNote">Cups calculation needs the food energy density (kcal/100g or kcal/cup) and grams per cup (often on the bag). If unknown, rely on grams/day first.</p>
       </fieldset>
@@ -207,7 +208,6 @@ input[type=number]{width:100%}
           <li><strong>Dog</strong>：低活动/体重管理 1.2–1.4；<strong>已绝育成犬 ~1.6（默认）</strong>；未绝育 ~1.8；活跃/工作 2.0–5.0；幼犬/哺乳更高。</li>
           <li><strong>Cat</strong>：低活动/肥胖倾向 1.0–1.2；<strong>已绝育成猫 ~1.3（1.2–1.4）</strong>；未绝育 ~1.4–1.6；幼猫/哺乳更高。</li>
         </ul>
-        <p><strong>7 天渐进换粮</strong>：90/10→80/20→…→10/90。如出现软便/不适，保持当日或倒回一天再继续。</p>
         <hr/>
         <p><strong>RER</strong> = <code>70 × weight(kg)^0.75</code>; <strong>MER</strong> = <code>RER × factor</code>.</p>
         <ul>
@@ -246,11 +246,11 @@ input[type=number]{width:100%}
       <p class="muted" data-i18n="fb.note">Choose a category and send us details. No personal health data, please.</p>
       <div class="row">
         <select id="fbCat">
-          <option value="calc" data-i18n="fb.opt.calc">Calculator</option>
-          <option value="copy" data-i18n="fb.opt.copy">Copy/Basis & Notes</option>
+          <option value="calc"   data-i18n="fb.opt.calc">Calculator</option>
+          <option value="copy"   data-i18n="fb.opt.copy">Copy/Basis & Notes</option>
           <option value="switch" data-i18n="fb.opt.switch">7-Day Switch</option>
-          <option value="bug" data-i18n="fb.opt.bug">Bug</option>
-          <option value="idea" data-i18n="fb.opt.idea">Idea</option>
+          <option value="bug"    data-i18n="fb.opt.bug">Bug</option>
+          <option value="idea"   data-i18n="fb.opt.idea">Idea</option>
         </select>
         <button id="fbSend" class="badge" data-i18n="fb.send">Send mail</button>
       </div>
@@ -258,25 +258,41 @@ input[type=number]{width:100%}
   </section>
 </main>
 
-<!-- ===================== 业务层脚本（路由、i18n、计算等） ===================== -->
 <script>
-/* ===== i18n ===== */
-const I18N={en:{nav:{home:"Home",calc:"Calc",switch:"7-Day",feedback:"Feedback"},
-home:{title:"Feeding & Switch Helper",pitch:"Informational tool for the U.S. market: turn pet food / grooming labels into actionable guidance. Not medical advice.",kcal:"RER/MER transparent",i18n:"Multi-language",mode:"Single-file SPA",quick:"Quick start",q1:"Go to Calc → enter weight (kg) → pick species & activity factor.",q2:"Review kcal/day and grams/day. Cups/day requires density info from the bag.",q3:"See 7-Day gradual switch plan. If stool soft or upset → hold or step back."},
-calc:{title:"Feeding Calculator",species:"Species",weight:"Weight (kg)",lifeStage:"Life stage",activity:"Activity / life stage (MER factor)",factorHint:"Labels show the actual factor used.",infoTip:"Info (i): RER=70×kg^0.75; MER=RER×factor. Factors are a starting point—adjust by body condition & stool; special stages/diseases: follow your vet.",grams:"Grams/day",cups:"Cups/day",cupsNote:"Cups calculation needs the food energy density (kcal/100g or kcal/cup) and grams per cup (often on the bag). If unknown, rely on grams/day first.",density:"Optional: density for precise grams/cups",kcal100:"kcal / 100 g",kcalCup:"kcal / cup",gPerCup:"grams / cup",customToggle:"Use custom factor",customHint:"Only change if you know what you’re doing (懂则改，不懂别动)。",estNote:"Values marked (est.) are based on a typical density; use your bag’s numbers for precision."},
-switch:{title:"7-Day Gradual Switch",caution:"If stool is soft or pet seems unwell, hold that day or step back one day, then continue after recovery."},
-fb:{title:"Feedback",note:"Choose a category and send us details. No personal health data, please.",send:"Send mail",opt:{calc:"Calculator",copy:"Copy/Basis & Notes",switch:"7-Day Switch",bug:"Bug",idea:"Idea"}}},
-zh:{nav:{home:"首页",calc:"计算",switch:"7天换粮",feedback:"反馈"},
-home:{title:"喂养与换粮助手",pitch:"面向美国市场的信息性工具：把宠物食品/洗护标签转成可执行建议。非医疗建议。",kcal:"RER/MER 透明可解释",i18n:"多语言",mode:"单文件 SPA",quick:"快速开始",q1:"进入 计算 → 输入体重(kg) → 选择物种与活动系数。",q2:"查看 kcal/日 与 g/日。Cups/日 需要包装上的能量密度与每杯克数。",q3:"查看 7 天渐进换粮。如便便偏软或不适 → 保持当日或倒回一天。"},
-calc:{title:"喂养计算器",species:"物种",weight:"体重(kg)",lifeStage:"生命周期",activity:"活动/阶段（MER 系数）",factorHint:"选项名称直接展示所用系数。",infoTip:"提示（i）：RER=70×kg^0.75；MER=RER×系数。系数仅为起点，应结合体况/便便微调；特殊阶段/疾病遵从兽医。",grams:"克/日",cups:"杯/日",cupsNote:"计算杯数需要食品能量密度（kcal/100g 或 kcal/cup）与每杯克数；若未知，请先以 g/日 为准。",density:"可选：用于精算克/杯的密度参数",kcal100:"kcal / 100 g",kcalCup:"kcal / 杯",gPerCup:"克 / 杯",customToggle:"自定义系数",customHint:"懂则改，不懂别动。",estNote:"标注 (估) 的数值基于典型密度；使用包装标注可获得更精确结果。"},
-switch:{title:"7天渐进换粮",caution:"若便便偏软或不适，请保持当日或倒回一天，恢复后再继续。"},
-fb:{title:"反馈",note:"请选择分类并通过邮件发送问题/建议。请勿提交个人健康信息。",send:"发送邮件",opt:{calc:"计算器",copy:"文案/依据与说明",switch:"7天换粮",bug:"缺陷",idea:"想法"}}}};
+/* ========================= i18n dictionary ========================= */
+const I18N={
+  en:{nav:{home:"Home",calc:"Calc",switch:"7-Day",feedback:"Feedback"},
+      home:{title:"Feeding & Switch Helper",pitch:"Informational tool for the U.S. market: turn pet food / grooming labels into actionable guidance. Not medical advice.",kcal:"RER/MER transparent",i18n:"Multi-language",mode:"Single-file SPA",quick:"Quick start",q1:"Go to Calc → enter weight (kg) → pick species & activity factor.",q2:"Review kcal/day and grams/day. Cups/day requires density info from the bag.",q3:"See 7-Day gradual switch plan. If stool soft or upset → hold or step back."},
+      calc:{title:"Feeding Calculator",species:"Species",weight:"Weight (kg)",lifeStage:"Life stage",activity:"Activity / life stage (MER factor)",factorHint:"Labels show the actual factor used.",infoTip:"Info (i): RER=70×kg^0.75; MER=RER×factor. Factors are a starting point—adjust by body condition & stool; special stages/diseases: follow your vet.",grams:"Grams/day",cups:"Cups/day",cupsNote:"Cups calculation needs the food energy density (kcal/100g or kcal/cup) and grams per cup (often on the bag). If unknown, rely on grams/day first.",density:"Optional: density for precise grams/cups",kcal100:"kcal / 100 g",kcalCup:"kcal / cup",gPerCup:"grams / cup",customToggle:"Use custom factor",customHint:"Only change if you know what you’re doing (懂则改，不懂别动)。",estNote:"Values marked (est.) are based on a typical density; use your bag’s numbers for precision."},
+      switch:{title:"7-Day Gradual Switch",caution:"If stool is soft or pet seems unwell, hold that day or step back one day, then continue after recovery."},
+      fb:{title:"Feedback",note:"Choose a category and send us details. No personal health data, please.",send:"Send mail",
+          opt:{calc:"Calculator",copy:"Copy/Basis & Notes",switch:"7-Day Switch",bug:"Bug",idea:"Idea"}}},
+  zh:{nav:{home:"首页",calc:"计算",switch:"7天换粮",feedback:"反馈"},
+      home:{title:"喂养与换粮助手",pitch:"面向美国市场的信息性工具：把宠物食品/洗护标签转成可执行建议。非医疗建议。",kcal:"RER/MER 透明可解释",i18n:"多语言",mode:"单文件 SPA",quick:"快速开始",q1:"进入 计算 → 输入体重(kg) → 选择物种与活动系数。",q2:"查看 kcal/日 与 g/日。Cups/日 需要包装上的能量密度与每杯克数。",q3:"查看 7 天渐进换粮。如便便偏软或不适 → 保持当日或倒回一天。"},
+      calc:{title:"喂养计算器",species:"物种",weight:"体重(kg)",lifeStage:"生命周期",activity:"活动/阶段（MER 系数）",factorHint:"选项名称直接展示所用系数。",infoTip:"提示（i）：RER=70×kg^0.75；MER=RER×系数。系数仅为起点，应结合体况/便便微调；特殊阶段/疾病遵从兽医。",grams:"克/日",cups:"杯/日",cupsNote:"计算杯数需要食品能量密度（kcal/100g 或 kcal/cup）与每杯克数；若未知，请先以 g/日 为准。",density:"可选：用于精算克/杯的密度参数",kcal100:"kcal / 100 g",kcalCup:"kcal / 杯",gPerCup:"克 / 杯",customToggle:"自定义系数",customHint:"懂则改，不懂别动。",estNote:"标注 (估) 的数值基于典型密度；使用包装标注可获得更精确结果。"},
+      switch:{title:"7天渐进换粮",caution:"若便便偏软或不适，请保持当日或倒回一天，恢复后再继续。"},
+      fb:{title:"反馈",note:"请选择分类并通过邮件发送问题/建议。请勿提交个人健康信息。",send:"发送邮件",
+          opt:{calc:"计算器",copy:"文案/依据与说明",switch:"7天换粮",bug:"缺陷",idea:"想法"}}},
+  es:{nav:{home:"Inicio",calc:"Cálculo",switch:"7-Días",feedback:"Feedback"},
+      home:{title:"Asistente de Alimentación y Cambio",pitch:"Herramienta informativa para EE. UU.: convierte etiquetas en guías accionables. No es consejo médico.",kcal:"RER/MER transparente",i18n:"Multi-idioma",mode:"SPA de archivo único",quick:"Inicio rápido",q1:"Ve a Cálculo → ingresa peso (kg) → elige especie y factor.",q2:"Revisa kcal/día y g/día. Tazas/día requiere densidad de la bolsa.",q3:"Plan de cambio gradual 7 días; si hay heces blandas, pausa o retrocede un día."},
+      calc:{title:"Calculadora de Alimentación",species:"Especie",weight:"Peso (kg)",lifeStage:"Etapa de vida",activity:"Actividad / etapa (factor MER)",factorHint:"Las etiquetas muestran el factor real usado.",infoTip:"Info: RER=70×kg^0.75; MER=RER×factor; ajusta por condición corporal y heces; etapas especiales: sigue a tu veterinario.",grams:"Gramos/día",cups:"Tazas/día",cupsNote:"Para calcular tazas necesitas (kcal/100g o kcal/taza) y gramos por taza.",density:"Opcional: densidad para mayor precisión",kcal100:"kcal / 100 g",kcalCup:"kcal / taza",gPerCup:"gramos / taza",customToggle:"Usar factor personalizado",customHint:"Cámbialo solo si sabes lo que haces.",estNote:"(est.) basado en densidad típica; usa tu bolsa para precisión."},
+      switch:{title:"Cambio gradual de 7 días",caution:"Si hay heces blandas o malestar, mantén el día o retrocede uno; continúa tras recuperarse."},
+      fb:{title:"Feedback",note:"Elige categoría y envíanos detalles. Sin datos de salud personales.",send:"Enviar correo",
+          opt:{calc:"Calculadora",copy:"Texto/Bases",switch:"Cambio 7 días",bug:"Bug",idea:"Idea"}}},
+  fr:{nav:{home:"Accueil",calc:"Calcul",switch:"7 jours",feedback:"Retour"},
+      home:{title:"Assistant d’alimentation & transition",pitch:"Outil d’information pour les É.-U. : transformer les étiquettes en conseils actionnables. Pas d’avis médical.",kcal:"RER/MER transparent",i18n:"Multilingue",mode:"SPA fichier unique",quick:"Démarrage rapide",q1:"Aller à Calcul → saisir le poids (kg) → choisir espèce & facteur.",q2:"Vérifier kcal/jour et g/jour. Tasses/jour nécessite la densité.",q3:"Plan de transition 7 jours ; selles molles ? stopper ou revenir d’un jour."},
+      calc:{title:"Calculateur d’alimentation",species:"Espèce",weight:"Poids (kg)",lifeStage:"Étape de vie",activity:"Activité / étape (facteur MER)",factorHint:"Les libellés affichent le facteur réel utilisé.",infoTip:"Info : RER=70×kg^0.75 ; MER=RER×facteur ; ajuster selon condition & selles ; cas particuliers : vétérinaire.",grams:"Grammes/jour",cups:"Tasses/jour",cupsNote:"Le calcul des tasses nécessite (kcal/100g ou kcal/tasse) et grammes par tasse.",density:"Optionnel : densité pour précision",kcal100:"kcal / 100 g",kcalCup:"kcal / tasse",gPerCup:"grammes / tasse",customToggle:"Facteur personnalisé",customHint:"Changer seulement si vous savez ce que vous faites.",estNote:"(est.) basé sur densité typique ; utilisez les données du sac."},
+      switch:{title:"Transition sur 7 jours",caution:"Si selles molles ou malaise, conserver la journée ou revenir d’un jour ; reprendre après."},
+      fb:{title:"Retour",note:"Choisissez une catégorie et envoyez les détails. Pas de données de santé personnelles.",send:"Envoyer un mail",
+          opt:{calc:"Calculateur",copy:"Texte/Bases",switch:"Transition 7 jours",bug:"Bug",idea:"Idée"}}}
+};
 
-/* helpers */
+/* ========================= helpers ========================= */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const KG_PER_LB=0.45359237;
 
-/* router */
+/* ========================= router ========================= */
 function route(){
   const hash=(location.hash||'#home').split('&')[0];
   $$('#home,#calc,#switch,#feedback').forEach(sec=>sec.hidden=true);
@@ -285,41 +301,52 @@ function route(){
 }
 window.addEventListener('hashchange',route);
 
-/* i18n */
-function setLang(l){
-  const lang=I18N[l]?l:'en';
-  localStorage.setItem('lang',lang);
-  document.documentElement.lang=lang;
+/* ========================= i18n ========================= */
+function setLang(lang){
+  const l=I18N[lang]?lang:'en';
+  localStorage.setItem('lang',l);
+  document.documentElement.lang=l;
   $$('[data-i18n]').forEach(node=>{
     const path=node.getAttribute('data-i18n').split('.');
-    let cur=I18N[lang]; for(const k of path){cur=cur?.[k];}
+    let cur=I18N[l]; for(const k of path){cur=cur?.[k];}
     if(typeof cur==='string') node.textContent=cur;
   });
+  // 同步 URL
+  const p=new URLSearchParams(location.search); p.set('lang',l);
+  history.replaceState(null,'',location.pathname+'?'+p.toString()+(location.hash||'#home'));
 }
 function initLang(){
-  const params=new URLSearchParams(location.search);
-  const ql=params.get('lang');
-  const lang=ql||localStorage.getItem('lang')||'en';
-  $('#langSel').value=I18N[lang]?lang:'en';
+  const p=new URLSearchParams(location.search);
+  const want=p.get('lang')||localStorage.getItem('lang')||'en';
+  $('#langSel').value=I18N[want]?want:'en';
   setLang($('#langSel').value);
 }
-$('#langSel')?.addEventListener('change',e=>{
-  setLang(e.target.value);
-  const p=new URLSearchParams(location.search); p.set('lang',e.target.value);
-  history.replaceState(null,'',location.pathname+'?'+p.toString()+(location.hash||'#home'));
-});
+$('#langSel').addEventListener('change',e=>setLang(e.target.value));
 
-/* calc factors */
-const SAFETY_MIN_FACTOR=0.8, SAFETY_MAX_FACTOR=6.0;
-const KCAL_PER_100G_DEFAULT=350;
+/* ========================= factors ========================= */
 const STAGE_FACTORS={
-  dog:{adult:[{label:'Resting (1.3)',value:1.3,hint:'low activity / weight mgmt'},{label:'Normal (1.6)',value:1.6,hint:'neutered adult (default)'},{label:'Active (2.0)',value:2.0,hint:'active / working higher'}],
-       puppy:[{label:'Resting (1.6)',value:1.6,hint:'young baseline'},{label:'Normal (2.5)',value:2.5,hint:'typical growth'},{label:'Active (3.0)',value:3.0,hint:'very active / growth'}],
-       senior:[{label:'Resting (1.2)',value:1.2,hint:'lower activity'},{label:'Normal (1.4)',value:1.4,hint:'senior typical'},{label:'Active (1.6)',value:1.6,hint:'active senior'}]},
-  cat:{adult:[{label:'Resting (1.1)',value:1.1,hint:'low activity'},{label:'Normal (1.3)',value:1.3,hint:'neutered adult (default)'},{label:'Active (1.6)',value:1.6,hint:'active / intact higher'}],
-       puppy:[{label:'Resting (1.2)',value:1.2,hint:'~0–12 mo'},{label:'Normal (1.3)',value:1.3,hint:'~0–12 mo'},{label:'Active (1.6)',value:1.6,hint:'~0–12 mo'}],
-       senior:[{label:'Resting (1.1)',value:1.1,hint:'lower activity'},{label:'Normal (1.2)',value:1.2,hint:'senior typical'},{label:'Active (1.3)',value:1.3,hint:'active senior'}]}
+  dog:{adult:[{label:'Resting (1.3)',value:1.3,hint:'low activity / weight mgmt'},
+              {label:'Normal (1.6)', value:1.6,hint:'neutered adult (default)'},
+              {label:'Active (2.0)',  value:2.0,hint:'active / working higher'}],
+       puppy:[{label:'Resting (1.6)',value:1.6,hint:'young baseline'},
+              {label:'Normal (2.5)', value:2.5,hint:'typical growth'},
+              {label:'Active (3.0)',  value:3.0,hint:'very active / growth'}],
+       senior:[{label:'Resting (1.2)',value:1.2,hint:'lower activity'},
+               {label:'Normal (1.4)', value:1.4,hint:'senior typical'},
+               {label:'Active (1.6)',  value:1.6,hint:'active senior'}]},
+  cat:{adult:[{label:'Resting (1.1)',value:1.1,hint:'low activity'},
+              {label:'Normal (1.3)', value:1.3,hint:'neutered adult (default)'},
+              {label:'Active (1.6)',  value:1.6,hint:'active / intact higher'}],
+       puppy:[{label:'Resting (1.2)',value:1.2,hint:'~0–12 mo'},
+              {label:'Normal (1.3)', value:1.3,hint:'~0–12 mo'},
+              {label:'Active (1.6)',  value:1.6,hint:'~0–12 mo'}],
+       senior:[{label:'Resting (1.1)',value:1.1,hint:'lower activity'},
+               {label:'Normal (1.2)', value:1.2,hint:'senior typical'},
+               {label:'Active (1.3)',  value:1.3,hint:'active senior'}]}
 };
+const clamp=(x,a,b)=>Math.min(b,Math.max(a,x));
+const SAFETY_MIN_FACTOR=0.8,SAFETY_MAX_FACTOR=6.0;
+
 function renderFactors(){
   const species=$('#species').value||'dog';
   const stage=$('#lifeStageLbl').value||'adult';
@@ -328,77 +355,92 @@ function renderFactors(){
   defs.forEach((f,i)=>{
     const w=document.createElement('label');
     w.className='label-inline';
-    w.innerHTML=`<input type="radio" name="factor" value="${f.value}" ${i===1?'checked':''} aria-label="${f.label}"><span><strong>${f.label}</strong><br/><span class="muted">${f.hint}</span></span>`;
+    w.innerHTML=`<input type="radio" name="factor" value="${f.value}" ${i===1?'checked':''}>
+      <span><strong>${f.label}</strong><br/><span class="muted">${f.hint}</span></span>`;
     box.appendChild(w);
   });
 }
 
-/* calc */
-const pow075=x=>Math.pow(x,0.75);
-const clamp=(x,a,b)=>Math.min(b,Math.max(a,x));
-const isNum=n=>typeof n==='number'&&!Number.isNaN(n)&&Number.isFinite(n);
-
-function currentKg(){
-  const u=$('#unitSel')?.value||'kg';
+/* ========================= calc & unit ========================= */
+function trueKg(){ // read UI → return kg
+  const u=$('#unitSel').value;
   const v=parseFloat($('#wkg').value);
   if(!(v>0)) return NaN;
-  return u==='lb' ? v*0.45359237 : v;
+  return u==='lb'? v*KG_PER_LB : v;
 }
+function setFromKg(kg){ // write UI from kg
+  const u=$('#unitSel').value;
+  if(!isFinite(kg)){ $('#wkg').value=''; return; }
+  $('#wkg').value = u==='lb' ? (kg/KG_PER_LB).toFixed(2).replace(/\.00$/,'') : (kg.toString());
+}
+function syncURL(extra={}){
+  const p=new URLSearchParams(location.search);
+  p.set('lang',$('#langSel').value);
+  p.set('sp',$('#species').value);
+  p.set('stage',$('#lifeStageLbl').value);
+  p.set('u',$('#unitSel').value);
+  p.set('w',$('#wkg').value);
+  const kg=trueKg(); if(isFinite(kg)) p.set('kg',kg.toFixed(3));
+  const usec=$('#useCustom').checked; p.set('usec',usec?1:0);
+  if(usec){ const f=parseFloat($('#customFactor').value); if(isFinite(f)) p.set('f',f.toString()); }
+  Object.entries(extra).forEach(([k,v])=>p.set(k,v));
+  history.replaceState(null,'',location.pathname+'?'+p.toString()+(location.hash||'#calc'));
+}
+
 function currentFactor(){
   if($('#useCustom').checked){
     const cf=parseFloat($('#customFactor').value);
-    return clamp(isNum(cf)?cf:NaN,SAFETY_MIN_FACTOR,SAFETY_MAX_FACTOR);
+    return clamp(cf,SAFETY_MIN_FACTOR,SAFETY_MAX_FACTOR);
   }
   const checked=document.querySelector('input[name="factor"]:checked');
   return parseFloat(checked?.value||'');
 }
+
 function calc(){
-  const kg=currentKg();
+  const kg=trueKg();
   const f=currentFactor();
   if(!(kg>0)||!(f>0)){
     $('#outRER').textContent='—';$('#outMER').textContent='—';
     $('#outG').textContent='—';$('#outCups').textContent='—';
-    $('#estNote').hidden=true; return;
+    $('#estNote').hidden=true; syncURL(); return;
   }
-  const RER=70*pow075(kg);
+  const RER=70*Math.pow(kg,0.75);
   const factor=clamp(f,SAFETY_MIN_FACTOR,SAFETY_MAX_FACTOR);
   const MER=RER*factor;
 
   const kcal100=parseFloat($('#kcal100').value);
   const kcalCup=parseFloat($('#kcalCup').value);
   const gPerCup=parseFloat($('#gPerCup').value);
-
   let est=false; let kcalPerGram;
-  if(isNum(kcal100)){ kcalPerGram=kcal100/100; }
-  else if(isNum(kcalCup)&&isNum(gPerCup)){ kcalPerGram=kcalCup/gPerCup; }
-  else { kcalPerGram=KCAL_PER_100G_DEFAULT/100; est=true; }
+  if(isFinite(kcal100)){ kcalPerGram=kcal100/100; }
+  else if(isFinite(kcalCup)&&isFinite(gPerCup)){ kcalPerGram=kcalCup/gPerCup; }
+  else { kcalPerGram=350/100; est=true; }
 
   const gramsPerDay=MER/kcalPerGram;
   $('#outRER').textContent=Math.round(RER).toLocaleString();
   $('#outMER').textContent=Math.round(MER).toLocaleString();
   $('#outG').textContent=Math.round(gramsPerDay).toLocaleString()+(est?' (est.)':'');
   let cupsTxt='—';
-  if(isNum(gPerCup)){
+  if(isFinite(gPerCup)){
     const cups=gramsPerDay/gPerCup;
     cupsTxt=(Math.round(cups*100)/100).toLocaleString()+(est?' (est.)':'');
   }
   $('#outCups').textContent=cupsTxt;
   $('#estNote').hidden=!est;
 
-  const p=new URLSearchParams(location.search);
-  const u=$('#unitSel')?.value||'kg';
-  p.set('u',u); p.set('w',$('#wkg').value);
-  p.set('kg',kg.toFixed(3));
-  history.replaceState(null,'',location.pathname+'?'+p.toString()+(location.hash||'#calc'));
+  syncURL();
 }
 
-/* wiring */
-$('#species')?.addEventListener('change',()=>{ renderFactors(); calc(); });
-$('#lifeStageLbl')?.addEventListener('change',()=>{ renderFactors(); calc(); });
-$('#wkg')?.addEventListener('input',calc);
+/* ========================= wire events ========================= */
+$('#species').addEventListener('change',()=>{renderFactors(); calc();});
+$('#lifeStageLbl').addEventListener('change',()=>{renderFactors(); calc();});
 document.addEventListener('change',e=>{ if(e.target.name==='factor') calc(); });
+
+$('#wkg').addEventListener('input',calc);
+$('#unitSel').addEventListener('change',()=>{ const kg=trueKg(); setFromKg(kg); calc(); localStorage.setItem('unit',$('#unitSel').value); });
+
 ['kcal100','kcalCup','gPerCup','customFactor'].forEach(id=>$('#'+id)?.addEventListener('input',calc));
-$('#useCustom')?.addEventListener('change',e=>{
+$('#useCustom').addEventListener('change',e=>{
   const on=e.target.checked;
   $('#customFactor').disabled=!on;
   if(on){ $$('input[name="factor"]').forEach(r=>r.checked=false); }
@@ -409,10 +451,7 @@ $('#useCustom')?.addEventListener('change',e=>{
 function copyLink(){ navigator.clipboard?.writeText(location.href).then(()=>alert('Link copied')).catch(()=>{}); }
 function resetSaved(){
   localStorage.removeItem('lang'); localStorage.removeItem('unit');
-  const p=new URLSearchParams(location.search);
-  ['w','kg','sp','stage','usec','f','lang','u'].forEach(k=>p.delete(k));
-  history.replaceState(null,'',location.pathname+'?'+p.toString()+(location.hash||'#home'));
-  location.reload();
+  history.replaceState(null,'',location.pathname+'#home'); location.reload();
 }
 $$('[data-hook="copy-link"]').forEach(b=>b.addEventListener('click',copyLink));
 $$('[data-hook="reset-saved"]').forEach(b=>b.addEventListener('click',resetSaved));
@@ -424,80 +463,31 @@ $('#fbSend')?.addEventListener('click',()=>{
   location.href=`mailto:hello@example.com?subject=${sub}&body=${body}`;
 });
 
-/* boot */
+/* ========================= boot: deep-link restore ========================= */
 (function boot(){
   if(!location.hash) location.hash='#home';
+
+  // lang first
+  initLang();
+
+  // deep link
   const p=new URLSearchParams(location.search);
-  const lang=p.get('lang')||localStorage.getItem('lang')||'en';
-  $('#langSel').value=I18N[lang]?lang:'en';
-  setLang($('#langSel').value);
-  renderFactors(); calc(); route();
-})();
-</script>
+  const sp=p.get('sp'); if(sp) $('#species').value=sp;
+  const stage=p.get('stage'); if(stage) $('#lifeStageLbl').value=stage;
+  const u=p.get('u')||localStorage.getItem('unit')||'kg'; $('#unitSel').value=(u==='lb'?'lb':'kg');
+  const kg=parseFloat(p.get('kg'));
+  if(isFinite(kg)) setFromKg(kg);
 
-<!-- ===================== 稳定层脚本（仅兜底与单位切换修正） ===================== -->
-<script>
-/* Hard-Fix: kg/lb 切换保留旧单位上下文，避免读错值 */
-(function () {
-  const sel  = document.getElementById('unitSel');
-  const inp  = document.getElementById('wkg');
-  if (!sel || !inp) return;
+  renderFactors();
 
-  const KG_PER_LB = 0.45359237;
-  const $ = (s,r=document)=>r.querySelector(s);
+  // custom factor
+  const usec=p.get('usec')==='1';
+  $('#useCustom').checked=usec;
+  $('#customFactor').disabled=!usec;
+  if(usec && p.get('f')) $('#customFactor').value=p.get('f');
 
-  function readAsKg(raw, unit){
-    const v = parseFloat(raw);
-    if (!(v > 0)) return NaN;
-    return unit === 'lb' ? v * KG_PER_LB : v;
-  }
-  function renderFromKg(kg, unit){
-    if (!isFinite(kg)) { inp.value = ''; return; }
-    const val = unit === 'lb' ? (kg / KG_PER_LB) : kg;
-    const txt = (Math.round(val * 100) / 100).toFixed(2).replace(/\.00$/,'');
-    inp.value = txt;
-  }
-  function afterRender(kg){
-    try {
-      const p = new URLSearchParams(location.search);
-      p.set('u', sel.value);
-      if (isFinite(kg)) p.set('kg', kg.toFixed(3));
-      p.set('w', inp.value);
-      history.replaceState(null, '', location.pathname + '?' + p.toString() + (location.hash || '#calc'));
-    } catch {}
-    try { window.calc && window.calc(); } catch {}
-    const lbl = document.querySelector('label[for="wkg"]');
-    if (lbl) {
-      const lang = document.documentElement.lang || 'en';
-      const base = (window.I18N && window.I18N[lang] && window.I18N[lang].calc && window.I18N[lang].calc.weight) || 'Weight (kg)';
-      lbl.textContent = base.replace(/\((kg|lb)\)/,'') + ` (${sel.value})`;
-    }
-  }
-
-  let prevUnit = sel.value;
-  const rememberPrev = () => prevUnit = sel.value;
-  sel.addEventListener('focus',      rememberPrev, true);
-  sel.addEventListener('mousedown',  rememberPrev, true);
-  sel.addEventListener('keydown',    rememberPrev, true);
-  sel.addEventListener('click',      rememberPrev, true);
-
-  sel.addEventListener('change', () => {
-    const kg = readAsKg(inp.value, prevUnit);
-    renderFromKg(kg, sel.value);
-    localStorage.setItem('unit', sel.value);
-    afterRender(kg);
-  });
-
-  (function bootOnce(){
-    const p = new URLSearchParams(location.search);
-    const u = p.get('u') || localStorage.getItem('unit') || sel.value || 'kg';
-    sel.value = u;
-    const kgFromURL = parseFloat(p.get('kg'));
-    const kg = isFinite(kgFromURL) ? kgFromURL : readAsKg(inp.value, sel.value);
-    renderFromKg(kg, sel.value);
-    localStorage.setItem('unit', sel.value);
-    afterRender(kg);
-  })();
+  calc();  // will also sync URL
+  route();
 })();
 </script>
 </body>
