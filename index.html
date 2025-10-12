@@ -1,4 +1,4 @@
-<!-- deploy: 2025-10-11 · hotfix-20251011a (unit toggle + url sync + print fix) -->
+<!-- deploy: 2025-10-11 · v1.2.3 hotfix · compact results 2-col + url sync + kg/lb + print -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -12,8 +12,7 @@
 <link rel="icon" href="data:," />
 <style>
 :root{--bg:#0b1220;--fg:#e8eefc;--muted:#9fb0d0;--card:#111a2e;--accent:#7aa7ff;--maxw:980px}
-*{box-sizing:border-box}
-html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji"}
+html,body{margin:0;padding:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";background:var(--bg);color:var(--fg)}
 a{color:var(--accent)}
 .wrap{max-width:var(--maxw);margin:0 auto;padding:16px 20px 80px}
 header{position:sticky;top:0;background:linear-gradient(180deg,rgba(11,18,32,.95),rgba(11,18,32,.75));backdrop-filter:saturate(140%) blur(8px);z-index:10;border-bottom:1px solid #1f2b44}
@@ -52,34 +51,52 @@ hr{border:none;border-top:1px solid #1f2b44;margin:10px 0}
 }
 #calc .form-grid > *{display:flex;flex-direction:column;gap:6px;min-width:0}
 #calc input,#calc select,#calc textarea{width:min(100%, 360px)}
-
-/* Factor row cards (compact dot spacing) */
-#calc .factor-row{display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:12px 14px}
-#calc .factor-row .label-inline{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:8px;
-  padding:10px 12px;background:#0f1930;border:1px solid #24324f;border-radius:12px}
+/* weight + unit inline */
+#calc .wrow{display:grid;grid-template-columns:minmax(140px,1fr) 88px;gap:8px;align-items:end}
+@media (max-width:460px){#calc .wrow{grid-template-columns:1fr 74px}}
+/* factor row */
+#calc .factor-row{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap:12px 14px;
+}
+/* 卡片标签（保持） */
+#calc .factor-row .label-inline{
+  align-items:flex-start;gap:10px;padding:12px;background:#0f1930;border:1px solid #24324f;border-radius:12px;
+}
+/* 圆点更靠左、更贴近文字 */
+#calc .factor-row .label-inline{
+  display:grid;
+  grid-template-columns:auto 1fr;
+  align-items:center;
+  gap:8px;
+  padding:10px 12px;
+}
 #calc .factor-row input[type="radio"]{margin:0;transform:translateY(-1px)}
 #calc .factor-row .label-inline > span{line-height:1.15}
 
-/* Unit row (kg/lb) */
-.unit-row{display:flex;gap:8px;align-items:center}
-.unit-row input{flex:1 1 auto;min-width:0}
-#unitSel{width:84px}
+/* 结果区：恢复为桌面两列紧凑布局（移动端一列） */
+.out-grid{display:grid;grid-template-columns:1fr;gap:14px}
+@media (min-width:720px){.out-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.out-grid .box.card{padding:12px}
 
-/* small action bar on the right */
-.calc-actions{display:flex;gap:10px;justify-content:flex-end;margin:-8px 0 8px 0}
-.calc-actions button{cursor:pointer}
+/* 顶部右侧功能按钮容器（右对齐） */
+.tool-right{display:flex;gap:10px;justify-content:flex-end}
 
-/* 7-day list */
+/* 7-Day 单列 */
 #switch .grid{grid-template-columns:1fr}
+@media (min-width:720px){.grid2{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:720px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
-/* Print layout for switch page */
+/* 打印优化 */
 @media print{
-  header, nav, .langbox, .calc-actions, #home, #calc, #feedback { display:none !important; }
-  #switch{display:block !important}
-  body{background:#fff;color:#000}
-  .card{border:1px solid #ccc}
-  .wrap{max-width:900px}
+  header,.langbox,nav{display:none !important}
+  body{background:white;color:black}
+  .card{border:1px solid #999}
+  .wrap{max-width:900px;padding:0;margin:0}
+  .print-only{display:block !important}
 }
+.print-only{display:none}
 </style>
 </head>
 <body>
@@ -143,9 +160,9 @@ hr{border:none;border-top:1px solid #1f2b44;margin:10px 0}
   <!-- CALC -->
   <section id="calc" class="route" hidden>
     <div class="card">
-      <div class="calc-actions">
-        <button id="btnCopy" title="Copy link">Copy link</button>
-        <button id="btnReset" title="Reset saved">Reset saved</button>
+      <div class="tool-right" style="margin-bottom:8px;">
+        <button id="copyLinkBtn">Copy link</button>
+        <button id="resetSavedBtn">Reset saved</button>
       </div>
 
       <h2 data-i18n="calc.title">Feeding Calculator</h2>
@@ -161,9 +178,9 @@ hr{border:none;border-top:1px solid #1f2b44;margin:10px 0}
 
         <div>
           <label for="wkg" data-i18n="calc.weight">Weight (kg)</label>
-          <div class="unit-row">
+          <div class="wrow">
             <input id="wkg" type="number" min="0" step="0.1" placeholder="10" />
-            <select id="unitSel" aria-label="Weight unit">
+            <select id="unit" aria-label="Unit">
               <option value="kg">kg</option>
               <option value="lb">lb</option>
             </select>
@@ -222,7 +239,8 @@ hr{border:none;border-top:1px solid #1f2b44;margin:10px 0}
 
       <div style="height:8px"></div>
 
-      <div class="grid">
+      <!-- 结果区：恢复为两列紧凑 -->
+      <div class="out-grid">
         <div class="box card"><div class="muted">RER</div><div class="mono" id="outRER">—</div></div>
         <div class="box card"><div class="muted">MER (kcal/day)</div><div class="mono" id="outMER">—</div></div>
         <div class="box card"><div class="muted" data-i18n="calc.grams">Grams/day</div><div class="mono" id="outG" data-est="no">—</div></div>
@@ -238,7 +256,7 @@ hr{border:none;border-top:1px solid #1f2b44;margin:10px 0}
         <p><strong>RER</strong> = <code>70 × 体重(kg)^0.75</code>；<strong>MER</strong> = <code>RER × 系数</code>。</p>
         <ul>
           <li><strong>Dog</strong>：低活动/体重管理 1.2–1.4；<strong>已绝育成犬 ~1.6（默认）</strong>；未绝育 ~1.8；活跃/工作 2.0–5.0；幼犬/哺乳更高。</li>
-          <li><strong>Cat</strong>：低活动/肥胖倾向 1.0–1.2；<strong>已绝育成猫 ~1.2–1.4（默认 1.3）</strong>；未绝育 ~1.4–1.6；幼猫/哺乳更高。</li>
+          <li><strong>Cat</strong>：低活动/肥胖倾向 1.0–1.2；<strong>已绝育成猫 ~1.3（1.2–1.4）</strong>；未绝育 ~1.4–1.6；幼猫/哺乳更高。</li>
         </ul>
         <p><strong>7 天渐进换粮</strong>：90/10→80/20→…→10/90。如出现软便/不适，保持当日或倒回一天再继续。</p>
         <p class="muted">WSAVA、AAHA/AAFP、NRC(2006)、FEDIAF、以及包装标注的 kcal/100g 或 kcal/cup 为参考。以上为一般营养建议，不构成医疗意见。</p>
@@ -256,8 +274,8 @@ hr{border:none;border-top:1px solid #1f2b44;margin:10px 0}
   <!-- 7-DAY -->
   <section id="switch" class="route" hidden>
     <div class="card">
-      <div class="calc-actions">
-        <button id="btnPrint">Export / Print</button>
+      <div class="tool-right" style="margin-bottom:8px;">
+        <button id="printPlanBtn" data-i18n="switch.export">Export / Print</button>
       </div>
       <h2 data-i18n="switch.title">7-Day Gradual Switch</h2>
       <div class="grid">
@@ -270,6 +288,13 @@ hr{border:none;border-top:1px solid #1f2b44;margin:10px 0}
         <div class="card"><strong>Day 7</strong> — 10% / 90%</div>
       </div>
       <p class="muted"><strong data-i18n="switch.caution">If stool is soft or pet seems unwell, hold that day or step back one day, then continue after recovery.</strong></p>
+
+      <!-- 打印页眉（仅打印显示） -->
+      <div class="print-only" style="margin-top:16px">
+        <div class="muted" style="font-size:.85em">
+          Printed from Pet A Plan — <span id="printTime"></span>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -293,25 +318,24 @@ hr{border:none;border-top:1px solid #1f2b44;margin:10px 0}
 </main>
 
 <script>
-/* ---------------- i18n ---------------- */
-const I18N={en:{nav:{home:"Home",calc:"Calc",switch:"7-Day",feedback:"Feedback"},ui:{lang:"Language"},home:{title:"Feeding & Switch Helper",pitch:"Informational tool for the U.S. market: turn pet food / grooming labels into actionable guidance. Not medical advice.",kcal:"RER/MER transparent",i18n:"Multi-language",mode:"Single-file SPA",quick:"Quick start",q1:"Go to Calc → enter weight (kg) → pick species & activity factor.",q2:"Review kcal/day and grams/day. Cups/day requires density info from the bag.",q3:"See 7-Day gradual switch plan. If stool soft or upset → hold or step back."},calc:{title:"Feeding Calculator",species:"Species",weight:"Weight (kg)",lifeStage:"Life stage",activity:"Activity / life stage (MER factor)",factorHint:"Labels show the actual factor used.",infoTip:"Info (i): RER=70×kg^0.75; MER=RER×factor. Factors are a starting point—adjust by body condition & stool; special stages/diseases: follow your vet.",grams:"Grams/day",cups:"Cups/day",cupsNote:"Cups calculation needs the food energy density (kcal/100g or kcal/cup) and grams per cup (often on the bag). If unknown, rely on grams/day first.",density:"Optional: density for precise grams/cups",kcal100:"kcal / 100 g",kcalCup:"kcal / cup",gPerCup:"grams / cup",customToggle:"Use custom factor",customHint:"Only change if you know what you’re doing (懂则改，不懂别动)。",estNote:"Values marked (est.) are based on a typical density; use your bag’s numbers for precision."},switch:{title:"7-Day Gradual Switch",caution:"If stool is soft or pet seems unwell, hold that day or step back one day, then continue after recovery."},fb:{title:"Feedback",note:"Choose a category and send us details. No personal health data, please.",send:"Send mail",opt:{calc:"Calculator",copy:"Copy/Basis & Notes",switch:"7-Day Switch",bug:"Bug",idea:"Idea"}}},zh:{nav:{home:"首页",calc:"计算",switch:"7天换粮",feedback:"反馈"},ui:{lang:"语言"},home:{title:"喂养与换粮助手",pitch:"面向美国市场的信息性工具：把宠物食品/洗护标签转成可执行建议。非医疗建议。",kcal:"RER/MER 透明可解释",i18n:"多语言",mode:"单文件 SPA",quick:"快速开始",q1:"进入 计算 → 输入体重(kg) → 选择物种与活动系数。",q2:"查看 kcal/日 与 g/日。Cups/日 需要包装上的能量密度与每杯克数。",q3:"查看 7 天渐进换粮。如便便偏软或不适 → 保持当日或倒回一天。"},calc:{title:"喂养计算器",species:"物种",weight:"体重(kg)",lifeStage:"生命周期",activity:"活动/阶段（MER 系数）",factorHint:"选项名称直接展示所用系数。",infoTip:"提示（i）：RER=70×kg^0.75；MER=RER×系数。系数仅为起点，应结合体况/便便微调；特殊阶段/疾病遵从兽医。",grams:"克/日",cups:"杯/日",cupsNote:"计算杯数需要食品能量密度（kcal/100g 或 kcal/cup）与每杯克数（常见在包装袋上）；若未知，请先以 g/日 为准。",density:"可选：用于精算克/杯的密度参数",kcal100:"kcal / 100 g",kcalCup:"kcal / 杯",gPerCup:"克 / 杯",customToggle:"自定义系数",customHint:"懂则改，不懂别动。",estNote:"标注 (估) 的数值基于典型密度；使用包装标注可获得更精确结果。"},switch:{title:"7天渐进换粮",caution:"若便便偏软或不适，请保持当日或倒回一天，恢复后再继续。"},fb:{title:"反馈",note:"请选择分类并通过邮件发送问题/建议。请勿提交个人健康信息。",send:"发送邮件",opt:{calc:"计算器",copy:"文案/依据与说明",switch:"7天换粮",bug:"缺陷",idea:"想法"}}},es:{nav:{home:"Inicio",calc:"Cálculo",switch:"7 días",feedback:"Feedback"},ui:{lang:"Idioma"},home:{title:"Asistente de alimentación y cambio",pitch:"Herramienta informativa: convierte etiquetas en orientación accionable. No es consejo médico.",kcal:"RER/MER transparente",i18n:"Multi-idioma",mode:"SPA de un solo archivo",quick:"Inicio rápido",q1:"Ir a Cálculo → peso (kg) → especie y factor.",q2:"Revisa kcal/día y g/día. Las tazas requieren la densidad del alimento.",q3:"Plan de cambio gradual de 7 días. Si hay heces blandas → mantener o retroceder."},calc:{title:"Calculadora de alimentación",species:"Especie",weight:"Peso (kg)",lifeStage:"Etapa de vida",activity:"Actividad / etapa (factor MER)",factorHint:"Las etiquetas muestran el factor usado.",infoTip:"Info (i): RER=70×kg^0.75; MER=RER×factor. Punto de partida—ajustar por condición corporal y heces; etapas especiales/enfermedades: sigue a tu veterinario.",grams:"Gramos/día",cups:"Tazas/día",cupsNote:"Las tazas requieren densidad energética (kcal/100g o kcal/taza) y gramos por taza. Si es desconocido, usa g/día.",density:"Opcional: densidad para precisión",kcal100:"kcal / 100 g",kcalCup:"kcal / taza",gPerCup:"gramos / taza",customToggle:"Factor personalizado",customHint:"Cámbialo sólo si sabes lo que haces.",estNote:"(est.) usa densidad típica; usa tu bolsa para precisión."},switch:{title:"Cambio gradual 7 días",caution:"Si hay heces blandas o malestar, mantén el día o retrocede uno, y continúa tras mejorar."},fb:{title:"Comentarios",note:"Elige una categoría y envíanos detalles. Sin datos de salud personal, por favor.",send:"Enviar correo",opt:{calc:"Calculadora",copy:"Texto/Basis & Notes",switch:"Cambio 7 días",bug:"Error",idea:"Idea"}}},fr:{nav:{home:"Accueil",calc:"Calcul",switch:"7 jours",feedback:"Avis"},ui:{lang:"Langue"},home:{title:"Assistant d'alimentation & transition",pitch:"Outil informatif : transformer les étiquettes en conseils actionnables. Pas un avis médical.",kcal:"RER/MER transparent",i18n:"Multilingue",mode:"SPA fichier unique",quick:"Démarrage rapide",q1:"Aller à Calcul → poids (kg) → espèce & facteur.",q2:"Vérifier kcal/jour et g/jour. Les tasses nécessitent la densité du sac.",q3:"Plan de transition sur 7 jours. Selles molles ? Maintenir ou revenir d'une étape."},calc:{title:"Calculateur d'alimentation",species:"Espèce",weight:"Poids (kg)",lifeStage:"Stade de vie",activity:"Activité / stade (facteur MER)",factorHint:"Les étiquettes affichent le facteur utilisé.",infoTip:"Info (i) : RER=70×kg^0,75 ; MER=RER×facteur. Point de départ—ajuster selon l'état corporel & les selles ; stades spéciaux/maladies : suivre votre vétérinaire.",grams:"Grammes/jour",cups:"Tasses/jour",cupsNote:"Le calcul des tasses nécessite la densité énergétique et les grammes par tasse. Sinon, fiez-vous aux g/jour.",density:"Optionnel : densité pour précision",kcal100:"kcal / 100 g",kcalCup:"kcal / tasse",gPerCup:"grammes / tasse",customToggle:"Facteur personnalisé",customHint:"Ne changez que si nécessaire.",estNote:"(est.) basé sur densité typique ; utilisez les données du sac pour la précision."},switch:{title:"Transition 7 jours",caution:"Si selles molles ou malaise, maintenir la journée ou revenir d'un jour, puis poursuivre."},fb:{title:"Retour",note:"Choisissez une catégorie et envoyez-nous les détails. Pas de données de santé personnelles.",send:"Envoyer un mail",opt:{calc:"Calculateur",copy:"Texte/Basis & Notes",switch:"Transition 7 jours",bug:"Anomalie",idea:"Idée"}}}};
+/* ---------- i18n ---------- */
+const I18N={en:{nav:{home:"Home",calc:"Calc",switch:"7-Day",feedback:"Feedback"},ui:{lang:"Language"},home:{title:"Feeding & Switch Helper",pitch:"Informational tool for the U.S. market: turn pet food / grooming labels into actionable guidance. Not medical advice.",kcal:"RER/MER transparent",i18n:"Multi-language",mode:"Single-file SPA",quick:"Quick start",q1:"Go to Calc → enter weight (kg) → pick species & activity factor.",q2:"Review kcal/day and grams/day. Cups/day requires density info from the bag.",q3:"See 7-Day gradual switch plan. If stool soft or upset → hold or step back."},calc:{title:"Feeding Calculator",species:"Species",weight:"Weight (kg)",lifeStage:"Life stage",activity:"Activity / life stage (MER factor)",factorHint:"Labels show the actual factor used.",infoTip:"Info (i): RER=70×kg^0.75; MER=RER×factor. Factors are a starting point—adjust by body condition & stool; special stages/diseases: follow your vet.",grams:"Grams/day",cups:"Cups/day",cupsNote:"Cups calculation needs the food energy density (kcal/100g or kcal/cup) and grams per cup (often on the bag). If unknown, rely on grams/day first.",density:"Optional: density for precise grams/cups",kcal100:"kcal / 100 g",kcalCup:"kcal / cup",gPerCup:"grams / cup",customToggle:"Use custom factor",customHint:"Only change if you know what you’re doing (懂则改，不懂别动)。",estNote:"Values marked (est.) are based on a typical density; use your bag’s numbers for precision."},switch:{title:"7-Day Gradual Switch",export:"Export / Print",caution:"If stool is soft or pet seems unwell, hold that day or step back one day, then continue after recovery."},fb:{title:"Feedback",note:"Choose a category and send us details. No personal health data, please.",send:"Send mail",opt:{calc:"Calculator",copy:"Copy/Basis & Notes",switch:"7-Day Switch",bug:"Bug",idea:"Idea"}}},
+zh:{nav:{home:"首页",calc:"计算",switch:"7天换粮",feedback:"反馈"},ui:{lang:"语言"},home:{title:"喂养与换粮助手",pitch:"面向美国市场的信息性工具：把宠物食品/洗护标签转成可执行建议。非医疗建议。",kcal:"RER/MER 透明可解释",i18n:"多语言",mode:"单文件 SPA",quick:"快速开始",q1:"进入 计算 → 输入体重(kg) → 选择物种与活动系数。",q2:"查看 kcal/日 与 g/日。Cups/日 需要包装上的能量密度与每杯克数。",q3:"查看 7 天渐进换粮。如便便偏软或不适 → 保持当日或倒回一天。"},calc:{title:"喂养计算器",species:"物种",weight:"体重(kg)",lifeStage:"生命周期",activity:"活动/阶段（MER 系数）",factorHint:"选项名称直接展示所用系数。",infoTip:"提示（i）：RER=70×kg^0.75；MER=RER×系数。系数仅为起点，应结合体况/便便微调；特殊阶段/疾病遵从兽医。",grams:"克/日",cups:"杯/日",cupsNote:"计算杯数需要食品能量密度（kcal/100g 或 kcal/cup）与每杯克数（常见在包装袋上）；若未知，请先以 g/日 为准。",density:"可选：用于精算克/杯的密度参数",kcal100:"kcal / 100 g",kcalCup:"kcal / 杯",gPerCup:"克 / 杯",customToggle:"自定义系数",customHint:"懂则改，不懂别动。",estNote:"标注 (估) 的数值基于典型密度；使用包装标注可获得更精确结果。"},switch:{title:"7天渐进换粮",export:"导出 / 打印",caution:"若便便偏软或不适，请保持当日或倒回一天，恢复后再继续。"},fb:{title:"反馈",note:"请选择分类并通过邮件发送问题/建议。请勿提交个人健康信息。",send:"发送邮件",opt:{calc:"计算器",copy:"文案/依据与说明",switch:"7天换粮",bug:"缺陷",idea:"想法"}}}};
 
-/* ---------------- helpers ---------------- */
+/* helpers */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
-const KG_PER_LB = 0.45359237;
-const toKg = (v, unit) => (unit === 'lb' ? v * KG_PER_LB : v);
-const fromKg = (kg, unit) => (unit === 'lb' ? kg / KG_PER_LB : kg);
 
-const APP = { unit:'kg' };
-
+/* router */
 function route(){
   const hash=(location.hash||'#home').split('&')[0];
   $$('#home,#calc,#switch,#feedback').forEach(sec=>sec.hidden=true);
   const el=$(hash); if(el) el.hidden=false;
   $$('nav a').forEach(a=>a.classList.toggle('active',a.getAttribute('href')===hash));
 }
+window.addEventListener('hashchange',route);
 
+/* lang */
 function setLang(l){
   const lang=I18N[l]?l:'en';
   localStorage.setItem('lang',lang);
@@ -325,14 +349,16 @@ function setLang(l){
 function initLang(){
   const params=new URLSearchParams(location.search);
   const ql=params.get('lang');
-  const saved=localStorage.getItem('lang');
-  const lang=ql||saved||'en';
+  const lang=localStorage.getItem('lang')||ql||'en';
   $('#langSel').value=I18N[lang]?lang:'en';
   setLang($('#langSel').value);
 }
-$('#langSel')?.addEventListener('change',e=>{ setLang(e.target.value); updateUrlQuery(); });
+$('#langSel')?.addEventListener('change',e=>{
+  setLang(e.target.value);
+  upsertParam('lang',e.target.value,true);
+});
 
-/* ---------------- factors ---------------- */
+/* factors */
 const SAFETY_MIN_FACTOR=0.8, SAFETY_MAX_FACTOR=6.0;
 const KCAL_PER_100G_DEFAULT=350;
 
@@ -386,12 +412,29 @@ function renderFactors(){
       <span><strong>${f.label}</strong><br/><span class="muted">${f.hint}</span></span>`;
     box.appendChild(w);
   });
+  // set radio by URL/localStorage if present
+  const fp=getParam('f'); if(fp){const r=[...$$('input[name="factor"]')].find(x=>+x.value===+fp); if(r) r.checked=true;}
 }
 
-/* ---------------- calc ---------------- */
+/* math helpers */
+const pow075=x=>Math.pow(x,0.75);
 const clamp=(x,a,b)=>Math.min(b,Math.max(a,x));
 const isNum=n=>typeof n==='number'&&!Number.isNaN(n)&&Number.isFinite(n);
 
+/* unit conversion */
+function kgToLb(kg){return kg*2.2046226218}
+function lbToKg(lb){return lb/2.2046226218}
+
+/* get/set URL param */
+function getParam(k){return new URLSearchParams(location.search).get(k)}
+function upsertParam(k,v,replaceState=false){
+  const sp=new URLSearchParams(location.search);
+  if(v===undefined||v===null||v==='') sp.delete(k); else sp.set(k,v);
+  const url=location.pathname+'?'+sp.toString()+location.hash;
+  if(replaceState) history.replaceState(null,'',url); else history.pushState(null,'',url);
+}
+
+/* read + calc */
 function currentFactor(){
   const useCustom=$('#useCustom').checked;
   if(useCustom){
@@ -402,18 +445,34 @@ function currentFactor(){
   return parseFloat(checked?.value||'');
 }
 
-function calc(){
-  const raw = parseFloat($('#wkg').value);
-  const unit = $('#unitSel').value || APP.unit || 'kg';
-  const kg = (Number.isFinite(raw) ? toKg(raw, unit) : NaN);
+function readWeightKg(){
+  const unit=$('#unit').value;
+  const v=parseFloat($('#wkg').value);
+  if(!(v>0)) return NaN;
+  return unit==='lb'? lbToKg(v) : v;
+}
 
+function calc(){
+  const kg=readWeightKg();
   const f=currentFactor();
+
+  // sync URL essentials
+  upsertParam('sp',$('#species').value,true);
+  upsertParam('w',$('#wkg').value,true);
+  upsertParam('u',$('#unit').value,true);
+  upsertParam('stage',$('#lifeStageLbl').value,true);
+  upsertParam('usec',$('#useCustom').checked?1:0,true);
+  upsertParam('f',f||'',true);
+  upsertParam('k100',$('#kcal100').value||'',true);
+  upsertParam('kcup',$('#kcalCup').value||'',true);
+  upsertParam('gcup',$('#gPerCup').value||'',true);
+
   if(!(kg>0) || !(f>0)){
     $('#outRER').textContent='—'; $('#outMER').textContent='—';
     $('#outG').textContent='—'; $('#outCups').textContent='—';
     $('#estNote').hidden=true; return;
   }
-  const RER=70*Math.pow(kg,0.75);
+  const RER=70*pow075(kg);
   const factor=clamp(f,SAFETY_MIN_FACTOR,SAFETY_MAX_FACTOR);
   const MER=RER*factor;
 
@@ -437,78 +496,35 @@ function calc(){
   }
   $('#outCups').textContent=cupsTxt;
   $('#estNote').hidden=!est;
+
+  // save to localStorage (lightweight)
+  const save={sp:$('#species').value, w:$('#wkg').value, u:$('#unit').value, stage:$('#lifeStageLbl').value,
+              usec:$('#useCustom').checked?1:0, f:factor, k100:$('#kcal100').value, kcup:$('#kcalCup').value, gcup:$('#gPerCup').value};
+  localStorage.setItem('calc_pref',JSON.stringify(save));
 }
 
-/* ---------------- URL sync ---------------- */
-function updateUrlQuery(){
-  const qs = new URLSearchParams(location.search);
-  qs.set('sp',$('#species').value||'dog');
-  qs.set('w',$('#wkg').value||'');
-  qs.set('u',$('#unitSel').value||APP.unit||'kg');
-  qs.set('stage',$('#lifeStageLbl').value||'adult');
-  qs.set('usec',$('#useCustom').checked ? '1' : '0');
-  qs.set('f',$('#customFactor').value||'');
-  qs.set('k100',$('#kcal100').value||'');
-  qs.set('kc',$('#kcalCup').value||'');
-  qs.set('gpc',$('#gPerCup').value||'');
-  qs.set('lang',$('#langSel').value||'en');
-  history.replaceState(null,'',`${location.pathname}?${qs.toString()}${location.hash}`);
-}
+/* wiring */
+$('#species')?.addEventListener('change',()=>{ renderFactors(); calc(); });
 
-function restoreFromQuery(){
-  const qs = new URLSearchParams(location.search);
-  if(qs.get('sp')) $('#species').value = qs.get('sp');
-  if(qs.get('w')) $('#wkg').value = qs.get('w');
-  if(qs.get('u')) { APP.unit = (qs.get('u')==='lb'?'lb':'kg'); $('#unitSel').value=APP.unit; }
-  if(qs.get('stage')) $('#lifeStageLbl').value = qs.get('stage');
-  if(qs.get('usec')) { const on = qs.get('usec')==='1'; $('#useCustom').checked=on; $('#customFactor').disabled=!on; }
-  if(qs.get('f')) $('#customFactor').value = qs.get('f');
-  if(qs.get('k100')) $('#kcal100').value = qs.get('k100');
-  if(qs.get('kc')) $('#kcalCup').value = qs.get('kc');
-  if(qs.get('gpc')) $('#gPerCup').value = qs.get('gpc');
-  if(qs.get('lang') && I18N[qs.get('lang')]){ $('#langSel').value=qs.get('lang'); setLang(qs.get('lang')); }
-}
+$('#lifeStageLbl')?.addEventListener('change',()=>{ renderFactors(); calc(); });
 
-/* ---------------- events ---------------- */
-window.addEventListener('hashchange',route);
-$('#species')?.addEventListener('change',()=>{ renderFactors(); calc(); updateUrlQuery(); });
-$('#lifeStageLbl')?.addEventListener('change',()=>{ renderFactors(); calc(); updateUrlQuery(); });
-$('#wkg')?.addEventListener('input',()=>{ calc(); updateUrlQuery(); });
-document.addEventListener('change',e=>{ if(e.target.name==='factor'){ calc(); } });
-['kcal100','kcalCup','gPerCup','customFactor'].forEach(id=>$('#'+id)?.addEventListener('input',()=>{ calc(); updateUrlQuery(); }));
+$('#wkg')?.addEventListener('input',calc);
+document.addEventListener('change',e=>{ if(e.target.name==='factor') calc(); });
+['kcal100','kcalCup','gPerCup','customFactor'].forEach(id=>$('#'+id)?.addEventListener('input',calc));
+
 $('#useCustom')?.addEventListener('change',e=>{
-  const on=e.target.checked; $('#customFactor').disabled=!on; if(on){ $$('input[name="factor"]').forEach(r=>r.checked=false); }
-  calc(); updateUrlQuery();
+  const on=e.target.checked;
+  $('#customFactor').disabled=!on;
+  if(on){ $$('input[name="factor"]').forEach(r=>r.checked=false); }
+  calc();
 });
 
-/* unit: change = 立即换算 + 计算 + URL */
-$('#unitSel')?.addEventListener('change', e=>{
-  const prevUnit = APP.unit;
-  const newUnit = e.target.value === 'lb' ? 'lb' : 'kg';
-  const raw = parseFloat($('#wkg').value);
-
-  if(Number.isFinite(raw)){
-    const kg = toKg(raw, prevUnit);
-    const next = fromKg(kg, newUnit);
-    $('#wkg').value = (Math.round(next*100)/100).toString();
-  }
-  APP.unit = newUnit;
-  localStorage.setItem('unit', APP.unit);
-  calc(); updateUrlQuery();
+$('#unit')?.addEventListener('change',()=>{
+  // 在单位切换时只改变显示，不破坏 URL/计算：调用 calc() 统一处理
+  calc();
 });
 
-/* copy link / reset / print / feedback */
-$('#btnCopy')?.addEventListener('click', async ()=>{
-  updateUrlQuery();
-  try{ await navigator.clipboard.writeText(location.href); $('#btnCopy').textContent='Copied!'; setTimeout(()=>$('#btnCopy').textContent='Copy link',1200);}catch{}
-});
-$('#btnReset')?.addEventListener('click', ()=>{
-  localStorage.removeItem('unit');
-  history.replaceState(null,'',location.pathname+'#calc');
-  location.reload();
-});
-$('#btnPrint')?.addEventListener('click', ()=>{ window.print(); });
-
+/* feedback */
 $('#fbSend')?.addEventListener('click',()=>{
   const cat=$('#fbCat').value;
   const sub=encodeURIComponent(`[Pet A Plan] Feedback: ${cat}`);
@@ -521,29 +537,67 @@ Details:
   location.href=`mailto:hello@example.com?subject=${sub}&body=${body}`;
 });
 
-/* ---------------- boot ---------------- */
-function initUnitFromURLOrSaved(){
-  const qs = new URLSearchParams(location.search);
-  const u = qs.get('u') || localStorage.getItem('unit') || 'kg';
-  APP.unit = (u === 'lb') ? 'lb' : 'kg';
-  $('#unitSel').value = APP.unit;
-}
+/* tools */
+$('#copyLinkBtn')?.addEventListener('click',async()=>{
+  try{
+    await navigator.clipboard.writeText(location.href);
+    $('#copyLinkBtn').textContent='Copied!';
+    setTimeout(()=>$('#copyLinkBtn').textContent='Copy link',1200);
+  }catch(e){ alert('Copy failed.'); }
+});
 
+$('#resetSavedBtn')?.addEventListener('click',()=>{
+  localStorage.removeItem('calc_pref');
+  // 清空 URL 的状态参数
+  ['sp','w','u','stage','usec','f','k100','kcup','gcup'].forEach(k=>upsertParam(k,'',true));
+  // 重置控件
+  $('#species').value='dog';
+  $('#wkg').value='';
+  $('#unit').value='kg';
+  $('#lifeStageLbl').value='adult';
+  $('#useCustom').checked=false;
+  $('#customFactor').value=''; $('#customFactor').disabled=true;
+  $('#kcal100').value=''; $('#kcalCup').value=''; $('#gPerCup').value='';
+  renderFactors(); calc();
+});
+
+/* print */
+$('#printPlanBtn')?.addEventListener('click',()=>{
+  $('#printTime').textContent=new Date().toLocaleString();
+  window.print();
+});
+
+/* boot */
 (function boot(){
   if(!location.hash) location.hash='#home';
-  route();
-  initLang();
-  initUnitFromURLOrSaved();
-  restoreFromQuery();
-  renderFactors();
-  calc();
-  updateUrlQuery();
+  // 尝试从 URL / localStorage 恢复
+  try{
+    const sp=new URLSearchParams(location.search);
+    const saved=JSON.parse(localStorage.getItem('calc_pref')||'{}');
+
+    $('#species').value = sp.get('sp') || saved.sp || 'dog';
+    $('#wkg').value     = sp.get('w')  || saved.w  || '';
+    $('#unit').value    = sp.get('u')  || saved.u  || 'kg';
+    $('#lifeStageLbl').value = sp.get('stage') || saved.stage || 'adult';
+
+    const usec = sp.get('usec') ?? saved.usec;
+    $('#useCustom').checked = usec==1;
+    $('#customFactor').disabled = !(usec==1);
+    const ff = sp.get('f') || saved.f;
+    if(ff && !(usec==1)){} // radio 勾选在 renderFactors 之后处理
+
+    $('#kcal100').value = sp.get('k100') || saved.k100 || '';
+    $('#kcalCup').value = sp.get('kcup') || saved.kcup || '';
+    $('#gPerCup').value = sp.get('gcup') || saved.gcup || '';
+  }catch{}
+
+  route(); initLang(); renderFactors(); calc();
 })();
 </script>
 
 <!--
-DOC_SYNC_INDEX.md (append)
-- 2025-10-11 — hotfix-20251011a: add kg/lb toggle with live conversion, right-aligned Copy/Reset, URL sync (u=kg|lb), 7-Day print fix.
+Changelog
+- 2025-10-11 — results section restored to 2-col (.out-grid); URL sync + copy link; kg/lb unit toggle; print button; factors compact radios.
 -->
 </body>
 </html>
